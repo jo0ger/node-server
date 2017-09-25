@@ -9,14 +9,16 @@
 const Koa = require('koa')
 const json = require('koa-json')
 const logger = require('koa-logger')
-const compress = require('koa-compress')
 const onerror = require('koa-onerror')
+const bouncer = require('koa-bouncer')
+const compress = require('koa-compress')
 const bodyparser = require('koa-bodyparser')
 const koaBunyanLogger = require('koa-bunyan-logger')
 const middlewares = require('./middleware')
 
 const app = new Koa()
 
+require('./util')
 require('./mongo')()
 
 // error handler
@@ -30,6 +32,7 @@ app.use(json())
 app.use(logger())
 app.use(koaBunyanLogger())
 app.use(compress())
+app.use(bouncer.middleware())
 app.use(middlewares.response)
 app.use(middlewares.error)
 

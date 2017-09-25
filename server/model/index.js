@@ -8,6 +8,7 @@
 
 const mongoose = require('mongoose')
 const schemas = require('./schema')
+const { firstUpperCase } = require('../util')
 const models = {}
 
 Object.keys(schemas).forEach(key => {
@@ -33,10 +34,6 @@ function buildSchema (schema) {
 function updateHook (next) {
   this.findOneAndUpdate({}, { updatedAt: Date.now })
   next()
-}
-
-function firstUpperCase (str = '') {
-  return str.toLowerCase().replace(/( |^)[a-z]/g, (L) => L.toUpperCase())
 }
 
 module.exports = models
