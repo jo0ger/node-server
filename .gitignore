@@ -1,0 +1,23 @@
+# Logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Dependency directory
+# https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git-
+node_modules
+
+# Coverage directory used by tools like istanbul
+coverage
+
+# Debug log from npm
+npm-debug.log
+
+# IDEA
+.vscode
+.idea
+
+.DS_Store
