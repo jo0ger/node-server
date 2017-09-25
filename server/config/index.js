@@ -23,13 +23,16 @@ const baseConfig = {
     '10001': 'params error'
   },
   mongo: {
-    useMongoClient: true
+    option: {
+      useMongoClient: true,
+      poolSize: 20
+    }
   },
   // TODO: Redis
   redis: {},
   auth: {
     cookie: {
-      name: 'JOOGER_AUTH'
+      name: 'jooger.me'
     },
     secretKey: `${packageInfo.name} ${packageInfo.version}`,
     // token过期时间

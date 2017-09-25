@@ -24,6 +24,7 @@ const articleSchema = new mongoose.Schema({
   thumb: { uid: String, title: { type: String, default: '' }, url: { type: String, default: '' }, size: Number },
   // 文章状态 （ 0 草稿 | 1 已发布 ）
   state: { type: Number, default: 0 },
+  issueNumber: { type: Number, default: 1 },
   // 创建日期
   createdAt: { type: Date, default: Date.now },
   // 更新日期

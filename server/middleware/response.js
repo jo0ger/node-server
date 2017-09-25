@@ -14,19 +14,19 @@ module.exports = async (ctx, next) => {
     ctx.body = {
       code: 200,
       success: true,
-      message: config.codeMap('200'),
+      message: config.codeMap['200'],
       data
     }
   }
 
-  ctx.fail = (code = -1, message = config.codeMap['-1'], data = null) => {
+  ctx.fail = (code = -1, message = '', data = null) => {
     ctx.status = 200
-    ctx.send(200, {
+    ctx.body = {
       code,
       success: false,
-      message,
+      message: message || config.codeMap[code] || config.codeMap['-1'],
       data
-    })
+    }
   }
 
   await next()
