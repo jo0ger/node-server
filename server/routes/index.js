@@ -6,15 +6,19 @@
 
 'use strict'
 
-const Router = require('koa-router')
-const frontend = require('./frontend')
-const backend = require('./backend')
-const router = new Router({
+const router = require('koa-router')({
   prefix: '/api'
 })
+const frontend = require('./frontend')
+const backend = require('./backend')
 
 module.exports = app => {
-  // router.use('/frontend', frontend.routes(), frontend.allowedMethods())
-  // router.use('/backend', backend.routes(), backend.allowedMethods())
+  router.use('/frontend', frontend.routes(), frontend.allowedMethods())
+  router.use('/backend', backend.routes(), backend.allowedMethods())
+  router.all('*', (ctx,next)=> {
+    ctx.fail(404, `${ctx.path} 不支持 ${ctx.method} 请求类型`)
+    ctx.status = 404
+  })
+  
   app.use(router.routes(), router.allowedMethods())
 }

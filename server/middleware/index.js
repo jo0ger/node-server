@@ -8,3 +8,4 @@
 
 exports.error = require('./error')
 exports.response = require('./response')
+exports.auth = require('./auth')
