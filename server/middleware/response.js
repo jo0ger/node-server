@@ -9,12 +9,12 @@
 const config = require('../config')
 
 module.exports = async (ctx, next) => {
-  ctx.success = (data = null) => {
+  ctx.success = (data = null, message = config.codeMap[200]) => {
     ctx.status = 200
     ctx.body = {
       code: 200,
       success: true,
-      message: config.codeMap['200'],
+      message,
       data
     }
   }

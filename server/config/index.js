@@ -14,6 +14,7 @@ const baseConfig = {
   env: process.env.NODE_ENV,
   root: path.resolve(__dirname, '../../'),
   port: process.env.PORT || 3000,
+  pageSize: 12,
   codeMap: {
     '-1': 'fail',
     '200': 'success',

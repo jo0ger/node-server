@@ -52,7 +52,8 @@ exports.isAuthenticated = () => {
         ctx.fail(401)
         return
       }
-      ctx.req.user = user
+      ctx._user = user
+      ctx._isAuthenticated = true
       await next()
     }
   ])

@@ -11,9 +11,9 @@ module.exports = async (ctx, next) => {
     await next()
   } catch (err) {
     const code = err.status || 500
-    ctx.fail(code)
+    ctx.fail(code, err.message)
     ctx.status = code
-
+    
     if (code === 500) {
       ctx.log.error(
         { req: ctx.req, err },
