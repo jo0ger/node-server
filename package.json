@@ -26,7 +26,8 @@
     "marked": "^0.3.6",
     "md5": "^2.2.1",
     "mongoose": "^4.11.12",
-    "mongoose-paginate": "^5.0.3"
+    "mongoose-paginate": "^5.0.3",
+    "simple-netease-cloud-music": "^0.1.8"
   },
   "devDependencies": {
     "cross-env": "^5.0.5",

@@ -9,10 +9,8 @@
 const config = require('../config')
 const { ArticleModel, TagModel } = require('../model')
 const { marked, isObjectId } = require('../util')
-const ctrl = {
-}
 
-ctrl.list = async (ctx, next) => {
+exports.list = async (ctx, next) => {
   const pageSize = ctx.validateQuery('per_page').defaultTo(config.pageSize).toInt().gt(0, 'the "per_page" parameter should be greater than 0').val()
   const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, 'the "page" parameter should be greater than 0').val()
   const state = ctx.validateQuery('state').defaultTo(1).toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
@@ -92,7 +90,7 @@ ctrl.list = async (ctx, next) => {
   }
 }
 
-ctrl.item = async (ctx, next) => {
+exports.item = async (ctx, next) => {
   const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
 
   let data = null
@@ -120,7 +118,7 @@ ctrl.item = async (ctx, next) => {
   
 }
 
-ctrl.create = async (ctx, next) => {
+exports.create = async (ctx, next) => {
   const title = ctx.validateBody('title')
     .required('the "title" parameter is required')
     .notEmpty()
@@ -154,7 +152,7 @@ ctrl.create = async (ctx, next) => {
   }
 }
 
-ctrl.update = async (ctx, next) => {
+exports.update = async (ctx, next) => {
   const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
   const title = ctx.validateBody('title').optional().isString('the "title" parameter should be String type').val()
   const content = ctx.validateBody('content').optional().isString('the "content" parameter should be String type').val()
@@ -193,7 +191,7 @@ ctrl.update = async (ctx, next) => {
   }
 }
 
-ctrl.delete = async (ctx, next) => {
+exports.delete = async (ctx, next) => {
   const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
   const data = await ArticleModel.remove({ _id: id }).catch(err => {
     ctx.log.error(err.message)
@@ -207,7 +205,7 @@ ctrl.delete = async (ctx, next) => {
   }
 }
 
-ctrl.like = async (ctx, next) => {
+exports.like = async (ctx, next) => {
   const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
 
   const data = await ArticleModel.findByIdAndUpdate(id, {
@@ -280,5 +278,3 @@ async function getSiblingArticles (ctx, data) {
     data.adjacent = { prev, next }
   }
 }
-
-module.exports = ctrl
