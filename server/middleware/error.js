@@ -10,7 +10,6 @@ module.exports = async (ctx, next) => {
   try {
     await next()
   } catch (err) {
-    console.log(err.name)
     let code = err.status || 500
 
     if (err.name === 'ValidationError') {

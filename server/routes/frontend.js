@@ -11,5 +11,6 @@ const articleCtrl = require('../controller/article')
 
 router.get('/articles', articleCtrl.list)
 router.get('/articles/:id', articleCtrl.item)
+router.get('/articles/:id/like', articleCtrl.like)
 
 module.exports = router

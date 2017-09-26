@@ -20,10 +20,13 @@ const articleSchema = new mongoose.Schema({
   content: { type: String, required: true, validate: /\S+/ },
   // markdown渲染后的htmln内容
   renderedContent: { type: String, required: true, validate: /\S+/ },
+  // 标签
+  tag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
   // 缩略图 （图片uid, 图片名称，图片URL， 图片大小）
   thumb: { uid: String, title: { type: String, default: '' }, url: { type: String, default: '' }, size: Number },
   // 文章状态 （ 0 草稿 | 1 已发布 ）
   state: { type: Number, default: 0 },
+  // github issue
   issueNumber: { type: Number, default: 1 },
   // 创建日期
   createdAt: { type: Date, default: Date.now },
@@ -31,8 +34,6 @@ const articleSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
   // 发布日期
   publishedAt: { type: Date, default: Date.now },
-  // 标签
-  tag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
   // 文章元数据 （浏览量， 喜欢数， 评论数）
   meta: {
     pvs: { type: Number, default: 0 },

@@ -18,8 +18,9 @@ const middlewares = require('./middleware')
 
 const app = new Koa()
 
-require('./util')
 require('./mongo')()
+
+bouncer.Validator = require('./validation')
 
 // error handler
 onerror(app)
