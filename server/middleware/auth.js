@@ -18,8 +18,8 @@ function devAuth () {
   return async (ctx, next) => {
     if (!isProd && ctx.query._DEV_) {
       ctx._devauth_ = true
-      await next()
     }
+    await next()
   }
 }
 
