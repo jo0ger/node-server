@@ -11,21 +11,20 @@ const { TagModel, ArticleModel } = require('../model')
 exports.list = async (ctx, next) => {
   let data = await TagModel.find({}).sort('-createdAt').catch(err => {
     ctx.log.error(err.message)
-    return []
+    return null
   })
-
-  for (let i = 0; i < data.length; i++) {
-    if (data[i].toObject) {
-      data[i] = data[i].toObject()
-    }
-    const articles = await ArticleModel.find({ tag: data[i]._id }).exec().catch(err => {
-      ctx.log.error(err.message)
-      return []
-    })
-    data[i].count = articles.length
-  }
-
+  
   if (data) {
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].toObject) {
+        data[i] = data[i].toObject()
+      }
+      const articles = await ArticleModel.find({ tag: data[i]._id }).exec().catch(err => {
+        ctx.log.error(err.message)
+        return []
+      })
+      data[i].count = articles.length
+    }
     ctx.success(data)
   } else {
     ctx.fail()
@@ -114,7 +113,7 @@ exports.update = async (ctx, next) => {
     .val()
 
   const tag = {}
-  console.log(forbidden)
+  
   name && (tag.name = name)
   description && (tag.description = description)
   if (forbidden !== undefined) {

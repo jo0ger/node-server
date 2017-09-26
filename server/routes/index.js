@@ -11,10 +11,13 @@ const router = require('koa-router')({
 })
 const frontend = require('./frontend')
 const backend = require('./backend')
+const { header } = require('../middleware')
 
 module.exports = app => {
-  router.use(frontend.routes(), frontend.allowedMethods())
+  router.use('*', header)
+
   router.use('/backend', backend.routes(), backend.allowedMethods())
+  router.use(frontend.routes(), frontend.allowedMethods())
   
   router.all('*', (ctx,next)=> {
     ctx.fail(404, `${ctx.path} 不支持 ${ctx.method} 请求类型`)
