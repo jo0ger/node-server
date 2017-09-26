@@ -72,7 +72,7 @@ exports.list = async (ctx, next) => {
 
   const articles = await ArticleModel.paginate(query, options).catch(err => {
     ctx.log.error(err.message)
-    ctx.fail()
+    return null
   })
 
   if (articles) {
@@ -104,7 +104,7 @@ exports.item = async (ctx, next) => {
 
   data = await queryPs.populate('tag').exec().catch(err => {
     ctx.log.error(err.message)
-    ctx.fail()
+    return null
   })
 
   if (data) {
@@ -142,7 +142,7 @@ exports.create = async (ctx, next) => {
     description
   }).save().catch(err => {
     ctx.log.error(err.message)
-    ctx.fail()
+    return null
   })
 
   if (data) {
@@ -181,7 +181,7 @@ exports.update = async (ctx, next) => {
     new: true
   }).catch(err => {
     ctx.log.error(err.message)
-    ctx.fail()
+    return null
   })
 
   if (data) {
@@ -195,7 +195,7 @@ exports.delete = async (ctx, next) => {
   const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
   const data = await ArticleModel.remove({ _id: id }).catch(err => {
     ctx.log.error(err.message)
-    ctx.fail()
+    return null
   })
 
   if (data && data.result && data.result.ok) {
@@ -214,7 +214,7 @@ exports.like = async (ctx, next) => {
     }
   }).catch(err => {
     ctx.log.error(err.message)
-    ctx.fail()
+    return null
   })
 
   if (data) {
@@ -237,6 +237,7 @@ async function getRelatedArticles (ctx, data) {
       .exec()
       .catch(err => {
         ctx.log.error('related articles access failed, err: ', err.message)
+        return null
       })
     
       if (articles) {
@@ -264,6 +265,7 @@ async function getSiblingArticles (ctx, data) {
       .exec()
       .catch(err => {
         ctx.log.error('adjacent articles access failed, err: ', err.message)
+        return null
       })
     let next = await ArticleModel.findOne(query)
       .select('title createdAt thumb')
@@ -272,6 +274,7 @@ async function getSiblingArticles (ctx, data) {
       .exec()
       .catch(err => {
         ctx.log.error('adjacent articles access failed, err: ', err.message)
+        return null
       })
     prev = prev && prev.toObject()
     next = next && next.toObject()

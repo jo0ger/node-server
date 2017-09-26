@@ -7,12 +7,16 @@
 'use strict'
 
 const router = require('koa-router')()
-const { article, music } = require('../controller')
+const { article, tag, music } = require('../controller')
 
 // Article
 router.get('/articles', article.list)
 router.get('/articles/:id', article.item)
 router.get('/articles/:id/like', article.like)
+
+// Tag
+router.get('/tags', tag.list)
+router.get('/tags/:id', tag.item)
 
 // Music
 router.get('/music/songs', music.list)
