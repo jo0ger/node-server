@@ -9,7 +9,7 @@
 const router = require('koa-router')()
 const articleCtrl = require('../controller/article')
 
-router.get('/articles', articleCtrl.frontend.list)
-router.get('/articles/:id', articleCtrl.frontend.item)
+router.get('/articles', articleCtrl.list)
+router.get('/articles/:id', articleCtrl.item)
 
 module.exports = router

@@ -10,9 +10,15 @@ module.exports = async (ctx, next) => {
   try {
     await next()
   } catch (err) {
-    const code = err.status || 500
+    console.log(err.name)
+    let code = err.status || 500
+
+    if (err.name === 'ValidationError') {
+      code = 10001
+    }
+
     ctx.fail(code, err.message)
-    ctx.status = code
+    ctx.status = 200
     
     if (code === 500) {
       ctx.log.error(

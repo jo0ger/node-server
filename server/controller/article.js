@@ -9,14 +9,12 @@
 const config = require('../config')
 const { ArticleModel, TagModel } = require('../model')
 const ctrl = {
-  frontend: {},
-  backend: {}
 }
 
-ctrl.frontend.list = async (ctx, next) => {
+ctrl.list = async (ctx, next) => {
   const pageSize = ctx.validateQuery('per_page').defaultTo(config.pageSize).toInt().gt(0, 'the per_page parameter should be greater than 0').val()
   const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, 'the page parameter should be greater than 0').val()
-  const state = ctx.validateQuery('state').defaultTo(1).optional().toInt().isIn([0, 1], 'the expected value of the article state is 0 or 1').val()
+  const state = ctx.validateQuery('state').defaultTo(1).optional().toInt().isIn([0, 1], 'the state parameter is not the expected value').val()
   const tag = ctx.validateQuery('tag').defaultTo('').toString().val()
   const keyword = ctx.validateQuery('keyword').toString().defaultTo().val()
 
@@ -36,9 +34,7 @@ ctrl.frontend.list = async (ctx, next) => {
     ]
   }
 
-  const query = {
-    state
-  }
+  const query = { state }
 
    // 搜索关键词
    if (keyword) {
@@ -85,22 +81,14 @@ ctrl.frontend.list = async (ctx, next) => {
   }
 }
 
-ctrl.frontend.item = async (ctx, next) => {
+ctrl.item = async (ctx, next) => {
   ctx.success('222')
 }
 
-ctrl.backend.list = async (ctx, next) => {
-  ctx.success('123')
-}
+ctrl.create = async (ctx, next) => {}
 
-ctrl.backend.item = async (ctx, next) => {
-  ctx.success('222')
-}
+ctrl.update = async (ctx, next) => {}
 
-ctrl.backend.create = async (ctx, next) => {}
-
-ctrl.backend.update = async (ctx, next) => {}
-
-ctrl.backend.delete = async (ctx, next) => {}
+ctrl.delete = async (ctx, next) => {}
 
 module.exports = ctrl
