@@ -8,8 +8,8 @@
 
 const mongoose = require('mongoose')
 const config = require('./config')
-const { AdminModel, OptionModel } = require('./model')
-const { debug } = require('./util')
+const { UserModel, OptionModel } = require('./model')
+const { debug, bhash } = require('./util')
 
 module.exports = function () {
   mongoose.Promise = global.Promise
@@ -37,13 +37,18 @@ function seedOption () {
 }
 
 function seedAdmin () {
-  AdminModel.findOne().exec().then(data => {
+  UserModel.findOne({ role: 0 }).exec().then(data => {
     if (!data) {
       createAdmin()
     }
   })
-
+  
   function createAdmin () {
-    new AdminModel().save().catch(err => debug(err.message))
+    new UserModel({
+      role: 0,
+      password: bhash(config.auth.defaultPassword)
+    })
+    .save()
+    .catch(err => debug(err.message))
   }
 }

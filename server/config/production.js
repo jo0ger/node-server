@@ -14,8 +14,7 @@ module.exports = {
   },
   auth: {
     cookie: {
-      domain: '.jooger.me',
-      maxAge: 60000 * 60 * 24 * 365
+      domain: '.jooger.me'
     }
   }
 }
