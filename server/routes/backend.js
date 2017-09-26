@@ -9,28 +9,33 @@
 const router = require('koa-router')()
 const { article, tag, option, user } = require('../controller')
 const { auth } = require('../middleware')
+const isAuthenticated = auth.isAuthenticated()
 
 // Article
-router.get('/articles', auth.isAuthenticated(), article.list)
-router.get('/articles/:id', auth.isAuthenticated(), article.item)
-router.post('/articles', auth.isAuthenticated(), article.create)
-router.patch('/articles/:id', auth.isAuthenticated(), article.update)
-router.delete('/articles/:id', auth.isAuthenticated(), article.delete)
-router.get('/articles/:id/like', auth.isAuthenticated(), article.like)
+router.get('/articles', isAuthenticated, article.list)
+router.get('/articles/:id', isAuthenticated, article.item)
+router.post('/articles', isAuthenticated, article.create)
+router.patch('/articles/:id', isAuthenticated, article.update)
+router.delete('/articles/:id', isAuthenticated, article.delete)
+router.get('/articles/:id/like', isAuthenticated, article.like)
 
 // Tag
-router.get('/tags', auth.isAuthenticated(), tag.list)
-router.get('/tags/:id', auth.isAuthenticated(), tag.item)
-router.post('/tags', auth.isAuthenticated(), tag.create)
-router.patch('/tags/:id', auth.isAuthenticated(), tag.update)
-router.delete('/tags/:id', auth.isAuthenticated(), tag.delete)
+router.get('/tags', isAuthenticated, tag.list)
+router.get('/tags/:id', isAuthenticated, tag.item)
+router.post('/tags', isAuthenticated, tag.create)
+router.patch('/tags/:id', isAuthenticated, tag.update)
+router.delete('/tags/:id', isAuthenticated, tag.delete)
 
 // Option
-router.get('/options', auth.isAuthenticated(), option.data)
-router.patch('/options', auth.isAuthenticated(), option.update)
+router.get('/options', isAuthenticated, option.data)
+router.patch('/options', isAuthenticated, option.update)
 
 // User
-router.get('/user/info', auth.isAuthenticated(), user.info)
-router.post('/user/login', user.login)
+router.get('/users', isAuthenticated, user.list)
+router.post('/users/login', user.login)
+router.get('/users/logout', isAuthenticated, user.logout)
+router.get('/users/:id', isAuthenticated, user.item)
+router.patch('/users/:id', isAuthenticated, user.update)
+router.delete('/users/:id', isAuthenticated, user.delete)
 
 module.exports = router

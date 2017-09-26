@@ -29,8 +29,6 @@ exports.update = async (ctx, next) => {
     return null
   })
 
-  console.log(data)
-
   if (data) {
     ctx.success(data)
   } else {

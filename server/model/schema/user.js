@@ -17,9 +17,11 @@ const userSchema = new mongoose.Schema({
     // default: md5(`${config.auth.secretKey}${config.auth.defaultPassword}`)
   },
   slogan: { type: String, default: '' },
-  avatar: { type: String, default: '' },
+  avatar: { type: String, validate: /.+?\.(jpg|jpeg|gif|bmp|png)/ },
   // 角色 0 管理员 | 1 普通用户
-  role: { type: Number, default: 1 }
+  role: { type: Number, default: 1 },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 })
 
 module.exports = userSchema

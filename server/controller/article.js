@@ -8,7 +8,7 @@
 
 const config = require('../config')
 const { ArticleModel, TagModel } = require('../model')
-const { marked, isObjectId } = require('../util')
+const { marked, isObjectId, createObjectId } = require('../util')
 
 exports.list = async (ctx, next) => {
   const pageSize = ctx.validateQuery('per_page').defaultTo(config.pageSize).toInt().gt(0, 'the "per_page" parameter should be greater than 0').val()
@@ -69,7 +69,7 @@ exports.list = async (ctx, next) => {
     // 文章列表不需要content和state
     options.select = '-content -renderedContent -state'
   }
-
+  
   const articles = await ArticleModel.paginate(query, options).catch(err => {
     ctx.log.error(err.message)
     return null
@@ -168,9 +168,12 @@ exports.update = async (ctx, next) => {
   keywords && (article.keywords = keywords)
   description && (article.description = description)
   tag && (article.tag = tag)
-  state && (article.state = state)
   thumb && (article.thumb = thumb)
   issueNumber && (article.issueNumber = issueNumber)
+
+  if (state !== undefined) {
+    article.state = state
+  }
 
   if (content) {
     article.content = content

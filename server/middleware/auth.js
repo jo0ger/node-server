@@ -1,5 +1,5 @@
 /**
- * @desc 
+ * @desc Auth middleware
  * @author Jooger <zzy1198258955@163.com>
  * @date 25 Sep 2017
  */
@@ -17,37 +17,31 @@ const isProd = process.env.NODE_ENV === 'production'
 function devAuth () {
   return async (ctx, next) => {
     if (!isProd && ctx.query._DEV_) {
-      ctx._devauth_ = true
+      ctx._devauth = true
     }
     await next()
   }
 }
 
 function verifyToken () {
-  return compose([
-    async (ctx, next) => {
-      if (ctx._devauth_) {
-        return await next()
-      }
-      const token = ctx.cookies.get(config.auth.cookie.name, { signed: true })
-      if (token) {
-        try {
-          const decodedToken = await jwt.verify(token, config.auth.secretKey)
-          if (decodedToken.exp > Math.floor(Date.now() / 1000)) {
-            // 已验证权限
-            await next()
-          }
-        } catch (err) {
-          ctx.fail(401, err.message)
+  return async (ctx, next) => {
+    if (ctx._devauth) {
+      return await next()
+    }
+    const token = ctx.cookies.get(config.auth.cookie.name, { signed: true })
+    if (token) {
+      try {
+        const decodedToken = await jwt.verify(token, config.auth.secretKey)
+        if (decodedToken.exp > Math.floor(Date.now() / 1000)) {
+          // 已验证权限
+          await next()
         }
+      } catch (err) {
+        ctx.fail(401, err.message)
       }
-      ctx.fail(401)
-    },
-    koajwt({
-      secret: config.auth.secretKey,
-      passthrough: true
-    })
-  ])
+    }
+    ctx.fail(401)
+  }
 }
 
 exports.isAuthenticated = () => {
@@ -55,7 +49,7 @@ exports.isAuthenticated = () => {
     devAuth(),
     verifyToken(),
     async (ctx, next) => {
-      if (ctx._devauth_) {
+      if (ctx._devauth) {
         return await next()
       } else if (!ctx.state.user) {
         ctx.fail(401)
@@ -64,11 +58,15 @@ exports.isAuthenticated = () => {
       await next()
     },
     async (ctx, next) => {
-      if (ctx._devauth_) {
+      if (ctx._devauth) {
         ctx._isAuthenticated = true
         return await next()
       }
-      const user = await UserModel.findById(ctx.state.user._id)
+      const userId = ctx.cookies.get('user_id', { domain: config.cookie.domain })
+      const user = await UserModel.findById(userId).exec().catch(err => {
+        ctx.log.error(err.message)
+        return null
+      })
       if (!user) {
         ctx.fail(401)
         return

@@ -29,6 +29,6 @@ router.get('/music/songs/cover/:cover_id', music.cover)
 router.get('/options', option.data)
 
 // User
-router.get('/user/info', user.info)
+router.get('/users/:id', user.item)
 
 module.exports = router

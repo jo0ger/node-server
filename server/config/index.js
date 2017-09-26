@@ -11,6 +11,8 @@ const _ = require('lodash')
 const packageInfo = require('../../package.json')
 
 const baseConfig = {
+  name: packageInfo.name,
+  version: packageInfo.version,
   env: process.env.NODE_ENV,
   root: path.resolve(__dirname, '../../'),
   port: process.env.PORT || 3000,
@@ -37,7 +39,7 @@ const baseConfig = {
     },
     secretKey: `${packageInfo.name} ${packageInfo.version}`,
     // token过期时间
-    expired: 60 * 60 * 24 * 365,
+    expired: 60000 * 60 * 24 * 365,
     defaultName: 'admin',
     defaultPassword: 'admin',
     // 允许请求的域名
