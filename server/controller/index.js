@@ -9,3 +9,4 @@
 exports.article = require('./article')
 exports.tag = require('./tag')
 exports.music = require('./music')
+exports.option = require('./option')

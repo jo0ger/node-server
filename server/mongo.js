@@ -8,6 +8,8 @@
 
 const mongoose = require('mongoose')
 const config = require('./config')
+const { AdminModel, OptionModel } = require('./model')
+const { debug } = require('./util')
 
 module.exports = function () {
   mongoose.Promise = global.Promise
@@ -17,4 +19,31 @@ module.exports = function () {
       process.exit(0)
     }
   })
+
+  seedOption()
+  seedAdmin()
+}
+
+function seedOption () {
+  OptionModel.findOne().exec().then(data => {
+    if (!data) {
+      createOption()
+    }
+  })
+
+  function createOption () {
+    new OptionModel().save().catch(err => debug(err.message))
+  }
+}
+
+function seedAdmin () {
+  AdminModel.findOne().exec().then(data => {
+    if (!data) {
+      createAdmin()
+    }
+  })
+
+  function createAdmin () {
+    new AdminModel().save().catch(err => debug(err.message))
+  }
 }

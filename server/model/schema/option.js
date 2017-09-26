@@ -39,7 +39,8 @@ const optionSchema = new mongoose.Schema({
     name: { type: String, required: true },
     github: { type: String, default: '' },
     site: { type: String, required: true }
-  }]
+  }],
+  musicId: { type: String, default: '' }
 })
 
 module.exports = optionSchema
