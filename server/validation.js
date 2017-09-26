@@ -11,7 +11,7 @@ const Validator = require('koa-bouncer').Validator
 const { isObjectId } = require('./util')
 
 Validator.addMethod('notEmpty', function (tip) {
-  this.isString('the "${this.key}" parameter should be String type')
+  this.isString(`the "${this.key}" parameter should be String type`)
   if (this.val().length === 0) {
     this.throwError(tip || `the "${this.key}" parameter should not be empty value`)
   }

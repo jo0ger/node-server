@@ -8,16 +8,16 @@
 
 const config = require('../config')
 const { ArticleModel, TagModel } = require('../model')
-const { marked } = require('../util')
+const { marked, isObjectId } = require('../util')
 const ctrl = {
 }
 
 ctrl.list = async (ctx, next) => {
   const pageSize = ctx.validateQuery('per_page').defaultTo(config.pageSize).toInt().gt(0, 'the "per_page" parameter should be greater than 0').val()
   const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, 'the "page" parameter should be greater than 0').val()
-  const state = ctx.validateQuery('state').defaultTo(1).optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
-  const tag = ctx.validateQuery('tag').isObjectId().val()
-  const keyword = ctx.validateQuery('keyword').toString().defaultTo().val()
+  const state = ctx.validateQuery('state').defaultTo(1).toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
+  const tag = ctx.validateQuery('tag').optional().toString().val()
+  const keyword = ctx.validateQuery('keyword').optional().toString().val()
 
   // 过滤条件
   const options = {
@@ -35,6 +35,7 @@ ctrl.list = async (ctx, next) => {
     ]
   }
 
+  // 查询条件
   const query = { state }
 
    // 搜索关键词
@@ -120,10 +121,21 @@ ctrl.item = async (ctx, next) => {
 }
 
 ctrl.create = async (ctx, next) => {
-  const title = ctx.validateBody('title').required('the title parameter is required').notEmpty().val()
-  const content = ctx.validateBody('content').required('the content parameter is required').notEmpty().val()
-  const keywords = ctx.validateBody('keywords').defaultTo([]).isArray('the keywords parameter should be Array type').val()
-  const description = ctx.validateBody('description').optional().isString().val()
+  const title = ctx.validateBody('title')
+    .required('the "title" parameter is required')
+    .notEmpty()
+    .isString('the "title" parameter should be String type')
+    .val()
+  const content = ctx.validateBody('content')
+    .required('the "content" parameter is required')
+    .notEmpty()
+    .isString('the "content" parameter should be String type')
+    .val()
+  const keywords = ctx.validateBody('keywords').optional().defaultTo([]).isArray('the "keywords" parameter should be Array type').val()
+  const description = ctx.validateBody('description')
+    .optional()
+    .isString('the "description" parameter should be String type')
+    .val()
   const data = await new ArticleModel({
     title,
     content,
@@ -143,17 +155,76 @@ ctrl.create = async (ctx, next) => {
 }
 
 ctrl.update = async (ctx, next) => {
-  const title = ctx.validateBody('title').required('the title parameter is required').notEmpty().val()
-  const content = ctx.validateBody('content').required('the content parameter is required').notEmpty().val()
-  const keywords = ctx.validateBody('keywords').defaultTo([]).isArray('the keywords parameter should be Array type').val()
-  const description = ctx.validateBody('description').optional().isString().val()
-  const tag = ctx.validateBody('tag').defaultTo([]).isObjectIdArray().val()
-  console.log(tag)
+  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
+  const title = ctx.validateBody('title').optional().isString('the "title" parameter should be String type').val()
+  const content = ctx.validateBody('content').optional().isString('the "content" parameter should be String type').val()
+  const keywords = ctx.validateBody('keywords').optional().isArray('the "keywords" parameter should be Array type').val()
+  const description = ctx.validateBody('description').optional().isString('the "description" parameter should be String type').val()
+  const tag = ctx.validateBody('tag').optional().isObjectIdArray().val()
+  const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
+  const thumb = ctx.validateBody('thumb').optional().isString('the "thumb" parameter should be String type').val()
+  const issueNumber = ctx.validateBody('state').optional().toInt().gte(1, 'the "state" parameter must be 1 or older').val()
+  const article = {}
+
+  title && (article.title = title)
+  keywords && (article.keywords = keywords)
+  description && (article.description = description)
+  tag && (article.tag = tag)
+  state && (article.state = state)
+  thumb && (article.thumb = thumb)
+  issueNumber && (article.issueNumber = issueNumber)
+
+  if (content) {
+    article.content = content
+    article.renderedContent = marked(content)
+  }
+
+  const data = await ArticleModel.findByIdAndUpdate(id, article, {
+    new: true
+  }).catch(err => {
+    ctx.log.error(err.message)
+    ctx.fail()
+  })
+
+  if (data) {
+    ctx.success(data)
+  } else {
+    ctx.fail()
+  }
 }
 
-ctrl.delete = async (ctx, next) => {}
+ctrl.delete = async (ctx, next) => {
+  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
+  const data = await ArticleModel.remove({ _id: id }).catch(err => {
+    ctx.log.error(err.message)
+    ctx.fail()
+  })
 
-ctrl.like = async (ctx, next) => {}
+  if (data && data.result && data.result.ok) {
+    ctx.success()
+  } else {
+    ctx.fail()
+  }
+}
+
+ctrl.like = async (ctx, next) => {
+  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
+
+  const data = await ArticleModel.findByIdAndUpdate(id, {
+    $inc: {
+      'meta.ups': 1
+    }
+  }).catch(err => {
+    ctx.log.error(err.message)
+    ctx.fail()
+  })
+
+  if (data) {
+    ctx.success()
+  } else {
+    ctx.fail(-1, 'the article not found')
+  }
+}
 
 /**
  * 获取相关文章
