@@ -9,6 +9,6 @@
 exports.article = require('./article')
 exports.comment = require('./comment')
 exports.tag = require('./tag')
-exports.admin = require('./admin')
+exports.user = require('./user')
 // exports.log = require('./log')
 exports.option = require('./option')

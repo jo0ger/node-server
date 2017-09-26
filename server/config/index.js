@@ -33,7 +33,7 @@ const baseConfig = {
   redis: {},
   auth: {
     cookie: {
-      name: 'jooger.me'
+      name: 'jooger-me'
     },
     secretKey: `${packageInfo.name} ${packageInfo.version}`,
     // token过期时间

@@ -7,18 +7,19 @@
 'use strict'
 
 const mongoose = require('mongoose')
-const md5 = require('md5')
 const config = require('../../config')
 
-const adminSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   name: { type: String, default: config.auth.defaultName, required: true },
   password: {
     type: String,
-    default: md5(`${config.auth.secretKey}${config.auth.defaultPassword}`),
-    required: true
+    default: ''
+    // default: md5(`${config.auth.secretKey}${config.auth.defaultPassword}`)
   },
   slogan: { type: String, default: '' },
-  avatar: { type: String, default: '' }
+  avatar: { type: String, default: '' },
+  // 角色 0 管理员 | 1 普通用户
+  role: { type: Number, default: 1 }
 })
 
-module.exports = adminSchema
+module.exports = userSchema

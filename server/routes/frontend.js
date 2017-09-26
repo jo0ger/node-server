@@ -7,7 +7,7 @@
 'use strict'
 
 const router = require('koa-router')()
-const { article, tag, music, option } = require('../controller')
+const { article, tag, music, option, user } = require('../controller')
 
 // Article
 router.get('/articles', article.list)
@@ -27,5 +27,8 @@ router.get('/music/songs/cover/:cover_id', music.cover)
 
 // Option
 router.get('/options', option.data)
+
+// User
+router.get('/user/info', user.info)
 
 module.exports = router
