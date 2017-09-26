@@ -7,6 +7,11 @@
 'use strict'
 
 const mongoose = require('mongoose')
+const debug = require('debug')(require('../../package.json').name)
+
+debug.enabled = true
+
+exports.debug = debug
 
 exports.marked = require('./marked')
 

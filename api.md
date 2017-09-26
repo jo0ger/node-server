@@ -4,9 +4,9 @@ prefix: /api
 
 ### 文章
 
-> GET /frontend/articles          前台-文章列表
+> GET /articles          前台-文章列表
 
-> GET /frontend/articles/:id      前台-文章详情
+> GET /articles/:id      前台-文章详情
 
 > GET /backend/articles           后台-文章列表
 
@@ -21,9 +21,9 @@ prefix: /api
 
 ### 标签
 
-> GET /frontend/tags          前台-标签列表
+> GET /tags          前台-标签列表
 
-> GET /frontend/tags/:id      前台-标签详情
+> GET /tags/:id      前台-标签详情
 
 > GET /backend/tags           后台-标签列表
 
@@ -37,11 +37,11 @@ prefix: /api
 
 ### 评论
 
-> GET /frontend/comments          前台-评论列表
+> GET /comments          前台-评论列表
 
-> GET /frontend/comments/:id      前台-评论详情
+> GET /comments/:id      前台-评论详情
 
-> POST /frontend/comments         前台-发布评论
+> POST /comments         前台-发布评论
 
 > GET /backend/comments           后台-评论列表
 
@@ -55,7 +55,7 @@ prefix: /api
 
 ### 全站配置
 
-> GET /frontend/option            前台-全站配置
+> GET /option            前台-全站配置
 
 > GET /backend/option             后台-全站配置
 
