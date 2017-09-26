@@ -1,2 +1,3 @@
 # jooger.me-server
-jooger.me's api server
+
+My blog's api server build by koa2 and mongoose
