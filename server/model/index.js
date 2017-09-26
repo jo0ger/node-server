@@ -12,14 +12,14 @@ const { firstUpperCase } = require('../util')
 const models = {}
 
 Object.keys(schemas).forEach(key => {
-  const schema = buildSchema(schemas[key])
+  const schema = getSchema(schemas[key])
   if (schema) {
-    models[`${firstUpperCase(key)}Model`] = mongoose.model(key, schema)
+    models[`${firstUpperCase(key)}Model`] = mongoose.model(firstUpperCase(key), schema)
   }
 })
 
 // 构建schema
-function buildSchema (schema) {
+function getSchema (schema) {
   if (!schema) {
     return null
   }
@@ -32,7 +32,7 @@ function buildSchema (schema) {
 
 // 更新updatedAt
 function updateHook (next) {
-  this.findOneAndUpdate({}, { updatedAt: Date.now })
+  this.findOneAndUpdate({}, { updatedAt: Date.now() })
   next()
 }
 

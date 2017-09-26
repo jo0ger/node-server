@@ -13,7 +13,7 @@ const frontend = require('./frontend')
 const backend = require('./backend')
 
 module.exports = app => {
-  router.use('/frontend', frontend.routes(), frontend.allowedMethods())
+  router.use(frontend.routes(), frontend.allowedMethods())
   router.use('/backend', backend.routes(), backend.allowedMethods())
   
   router.all('*', (ctx,next)=> {

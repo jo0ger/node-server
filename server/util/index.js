@@ -6,7 +6,9 @@
 
 'use strict'
 
-exports.validation = require('./validation')
+const mongoose = require('mongoose')
+
+exports.marked = require('./marked')
 
 exports.isObjectId = (str = '') => mongoose.Types.ObjectId.isValid(str)
 
