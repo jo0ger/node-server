@@ -32,7 +32,7 @@ module.exports = {
       host : 'jooger.me',
       ref  : 'origin/master',
       repo : packageInfo.repository.url,
-      path : '/var/www/' + packageInfo.name,
+      path : '/root/www/' + packageInfo.name,
       'post-deploy' : 'cnpm install && pm2 stop all && pm2 reload ecosystem.config.js --env production && pm2 start all'
     }
   }
