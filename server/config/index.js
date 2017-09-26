@@ -18,7 +18,7 @@ const baseConfig = {
   codeMap: {
     '-1': 'fail',
     '200': 'success',
-    '401': 'token expired',
+    '401': 'authentication failure',
     '403': 'forbidden',
     '500': 'server error',
     '10001': 'params error'

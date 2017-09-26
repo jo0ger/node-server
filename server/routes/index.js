@@ -15,6 +15,7 @@ const backend = require('./backend')
 module.exports = app => {
   router.use('/frontend', frontend.routes(), frontend.allowedMethods())
   router.use('/backend', backend.routes(), backend.allowedMethods())
+  
   router.all('*', (ctx,next)=> {
     ctx.fail(404, `${ctx.path} 不支持 ${ctx.method} 请求类型`)
     ctx.status = 404

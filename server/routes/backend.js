@@ -10,7 +10,7 @@ const router = require('koa-router')()
 const articleCtrl = require('../controller/article')
 const { auth } = require('../middleware')
 
-router.get('/articles', auth.isAuthenticated(), articleCtrl.backend.list)
-router.get('/articles/:id', auth.isAuthenticated(), articleCtrl.backend.item)
+router.get('/articles', auth.isAuthenticated(), articleCtrl.list)
+router.get('/articles/:id', auth.isAuthenticated(), articleCtrl.item)
 
 module.exports = router
