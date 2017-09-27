@@ -9,8 +9,6 @@ const app = require('../server/app')
 const debug = require('../server/util').setDebug()
 const config = require('../server/config')
 
-debug.enabled = true
-
 /**
  * Get port from environment and store in Express.
  */

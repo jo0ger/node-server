@@ -25,7 +25,7 @@ exports.init = (UserModel, config) => {
       const user = await UserModel.findOne({
         'github.id': profile.id
       }).catch(err => {
-        debug('user check error, err: ', err.message)
+        debug.error('user check error, err: ', err.message)
         return null
       })
 
@@ -40,7 +40,7 @@ exports.init = (UserModel, config) => {
         }
 
         const updatedUser = await UserModel.findByIdAndUpdate(user._id, userData).exec().catch(err => {
-          debug('user update error, err: ', err.message)
+          debug.error('user update error, err: ', err.message)
         }) || user
 
         return end(null, updatedUser)
@@ -57,7 +57,7 @@ exports.init = (UserModel, config) => {
       newUser.github.token = accessToken
 
       const checkUser = await UserModel.findOne({ name: newUser.name }).exec().catch(err => {
-        debug('user check error, err: ', err.message)
+        debug.error('user check error, err: ', err.message)
         return true
       })
 
@@ -66,12 +66,12 @@ exports.init = (UserModel, config) => {
       }
 
       const data = await new UserModel(newUser).save().catch(err => {
-        debug('user create fail, err: ', err.message)
+        debug.error('user create fail, err: ', err.message)
       })
       
       return end(null, data)
     } catch (err) {
-      debug('github auth error')
+      debug.error('github auth error')
       return end(err)
     }
 
