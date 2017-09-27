@@ -9,13 +9,14 @@
 const mongoose = require('mongoose')
 const config = require('./config')
 const { UserModel, OptionModel } = require('./model')
-const { debug, bhash } = require('./util')
+const { bhash, setDebug } = require('./util')
+const debug = setDebug('mongo:connect')
 
 module.exports = function () {
   mongoose.Promise = global.Promise
   mongoose.connect(config.mongo.uri, config.mongo.option, err => {
     if (err) {
-      console.error('connect to %s error: ', config.mongo.uri, err.message)
+      debug('connect to %s error: ', config.mongo.uri, err.message)
       process.exit(0)
     }
   })

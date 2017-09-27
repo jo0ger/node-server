@@ -15,7 +15,7 @@ const baseConfig = {
   version: packageInfo.version,
   env: process.env.NODE_ENV,
   root: path.resolve(__dirname, '../../'),
-  port: process.env.PORT || 3000,
+  port: process.env.PORT || 3001,
   pageSize: 12,
   codeMap: {
     '-1': 'fail',
@@ -34,12 +34,12 @@ const baseConfig = {
   // TODO: Redis
   redis: {},
   auth: {
-    cookie: {
-      name: 'jooger-me'
+    session: {
+      key: 'jooger.me.sid',
+      maxAge: 60000 * 60 * 24 * 7,
+      signed: false
     },
-    secretKey: `${packageInfo.name} ${packageInfo.version}`,
-    // token过期时间
-    expired: 60000 * 60 * 24 * 365,
+    secrets: `${packageInfo.name} ${packageInfo.version}`,
     defaultName: 'admin',
     defaultPassword: 'admin',
     // 允许请求的域名
@@ -49,6 +49,13 @@ const baseConfig = {
       'blog.jooger.me',
       'admin.jooger.me'
     ]
+  },
+  sns: {
+    github: {
+      clientID: process.env.GITHUB_CLIENT_ID || '5b4d4a7945347d0fd2e2',
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || '8771bd9ae52749cc15b0c9e2c6cb4ecd7f39d9da',
+      callbackURL: process.env.GITHUB_CALLBACK_URL || 'http://127.0.0.1:3001/api/auth/github/login/callback'
+    }
   }
 }
 

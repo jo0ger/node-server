@@ -15,7 +15,7 @@
   },
   "keywords": [
     "jooger.me",
-    "server",    
+    "server",
     "api"
   ],
   "author": "Jooger",
@@ -38,11 +38,14 @@
     "koa-jwt": "^3.2.2",
     "koa-logger": "^2.0.1",
     "koa-onerror": "^1.2.1",
+    "koa-passport": "^4.0.0",
     "koa-router": "^7.1.1",
+    "koa-session": "^5.5.0",
     "lodash": "^4.17.4",
     "marked": "^0.3.6",
     "mongoose": "^4.11.12",
     "mongoose-paginate": "^5.0.3",
+    "passport-github": "^1.1.0",
     "simple-netease-cloud-music": "^0.1.8"
   },
   "devDependencies": {

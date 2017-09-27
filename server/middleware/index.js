@@ -8,5 +8,5 @@
 
 exports.error = require('./error')
 exports.response = require('./response')
-exports.auth = require('./auth')
+exports.authenticate = require('./authenticate')
 exports.header = require('./header')

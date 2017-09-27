@@ -6,7 +6,7 @@
 
 const http = require('http')
 const app = require('../server/app')
-const debug = require('debug')(require('../package.json').name)
+const debug = require('../server/util').setDebug()
 const config = require('../server/config')
 
 debug.enabled = true

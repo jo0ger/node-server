@@ -7,9 +7,9 @@
 'use strict'
 
 const router = require('koa-router')()
-const { article, tag, option, user } = require('../controller')
-const { auth } = require('../middleware')
-const isAuthenticated = auth.isAuthenticated()
+const { article, tag, option, user, auth } = require('../controller')
+const { authenticate } = require('../middleware')
+const isAuthenticated = authenticate.isAuthenticated()
 
 // Article
 router.get('/articles', isAuthenticated, article.list)
@@ -32,10 +32,12 @@ router.patch('/options', isAuthenticated, option.update)
 
 // User
 router.get('/users', isAuthenticated, user.list)
-router.post('/users/login', user.login)
-router.get('/users/logout', isAuthenticated, user.logout)
 router.get('/users/:id', isAuthenticated, user.item)
 router.patch('/users/:id', isAuthenticated, user.update)
 router.delete('/users/:id', isAuthenticated, user.delete)
+
+// Auth
+router.get('/auth/local/logout', isAuthenticated, auth.logout)
+router.post('/auth/local/login', auth.localLogin)
 
 module.exports = router

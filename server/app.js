@@ -11,19 +11,26 @@ const json = require('koa-json')
 const logger = require('koa-logger')
 const onerror = require('koa-onerror')
 const bouncer = require('koa-bouncer')
+const session = require('koa-session')
+const passport = require('koa-passport')
 const compress = require('koa-compress')
 const bodyparser = require('koa-bodyparser')
 const koaBunyanLogger = require('koa-bunyan-logger')
 const middlewares = require('./middleware')
+const config = require('./config')
 
 const app = new Koa()
 
+// connect mongodb
 require('./mongo')()
 
+// load custom validations
 bouncer.Validator = require('./validation')
 
 // error handler
 onerror(app)
+
+app.keys = config.auth.secrets
 
 // middlewares
 app.use(bodyparser({
@@ -32,10 +39,12 @@ app.use(bodyparser({
 app.use(json())
 app.use(logger())
 app.use(koaBunyanLogger())
-app.use(compress())
 app.use(bouncer.middleware())
 app.use(middlewares.response)
 app.use(middlewares.error)
+app.use(session(config.auth.session, app))
+app.use(passport.initialize())
+app.use(compress())
 
 // routes
 require('./routes')(app)

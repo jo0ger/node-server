@@ -33,7 +33,7 @@ Validator.addMethod('isObjectIdArray', function (tip) {
   const val = this.val()
   if (val !== undefined) {
     this.isArray()
-    val.every(data => {
+    val.forEach(data => {
       if (!isObjectId(data)) {
         this.throwError(tip || `the "${this.key}" parameter contains a data(${data}) that is not ObjectId type`)
       }

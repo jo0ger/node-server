@@ -6,8 +6,6 @@
 
 'use strict'
 
-const jwt = require('jsonwebtoken')
-const config = require('../config')
 const { UserModel } = require('../model')
 const { bhash, bcompare } = require('../util')
 
@@ -53,57 +51,6 @@ exports.item = async (ctx, next) => {
   } else {
     ctx.fail()
   }
-}
-
-exports.login = async (ctx, next) => {
-  const name = ctx.validateBody('name')
-    .required('the "name" parameter is required')
-    .notEmpty()
-    .isString('the "name" parameter should be String type')
-    .val()
-  const password = ctx.validateBody('password')
-    .required('the "password" parameter is required')
-    .notEmpty()
-    .isString('the "password" parameter should be String type')
-    .val()
-  
-  const user = await UserModel.findOne({ name }).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
-
-  if (user) {
-    const vertifyPassword = bcompare(password, user.password)
-    if (vertifyPassword) {
-      const { expired, cookie } = config.auth
-      const token = signUserToken({
-        id: user._id,
-        name: user.name
-      })
-      ctx.cookies.set(cookie.name, token, { domain: cookie.domain, maxAge: expired, httpOnly: true })
-      ctx.cookies.set('user_id', user._id, { domain: cookie.domain, maxAge: expired })
-      ctx.success({
-        id: user._id,
-        token
-      }, 'login success')
-    } else {
-      ctx.fail(-1, 'incorrect password')
-    }
-  } else {
-    ctx.fail(-1, 'user doesn\'t exist')
-  }
-}
-
-exports.logout = async (ctx, next) => {
-  const { expired, cookie } = config.auth
-  const token = signUserToken({
-    id: ctx._user._id,
-    name: ctx._user.name
-  }, false)
-  ctx.cookies.set(cookie.name, token, {
-    maxAge: 0
-  })
-  ctx.success()
 }
 
 exports.update = async (ctx, next) => {
@@ -165,14 +112,4 @@ exports.delete = async (ctx, next) => {
   } else {
     ctx.fail()
   }
-}
-
-/**
- * @desc jwt sign
- * @param  {Object} payload={}
- * @param  {Boolean} isLogin=false
- */
-function signUserToken (payload = {}, isLogin = true) {
-  const { secretKey, expired } = config.auth
-  return jwt.sign(payload, secretKey, { expiresIn: isLogin ? expired : 0 })
 }

@@ -8,11 +8,16 @@
 
 const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
-const debug = require('debug')(require('../../package.json').name)
+const packageInfo = require('../../package.json')
+const debug = require('debug')
 
-debug.enabled = true
+exports.setDebug = level => {
+  const deBug = debug(`[${packageInfo.name}]${level ? ' ' + level : ''}`)
+  deBug.enabled = true
+  return deBug
+}
 
-exports.debug = debug
+exports.signToken = require('./sign-token')
 
 exports.marked = require('./marked')
 
@@ -26,3 +31,12 @@ exports.firstUpperCase = (str = '') => str.toLowerCase().replace(/( |^)[a-z]/g, 
 exports.bhash = (str = '') => bcrypt.hashSync(str, 8)
 
 exports.bcompare = (str, hash) => bcrypt.compareSync(str, hash)
+
+exports.randomString = (length = 8) => {
+  const chars = `ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz`
+  let id = ''
+  for (let i = 0; i < length; i++) {
+    id += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return id
+}

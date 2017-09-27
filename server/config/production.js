@@ -13,7 +13,7 @@ module.exports = {
     uri: 'mongodb://127.0.0.1/jooger-me'
   },
   auth: {
-    cookie: {
+    session: {
       domain: '.jooger.me'
     }
   }
