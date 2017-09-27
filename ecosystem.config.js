@@ -14,14 +14,14 @@ module.exports = {
     script: './bin/www',
     cwd: __dirname,
     watch: true,
-    ignore_watch: ["[\/\\]\./", "node_modules"],
+    ignore_watch: ['[\/\\]\./', 'node_modules'],
     env: {
       NODE_ENV: 'production'
     },
     env_production: {
-      NODE_ENV: "production"
+      NODE_ENV: 'production'
     },
-    log_date_format: "YYYY-MM-DD HH:mm Z",
+    log_date_format: 'YYYY-MM-DD HH:mm Z',
     out_file: './logs/pm2-out.log',
     error_file: './logs/pm2-error.log',
     pid_file: './logs/jooger.me-server.pid'
