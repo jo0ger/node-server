@@ -13,6 +13,7 @@ const packageInfo = require('../../package.json')
 const baseConfig = {
   name: packageInfo.name,
   version: packageInfo.version,
+  author: packageInfo.author || 'Jooger',
   env: process.env.NODE_ENV,
   root: path.resolve(__dirname, '../../'),
   port: process.env.PORT || 3001,
@@ -40,8 +41,8 @@ const baseConfig = {
       signed: false
     },
     secrets: `${packageInfo.name} ${packageInfo.version}`,
-    defaultName: 'admin',
-    defaultPassword: 'admin',
+    defaultName: 'Jooger',
+    defaultPassword: 'admin_jooger',
     // 允许请求的域名
     allowedOrigins: [
       'jooger.me',

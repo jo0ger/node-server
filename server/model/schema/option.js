@@ -38,6 +38,8 @@ const optionSchema = new mongoose.Schema({
   links: [{
     name: { type: String, required: true },
     github: { type: String, default: '' },
+    avatar: { type: String, default: '' },
+    slogan: { type: String, default: '' },
     site: { type: String, required: true }
   }],
   musicId: { type: String, default: '' }

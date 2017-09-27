@@ -8,6 +8,7 @@
 
 const { UserModel } = require('../model')
 const { bhash, bcompare } = require('../util')
+const config = require('../config')
 
 exports.list = async (ctx, next) => {
   let select = '-password'
@@ -109,6 +110,23 @@ exports.delete = async (ctx, next) => {
 
   if (data && data.result && data.result.ok) {
     ctx.success()
+  } else {
+    ctx.fail()
+  }
+}
+
+exports.me = async (ctx, next) => {
+  const data = await UserModel
+    .findOne({ name: config.author })
+    .select('-password -role -createdAt -updatedAt -github')
+    .exec()
+    .catch(err => {
+      ctx.log.error(err.message)
+      return null
+    })
+
+  if (data) {
+    ctx.success(data)
   } else {
     ctx.fail()
   }
