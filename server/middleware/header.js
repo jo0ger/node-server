@@ -12,7 +12,10 @@ module.exports = async (ctx, next) => {
   const { request, response } = ctx
   const allowedOrigins = config.auth.allowedOrigins
   const origin = request.get('origin') || ''
-  const allowed = origin.includes('localhost') || request.query._DEV_ || allowedOrigins.find(item => origin.includes(item))
+  const allowed = request.query._DEV_ ||
+    origin.includes('localhost') ||
+    origin.includes('127.0.0.1') ||
+    allowedOrigins.find(item => origin.includes(item))
   if (allowed) {
     response.set('Access-Control-Allow-Origin', origin)
   }
