@@ -16,7 +16,7 @@ module.exports = function () {
   mongoose.Promise = global.Promise
   mongoose.connect(config.mongo.uri, config.mongo.option, err => {
     if (err) {
-      debug('connect to %s error: ', config.mongo.uri, err.message)
+      debug.error('connect to %s error: ', config.mongo.uri, err.message)
       process.exit(0)
     }
   })
@@ -33,7 +33,7 @@ function seedOption () {
   })
 
   function createOption () {
-    new OptionModel().save().catch(err => debug(err.message))
+    new OptionModel().save().catch(err => debug.error(err.message))
   }
 }
 
@@ -50,6 +50,6 @@ function seedAdmin () {
       password: bhash(config.auth.defaultPassword)
     })
     .save()
-    .catch(err => debug(err.message))
+    .catch(err => debug.error(err.message))
   }
 }

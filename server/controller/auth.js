@@ -44,7 +44,7 @@ exports.localLogin = async (ctx, next) => {
       })
       ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: true })
       ctx.cookies.set('user_id', user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
-      debug('login success, user: ', user._id)
+      debug.success('login success, user: ', user._id)
       ctx.success({
         id: user._id,
         token
@@ -65,7 +65,7 @@ exports.logout = async (ctx, next) => {
   }, false)
   ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: 0, httpOnly: true })
   ctx.cookies.set('user_id', ctx._user._id, { signed: false, domain: session.domain, maxAge: 0, httpOnly: false })
-  debug('logout success, user: ', ctx._user._id)
+  debug.success('logout success, user: ', ctx._user._id)
   ctx.success(null, 'logout success')
 }
 
@@ -87,7 +87,7 @@ exports.githubLogin = async (ctx, next) => {
     ctx.cookies.set('user_id', user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
 
     debug('github auth callback finish')
-    debug('github login success, user: ', user._id)
+    debug.success('github login success, user: ', user._id)
     return ctx.redirect(redirectUrl)
   })(ctx)
 }

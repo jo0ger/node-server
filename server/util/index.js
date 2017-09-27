@@ -8,14 +8,8 @@
 
 const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
-const packageInfo = require('../../package.json')
-const debug = require('debug')
 
-exports.setDebug = level => {
-  const deBug = debug(`[${packageInfo.name}]${level ? ' ' + level : ''}`)
-  deBug.enabled = true
-  return deBug
-}
+exports.setDebug = require('./debug')
 
 exports.signToken = require('./sign-token')
 
@@ -28,10 +22,13 @@ exports.isObjectId = (str = '') => mongoose.Types.ObjectId.isValid(str)
 // 首字母大写
 exports.firstUpperCase = (str = '') => str.toLowerCase().replace(/( |^)[a-z]/g, (L) => L.toUpperCase())
 
+// hash 加密
 exports.bhash = (str = '') => bcrypt.hashSync(str, 8)
 
+// 对比
 exports.bcompare = (str, hash) => bcrypt.compareSync(str, hash)
 
+// 随机字符串
 exports.randomString = (length = 8) => {
   const chars = `ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz`
   let id = ''
