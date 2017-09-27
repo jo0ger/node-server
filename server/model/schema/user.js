@@ -14,14 +14,21 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     default: ''
-    // default: md5(`${config.auth.secretKey}${config.auth.defaultPassword}`)
   },
   slogan: { type: String, default: '' },
-  avatar: { type: String, validate: /.+?\.(jpg|jpeg|gif|bmp|png)/ },
+  avatar: { type: String, default: '' },
   // 角色 0 管理员 | 1 普通用户
   role: { type: Number, default: 1 },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
+  github: {
+    id: { type: String, default: '' },
+    email: { type: String, default: '' },
+    login: { type: String, default: '' },
+    name: { type: String, default: '' },
+    blog: { type: String, default: '' },
+    token: { type: String, default: '' }
+  }
 })
 
 module.exports = userSchema
