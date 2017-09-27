@@ -31,6 +31,7 @@ function verifyToken () {
     }
     ctx.session._verify = false
     const token = ctx.cookies.get(config.auth.session.key)
+    
     if (token) {
       const decodedToken = await jwt.verify(token, config.auth.secrets)
       if (decodedToken.exp > Math.floor(Date.now() / 1000)) {

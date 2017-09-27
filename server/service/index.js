@@ -7,3 +7,5 @@
 'use strict'
 
 exports.githubPassport = require('./github-passport')
+
+exports.getGithubUsersInfo = require('./github-userinfo')

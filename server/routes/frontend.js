@@ -16,7 +16,7 @@ const snsLogout = authenticate.snsLogout()
 // Article
 router.get('/articles', article.list)
 router.get('/articles/:id', article.item)
-router.get('/articles/:id/like', article.like)
+router.post('/articles/:id/like', article.like)
 
 // Tag
 router.get('/tags', tag.list)
@@ -33,6 +33,7 @@ router.get('/music/songs/cover/:cover_id', music.cover)
 router.get('/options', option.data)
 
 // User
+router.get('/users/me', user.me)
 router.get('/users/:id', user.item)
 
 // Auth

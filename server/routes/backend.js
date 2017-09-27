@@ -17,7 +17,7 @@ router.get('/articles/:id', isAuthenticated, article.item)
 router.post('/articles', isAuthenticated, article.create)
 router.patch('/articles/:id', isAuthenticated, article.update)
 router.delete('/articles/:id', isAuthenticated, article.delete)
-router.get('/articles/:id/like', isAuthenticated, article.like)
+router.post('/articles/:id/like', isAuthenticated, article.like)
 
 // Tag
 router.get('/tags', isAuthenticated, tag.list)

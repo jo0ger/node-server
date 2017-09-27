@@ -25,6 +25,7 @@
   },
   "bin": "./node_modules/.bin/",
   "dependencies": {
+    "axios": "^0.16.2",
     "bcryptjs": "^2.4.3",
     "debug": "^2.6.9",
     "highlight.js": "^9.12.0",
