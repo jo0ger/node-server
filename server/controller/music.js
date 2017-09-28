@@ -17,9 +17,30 @@ exports.list = async (ctx, next) => {
     .isString('the "play_list_id" parameter should be String type')
     .val()
 
-  const { playlist } = await neteaseMusic.playlist(playListId)
+  const tracks = await neteaseMusic.playlist(playListId).then(({ playlist }) => playlist.tracks)
 
-  ctx.success(playlist)
+  const data = await Promise.all(
+    tracks.map(track => {
+      return Promise.all([
+        neteaseMusic.url(track.id),
+        neteaseMusic.lyric(track.id)
+      ]).then(([song, lyric]) => {
+        return [song.data[0] || null, lyric.nolyric ? '' : lyric.lrc.lyric]
+      }).then(([song, lyric]) => {
+        const { id, name, dt, al, ar } = track
+        return {
+          id,
+          name,
+          duration: dt || 0,
+          album: al || {},
+          artists: ar || [],
+          src: song.url,
+          lyric
+        }
+      })
+    }
+  ))
+  ctx.success(data)
 }
 
 exports.item = async (ctx, next) => {
@@ -47,7 +68,7 @@ exports.url = async (ctx, next) => {
 }
 
 exports.lyric = async (ctx, next) => {
-  const coverId = ctx.validateParam('song_id')
+  const songId = ctx.validateParam('song_id')
   .required('the "song_id" parameter is required')
   .notEmpty()
   .isString('the "song_id" parameter should be String type')
