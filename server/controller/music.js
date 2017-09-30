@@ -27,11 +27,12 @@ exports.list = async (ctx, next) => {
     return null
   })
 
-  if (!option) {
+  if (!option || !option.musicId) {
     return ctx.fail()
   }
 
   const musicId = option.musicId
+
   if (songListMap[musicId]) {
     return ctx.success(songListMap[musicId])
   }
@@ -151,6 +152,9 @@ exports.updateSongListMap = async function () {
 
   if (option && option.musicId) {
     songListMap[option.musicId] = null
+  } else {
+    debug('music playlist id is not found')
+    return
   }
 
   const ids = Object.keys(songListMap)
