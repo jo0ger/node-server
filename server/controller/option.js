@@ -43,6 +43,7 @@ exports.updateOption = async function (option = null) {
       return {}
     })
   }
+
   // 更新友链
   if (option.links) {
     const githubNames = option.links.map(link => link.github)

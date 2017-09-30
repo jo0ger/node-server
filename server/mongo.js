@@ -28,18 +28,14 @@ module.exports = function () {
 }
 
 async function seedOption () {
-  let option = await OptionModel.findOne().exec().catch(err => debug.error(err.message))
+  const option = await OptionModel.findOne().exec().catch(err => debug.error(err.message))
 
   if (!option) {
-    option = await createOption()
+    await new OptionModel().save().catch(err => debug.error(err.message))
   }
 
-  updateOption(option)
+  updateOption()
   updateSongListMap()
-
-  function createOption () {
-    new OptionModel().save().catch(err => debug.error(err.message))
-  }
 }
 
 function seedAdmin () {
