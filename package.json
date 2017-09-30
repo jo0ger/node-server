@@ -27,6 +27,8 @@
   "dependencies": {
     "axios": "^0.16.2",
     "bcryptjs": "^2.4.3",
+    "big-integer": "^1.6.25",
+    "crypto": "^1.0.1",
     "debug": "^2.6.9",
     "highlight.js": "^9.12.0",
     "koa": "^2.2.0",

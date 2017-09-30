@@ -9,3 +9,5 @@
 exports.githubPassport = require('./github-passport')
 
 exports.getGithubUsersInfo = require('./github-userinfo')
+
+exports.fetchNE = require('./netease-music')
