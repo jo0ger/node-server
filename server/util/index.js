@@ -15,6 +15,8 @@ exports.signToken = require('./sign-token')
 
 exports.marked = require('./marked')
 
+exports.encrypt = require('./encrypt')
+
 exports.createObjectId = () => mongoose.Types.ObjectId()
 
 exports.isObjectId = (str = '') => mongoose.Types.ObjectId.isValid(str)

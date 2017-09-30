@@ -8,6 +8,7 @@
 
 const { OptionModel } = require('../model')
 const { getGithubUsersInfo } = require('../service')
+const debug = require('../util').setDebug('option')
 
 exports.data = async (ctx, next) => {
   const data = await OptionModel.findOne().exec().catch(err => {
@@ -34,10 +35,12 @@ exports.update = async (ctx, next) => {
   }
 }
 
-// 每3小时更新一次
-setInterval(updateOption, 1000 * 60 * 60 * 3)
+// 每1小时更新一次
+setInterval(updateOption, 1000 * 60 * 60 * 1)
+setTimeout(updateOption, 0)
 
 async function updateOption (option = null) {
+  debug('timed update option...')
   if (!option) {
     option = await OptionModel.findOne().exec().catch(err => {
       ctx.log.error(err.message)
@@ -66,6 +69,10 @@ async function updateOption (option = null) {
     ctx.log.error(err.message)
     return null
   })
+
+  if (data) {
+    debug.success('timed update option success...')
+  }
 
   return data
 }

@@ -15,19 +15,20 @@ const levelMap = {
   warn: 3,
   error: 1
 }
+const slice = Array.prototype.slice
 
 module.exports = function setDebug (namespace = '') {
   const deBug = debug(`[${packageInfo.name}]${namespace ? ' ' + namespace : ''}`)
 
   function d () {
-    d.info.apply(d, Array.prototype.slice.call(arguments))
+    d.info.apply(d, slice.call(arguments))
   }
 
   Object.keys(levelMap).map(level => {
     d[level] = function () {
       deBug.enabled = true
       deBug.color = levelMap[level]
-      deBug.apply(null, Array.prototype.slice.call(arguments))
+      deBug.apply(null, slice.call(arguments))
     }
   })
 
