@@ -140,12 +140,8 @@ async function fetchSonglist (playListId) {
   })
 }
 
-// 每1小时更新一次
-setInterval(updateSongListMap, 1000 * 60 * 60)
-setTimeout(updateSongListMap, 0)
-
 // 更新song list cache
-async function updateSongListMap () {
+exports.updateSongListMap = async function () {
   debug('timed update music...')
 
   const option = await OptionModel.findOne({}).exec().catch(err => {
@@ -169,4 +165,5 @@ async function updateSongListMap () {
   }
 }
 
-exports.updateSongListMap = updateSongListMap
+// 每1小时更新一次
+setInterval(exports.updateSongListMap, 1000 * 60 * 60)

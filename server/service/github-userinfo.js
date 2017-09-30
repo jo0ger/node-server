@@ -20,10 +20,11 @@ const getGithubUsersInfo = (githubNames = '') => {
   }
 
   const task = githubNames.map(name => {
-    debug('fetch github user ', name)
+    debug('fetch github user [', name, ']')
     return axios.get(`https://api.github.com/users/${name}`)
       .then(res => {
         if (res && res.status === 200) {
+          debug.success('fetch github user success [', name, ']')
           return res.data
         }
         return null

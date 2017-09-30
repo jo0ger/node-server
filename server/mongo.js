@@ -9,6 +9,8 @@
 const mongoose = require('mongoose')
 const config = require('./config')
 const { UserModel, OptionModel } = require('./model')
+const { updateOption } = require('./controller/option')
+const { updateSongListMap } = require('./controller/music')
 const { bhash, setDebug } = require('./util')
 const debug = setDebug('mongo:connect')
 
@@ -25,12 +27,15 @@ module.exports = function () {
   seedAdmin()
 }
 
-function seedOption () {
-  OptionModel.findOne().exec().then(data => {
-    if (!data) {
-      createOption()
-    }
-  })
+async function seedOption () {
+  let option = await OptionModel.findOne().exec().catch(err => debug.error(err.message))
+
+  if (!option) {
+    option = await createOption()
+  }
+
+  updateOption(option)
+  updateSongListMap()
 
   function createOption () {
     new OptionModel().save().catch(err => debug.error(err.message))

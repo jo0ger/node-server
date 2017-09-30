@@ -35,11 +35,7 @@ exports.update = async (ctx, next) => {
   }
 }
 
-// 每1小时更新一次
-setInterval(updateOption, 1000 * 60 * 60 * 1)
-setTimeout(updateOption, 0)
-
-async function updateOption (option = null) {
+exports.updateOption = async function (option = null) {
   debug('timed update option...')
   if (!option) {
     option = await OptionModel.findOne().exec().catch(err => {
@@ -76,3 +72,6 @@ async function updateOption (option = null) {
 
   return data
 }
+
+// 每1小时更新一次
+setInterval(exports.updateOption, 1000 * 60 * 60 * 1)
