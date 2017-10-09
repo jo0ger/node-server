@@ -31,12 +31,19 @@ function verifyToken () {
     }
     ctx.session._verify = false
     const token = ctx.cookies.get(config.auth.session.key)
-    
+
     if (token) {
-      const decodedToken = await jwt.verify(token, config.auth.secrets)
-      if (decodedToken.exp > Math.floor(Date.now() / 1000)) {
+      let decodedToken = null
+      try {
+        decodedToken = await jwt.verify(token, config.auth.secrets)
+      } catch (err) {
+        ctx.fail(401)
+      }
+
+      if (decodedToken && decodedToken.exp > Math.floor(Date.now() / 1000)) {
         // 已验证权限
         ctx.session._verify = true
+        ctx.session._token = token
       }
     }
     await next()
@@ -52,7 +59,7 @@ exports.isAuthenticated = () => {
         return ctx.fail(401)
       }
 
-      const userId = ctx.cookies.get('user_id', { signed: false })
+      const userId = ctx.cookies.get('jooger.me.userid', { signed: false })
 
       const user = await UserModel.findById(userId).exec().catch(err => {
         ctx.log.error(err.message)

@@ -47,6 +47,7 @@ exports.item = async (ctx, next) => {
       ctx.log.error(err.message)
       return null
     })
+
   if (data) {
     ctx.success(data)
   } else {

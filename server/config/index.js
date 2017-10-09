@@ -36,7 +36,7 @@ const baseConfig = {
   redis: {},
   auth: {
     session: {
-      key: 'jooger.me.sid',
+      key: 'jooger.me.token',
       maxAge: 60000 * 60 * 24 * 7,
       signed: false
     },

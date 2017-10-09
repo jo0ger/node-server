@@ -39,5 +39,6 @@ router.delete('/users/:id', isAuthenticated, user.delete)
 // Auth
 router.get('/auth/local/logout', isAuthenticated, auth.logout)
 router.post('/auth/local/login', auth.localLogin)
+router.get('/auth/info', isAuthenticated, auth.info)
 
 module.exports = router
