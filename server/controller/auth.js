@@ -28,7 +28,7 @@ exports.localLogin = async (ctx, next) => {
     .notEmpty()
     .isString('the "password" parameter should be String type')
     .val()
-  
+
   const user = await UserModel.findOne({ name }).catch(err => {
     ctx.log.error(err.message)
     return null
@@ -43,7 +43,7 @@ exports.localLogin = async (ctx, next) => {
         name: user.name
       })
       ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: true })
-      ctx.cookies.set('user_id', user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
+      ctx.cookies.set('jooger.me.userid', user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
       debug.success('login success, user: ', user._id)
       ctx.success({
         id: user._id,
@@ -64,9 +64,32 @@ exports.logout = async (ctx, next) => {
     name: ctx._user.name
   }, false)
   ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: 0, httpOnly: true })
-  ctx.cookies.set('user_id', ctx._user._id, { signed: false, domain: session.domain, maxAge: 0, httpOnly: false })
+  ctx.cookies.set('jooger.me.userid', ctx._user._id, { signed: false, domain: session.domain, maxAge: 0, httpOnly: false })
   debug.success('logout success, user: ', ctx._user._id)
   ctx.success(null, 'logout success')
+}
+
+exports.info = async (ctx, next) => {
+  const adminId = ctx._user._id
+  if (!adminId) {
+    return ctx.fail(401)
+  }
+
+  const data = await UserModel.findById(adminId)
+    .select('-password')
+    .exec()
+    .catch(err => {
+      ctx.log.error(err.message)
+      return null
+    })
+  if (data) {
+    ctx.success({
+      info: data,
+      token: ctx.session._token
+    })
+  } else {
+    ctx.fail(401)
+  }
 }
 
 // github login
@@ -84,7 +107,7 @@ exports.githubLogin = async (ctx, next) => {
       name: user.name
     })
     ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: true })
-    ctx.cookies.set('user_id', user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
+    ctx.cookies.set('jooger.me.userid', user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
 
     debug('github auth callback finish')
     debug.success('github login success, user: ', user._id)

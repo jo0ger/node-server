@@ -7,7 +7,7 @@
 'use strict'
 
 const NeteseMusic = require('simple-netease-cloud-music')
-// const { fetchNE } = require('../service')
+const { fetchNE } = require('../service')
 const { OptionModel } = require('../model')
 const debug = require('../util').setDebug('music')
 
@@ -90,48 +90,27 @@ exports.cover = async (ctx, next) => {
   ctx.success(data)
 }
 
-// TEST
-// exports.test = async (ctx, next) => {
-//   const playListId = ctx.validateQuery('play_list_id')
-//     .required('the "play_list_id" parameter is required')
-//     .notEmpty()
-//     .isString('the "play_list_id" parameter should be String type')
-//     .val()
-//   const tracks = await fetchNE('playlist', playListId)
-//     .then(({ playlist }) => {
-//       return playlist.tracks.map(({ name, id, ar, al, dt, tns }) => ({
-//         id,
-//         name,
-//         duration: dt,
-//         artists: ar.map(({ id, name }) => ({ id, name })),
-//         album: {
-//           name: al.name,
-//           cover: al.picUrl,
-//           tns: al.tns
-//         },
-//         tns: tns || []
-//       }))
-//     })
-//   ctx.success(tracks)
-// }
-
 async function fetchSonglist (playListId) {
-  return neteaseMusic.playlist(playListId).then(({ playlist }) => {
+  return fetchNE('playlist', playListId).then(({ playlist }) => {
     return Promise.all(
-      playlist.tracks.map(track => {
+      playlist.tracks.map(({ name, id, ar, al, dt, tns }) => {
         return Promise.all([
-          neteaseMusic.url(track.id),
-          neteaseMusic.lyric(track.id)
+          neteaseMusic.url(id),
+          neteaseMusic.lyric(id)
         ])
         .then(([song, lyric]) => [song.data[0] || null, lyric.nolyric ? '' : lyric.lrc.lyric])
         .then(([song, lyric]) => {
-          const { id, name, dt, al, ar } = track
           return {
             id,
             name,
             duration: dt || 0,
-            album: al || {},
-            artists: ar || [],
+            album: al && {
+              name: al.name,
+              cover: al.picUrl,
+              tns: al.tns
+            } || {},
+            artists: ar && ar.map(({ id, name }) => ({ id, name })) || [],
+            tns: tns || [],
             src: song.url,
             lyric
           }

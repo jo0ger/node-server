@@ -22,6 +22,7 @@ exports.list = async (ctx, next) => {
     sort: { createdAt: -1 },
     page,
     limit: pageSize,
+    select: '-content -renderedContent',
     populate: [
       {
         path: 'tag',
@@ -69,7 +70,7 @@ exports.list = async (ctx, next) => {
     // 文章列表不需要content和state
     options.select = '-content -renderedContent -state'
   }
-  
+
   const articles = await ArticleModel.paginate(query, options).catch(err => {
     ctx.log.error(err.message)
     return null
@@ -115,7 +116,6 @@ exports.item = async (ctx, next) => {
   } else {
     ctx.fail(-1, 'the article not found')
   }
-  
 }
 
 exports.create = async (ctx, next) => {
@@ -161,7 +161,7 @@ exports.update = async (ctx, next) => {
   const tag = ctx.validateBody('tag').optional().isObjectIdArray().val()
   const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
   const thumb = ctx.validateBody('thumb').optional().isString('the "thumb" parameter should be String type').val()
-  const issueNumber = ctx.validateBody('state').optional().toInt().gte(1, 'the "state" parameter must be 1 or older').val()
+  const issueNumber = ctx.validateBody('issue_number').optional().toInt().gte(1, 'the "issue_number" parameter must be 1 or older').val()
   const article = {}
 
   title && (article.title = title)
@@ -181,11 +181,15 @@ exports.update = async (ctx, next) => {
   }
 
   const data = await ArticleModel.findByIdAndUpdate(id, article, {
-    new: true
-  }).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
+      new: true
+    })
+    .select('-content -renderedContent')
+    .populate('tag')
+    .exec()
+    .catch(err => {
+      ctx.log.error(err.message)
+      return null
+    })
 
   if (data) {
     ctx.success(data)
