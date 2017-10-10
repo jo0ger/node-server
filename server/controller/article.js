@@ -13,10 +13,10 @@ const { marked, isObjectId, createObjectId } = require('../util')
 exports.list = async (ctx, next) => {
   const pageSize = ctx.validateQuery('per_page').defaultTo(config.pageSize).toInt().gt(0, 'the "per_page" parameter should be greater than 0').val()
   const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, 'the "page" parameter should be greater than 0').val()
-  const state = ctx.validateQuery('state').defaultTo(1).toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
+  const state = ctx.validateQuery('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
   const tag = ctx.validateQuery('tag').optional().toString().val()
   const keyword = ctx.validateQuery('keyword').optional().toString().val()
-
+  
   // 过滤条件
   const options = {
     sort: { createdAt: -1 },
@@ -26,23 +26,24 @@ exports.list = async (ctx, next) => {
     populate: [
       {
         path: 'tag',
-        select: 'name description',
-        match: {
-          forbidden: 0
-        }
+        select: 'name description'
       }
     ]
   }
 
   // 查询条件
-  const query = { state }
+  const query = {}
+
+  if (state !== undefined) {
+    query.state = state
+  }
 
    // 搜索关键词
    if (keyword) {
     const keywordReg = new RegExp(keyword)
     query.$or = [
-      { title:  keywordReg },
-      { description:  keywordReg }
+      { title:  keywordReg }
+      // { description:  keywordReg }
     ]
   }
 
@@ -53,13 +54,12 @@ exports.list = async (ctx, next) => {
       query.tag = tag
     } else {
       // 普通字符串，需要先查到id
-      await TagModel.findOne({ name: tag }).exec()
-        .then(t => {
-          query.tag = t && t._id || createObjectId()
+      const t = await TagModel.findOne({ name: tag }).exec()
+        .catch(err => {
+          ctx.log.error(err.message)
+          return null
         })
-        .catch(() => {
-          query.tag = createObjectId()
-        })
+      query.tag = t ? t._id : createObjectId()
     }
   }
 

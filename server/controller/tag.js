@@ -13,7 +13,7 @@ exports.list = async (ctx, next) => {
     ctx.log.error(err.message)
     return null
   })
-  
+
   if (data) {
     for (let i = 0; i < data.length; i++) {
       if (data[i].toObject) {
@@ -33,8 +33,9 @@ exports.list = async (ctx, next) => {
 
 exports.item = async (ctx, next) => {
   const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
-  
-  const data = await TagModel.findById(id).exec().catch(err => {
+
+  let data = await TagModel.findById(id).exec().catch(err => {
+    ctx.log.error(err.message)
     return null
   })
 
@@ -65,11 +66,6 @@ exports.create = async (ctx, next) => {
     .optional()
     .isString('the "description" parameter should be String type')
     .val()
-  const forbidden = ctx.validateBody('forbidden')
-    .defaultTo(0)
-    .toInt()
-    .isIn([0, 1], 'the "forbidden" parameter is not the expected value')
-    .val()
 
   const { length } = await TagModel.find({ name }).exec().catch(err => {
     ctx.log.error(err.message)
@@ -79,8 +75,7 @@ exports.create = async (ctx, next) => {
   if (!length) {
     const data = await new TagModel({
       name,
-      description,
-      forbidden
+      description
     }).save().catch(err => {
       ctx.log.error(err.message)
       return null
@@ -106,19 +101,11 @@ exports.update = async (ctx, next) => {
     .optional()
     .isString('the "description" parameter should be String type')
     .val()
-  const forbidden = ctx.validateBody('forbidden')
-    .optional()
-    .toInt()
-    .isIn([0, 1], 'the "forbidden" parameter is not the expected value')
-    .val()
 
   const tag = {}
-  
+
   name && (tag.name = name)
   description && (tag.description = description)
-  if (forbidden !== undefined) {
-    tag.forbidden = forbidden
-  }
 
   const data = await TagModel.findByIdAndUpdate(id, tag, {
     new: true
