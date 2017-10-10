@@ -9,7 +9,6 @@
 const mongoose = require('mongoose')
 
 const optionSchema = new mongoose.Schema({
-  url: { type: String, default: '' },
   title: { type: String, default: '' },
   subtitle: { type: String, default: '' },
   welcome: { type: String, default: '' },
