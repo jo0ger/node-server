@@ -16,7 +16,7 @@ exports.list = async (ctx, next) => {
   const state = ctx.validateQuery('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
   const tag = ctx.validateQuery('tag').optional().toString().val()
   const keyword = ctx.validateQuery('keyword').optional().toString().val()
-  
+
   // 过滤条件
   const options = {
     sort: { createdAt: -1 },

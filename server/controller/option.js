@@ -8,6 +8,7 @@
 
 const { OptionModel } = require('../model')
 const { getGithubUsersInfo } = require('../service')
+const { updateSongListMap } = require('./music')
 const debug = require('../util').setDebug('option')
 
 exports.data = async (ctx, next) => {
@@ -26,7 +27,7 @@ exports.data = async (ctx, next) => {
 exports.update = async (ctx, next) => {
   const option = ctx.request.body
 
-  const data = await updateOption(option)
+  const data = await exports.updateOption(option)
 
   if (data) {
     ctx.success(data)
@@ -45,12 +46,31 @@ exports.updateOption = async function (option = null) {
   }
 
   // 更新友链
-  if (option.links) {
-    const githubNames = option.links.map(link => link.github)
+  option.links = await generateLinks(option.links)
+
+  const data = await OptionModel.findOneAndUpdate({}, option, { new: true }).exec().catch(err => {
+    ctx.log.error(err.message)
+    return null
+  })
+
+  // 更新 music list
+  await updateSongListMap()
+
+  if (data) {
+    debug.success('timed update option success...')
+  }
+
+  return data
+}
+
+// 更新友链
+async function generateLinks (links = []) {
+  if (links && links.length) {
+    const githubNames = links.map(link => link.github)
     const usersInfo = await getGithubUsersInfo(githubNames)
 
     if (usersInfo) {
-      option.links = option.links.map((link, index) => {
+      return links.map((link, index) => {
         const userInfo = usersInfo[index]
         if (userInfo) {
           link.avatar = userInfo.avatar_url
@@ -61,17 +81,7 @@ exports.updateOption = async function (option = null) {
       })
     }
   }
-
-  const data = await OptionModel.findOneAndUpdate({}, option, { new: true }).exec().catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
-
-  if (data) {
-    debug.success('timed update option success...')
-  }
-
-  return data
+  return links
 }
 
 // 每1小时更新一次

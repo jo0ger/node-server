@@ -22,11 +22,11 @@ const middleware = (opts = {}) => async (ctx, next) => {
 
 middleware.parse = (opts = {}, ctx) => {
   return new Promise((resolve, reject) => {
-    const form = new formidable.IncomingForm(opts)
+    const form = new formidable.IncomingForm()
     for(const key in opts){
       form[key] = opts[key]
     }
-    form.parse(ctx.req, (err, fields, files) => {
+    form.parse(ctx.request, (err, fields, files) => {
       if (err) return reject(err)
       resolve({
         fields,
