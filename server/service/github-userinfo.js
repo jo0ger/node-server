@@ -8,6 +8,8 @@
 
 const axios = require('axios')
 const { setDebug } = require('../util')
+const config = require('../config')
+const { clientID, clientSecret } = config.sns.github
 const debug = setDebug('github:user')
 
 const getGithubUsersInfo = (githubNames = '') => {
@@ -21,18 +23,23 @@ const getGithubUsersInfo = (githubNames = '') => {
 
   const task = githubNames.map(name => {
     debug('fetch github user [', name, ']')
-    return axios.get(`https://api.github.com/users/${name}`)
-      .then(res => {
-        if (res && res.status === 200) {
-          debug.success('fetch github user success [', name, ']')
-          return res.data
-        }
-        return null
-      })
-      .catch(err => {
-        debug.error(err.message)
-        return null
-      })
+    return axios.get(`https://api.github.com/users/${name}`, {
+      params: {
+        client_id: clientID,
+        client_secret: clientSecret
+      }
+    }).then(res => {
+      if (res && res.status === 200) {
+        debug.success('fetch github user success [', name, ']')
+        return res.data
+      }
+      return null
+    })
+    .catch(err => {
+      console.error(err)
+      debug.error(err.message)
+      return null
+    })
   })
 
   return Promise.all(task)

@@ -25,6 +25,7 @@
   },
   "bin": "./node_modules/.bin/",
   "dependencies": {
+    "aliyun-sdk": "^1.10.18",
     "axios": "^0.16.2",
     "bcryptjs": "^2.4.3",
     "big-integer": "^1.6.25",

@@ -16,30 +16,35 @@ const neteaseMusic = new NeteseMusic()
 let songListMap = {}
 
 exports.list = async (ctx, next) => {
-  // const playListId = ctx.validateQuery('play_list_id')
-  //   .required('the "play_list_id" parameter is required')
-  //   .notEmpty()
-  //   .isString('the "play_list_id" parameter should be String type')
-  //   .val()
+  if (ctx._isAuthenticated) {
+    const playListId = ctx.validateQuery('play_list_id')
+      .required('the "play_list_id" parameter is required')
+      .notEmpty()
+      .isString('the "play_list_id" parameter should be String type')
+      .val()
 
-  const option = await OptionModel.findOne({}).exec().catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
+    const data = await fetchSonglist(playListId)
+    ctx.success(data)
+  } else {
+    const option = await OptionModel.findOne({}).exec().catch(err => {
+      ctx.log.error(err.message)
+      return null
+    })
 
-  if (!option || !option.musicId) {
-    return ctx.fail()
+    if (!option || !option.musicId) {
+      return ctx.fail()
+    }
+
+    const musicId = option.musicId
+
+    if (songListMap[musicId] && songListMap[musicId].length) {
+      return ctx.success(songListMap[musicId])
+    }
+
+    const data = await fetchSonglist(musicId)
+    songListMap[musicId] = data
+    ctx.success(data)
   }
-
-  const musicId = option.musicId
-
-  if (songListMap[musicId]) {
-    return ctx.success(songListMap[musicId])
-  }
-  
-  const data = await fetchSonglist(musicId)
-  songListMap[musicId] = data
-  ctx.success(data)
 }
 
 exports.item = async (ctx, next) => {
@@ -93,7 +98,7 @@ exports.cover = async (ctx, next) => {
 async function fetchSonglist (playListId) {
   return fetchNE('playlist', playListId).then(({ playlist }) => {
     return Promise.all(
-      playlist.tracks.map(({ name, id, ar, al, dt, tns }) => {
+      !playlist ? [] : playlist.tracks.map(({ name, id, ar, al, dt, tns }) => {
         return Promise.all([
           neteaseMusic.url(id),
           neteaseMusic.lyric(id)
@@ -117,6 +122,9 @@ async function fetchSonglist (playListId) {
         })
       }
     ))
+  }).catch(err => {
+    debug.error(err.message)
+    return []
   })
 }
 
@@ -139,7 +147,7 @@ exports.updateSongListMap = async function () {
   const ids = Object.keys(songListMap)
   const list = await Promise.all(ids.map(playListId => fetchSonglist(playListId)))
     .catch(err => debug.error('timed update music failed, err: ', err.message))
-  
+
   if (list && list.length === ids.length) {
     ids.map((id, index) => {
       songListMap[id] = list[index]
