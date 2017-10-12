@@ -98,7 +98,7 @@ exports.item = async (ctx, next) => {
   let queryPs = null
   // 只有前台博客访问文章的时候pv才+1
   if (!ctx._isAuthenticated) {
-    queryPs = ArticleModel.findByIdAndUpdate(id, { $inc: { 'meta.pvs': 1 } }, { new: true }).select('-content')
+    queryPs = ArticleModel.findAndUpdate({ _id: id, state: 1 }, { $inc: { 'meta.pvs': 1 } }, { new: true }).select('-content')
   } else {
     queryPs = ArticleModel.findById(id)
   }
@@ -130,22 +130,53 @@ exports.create = async (ctx, next) => {
     .isString('the "content" parameter should be String type')
     .val()
   const keywords = ctx.validateBody('keywords').optional().defaultTo([]).isArray('the "keywords" parameter should be Array type').val()
+  const tag = ctx.validateBody('tag').optional().isObjectIdArray().val()
   const description = ctx.validateBody('description')
     .optional()
     .isString('the "description" parameter should be String type')
     .val()
-  const data = await new ArticleModel({
-    title,
-    content,
-    renderedContent: marked(content),
-    keywords,
-    description
-  }).save().catch(err => {
+  const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
+  const thumb = ctx.validateBody('thumb').optional().isString('the "thumb" parameter should be String type').val()
+  const createdAt = ctx.validateBody('createdAt').optional().toString().val()
+  const permalink = ctx.validateBody('permalink')
+    .optional()
+    .isString('the "permalink" parameter should be String type')
+    .val()
+
+  const article = {}
+
+  title && (article.title = title)
+  keywords && (article.keywords = keywords)
+  description && (article.description = description)
+  tag && (article.tag = tag)
+  thumb && (article.thumb = thumb)
+  createdAt && (article.createdAt = new Date(createdAt))
+  permalink && (article.permalink = permalink)
+
+  if (state !== undefined) {
+    article.state = state
+  }
+
+  if (content) {
+    article.content = content
+    article.renderedContent = marked(content)
+  }
+
+  let data = await new ArticleModel(article).save().catch(err => {
     ctx.log.error(err.message)
     return null
   })
 
   if (data) {
+    if (!data.permalink) {
+      // 更新永久链接
+      data = await ArticleModel.findByIdAndUpdate(data._id, {
+        permalink: `https://jooger.me/blog/article/${data._id}`
+      }, { new : true }).exec().catch(err => {
+        ctx.log.error(err.message)
+        return data
+      })
+    }
     ctx.success(data)
   } else {
     ctx.fail()
@@ -161,15 +192,20 @@ exports.update = async (ctx, next) => {
   const tag = ctx.validateBody('tag').optional().isObjectIdArray().val()
   const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
   const thumb = ctx.validateBody('thumb').optional().isString('the "thumb" parameter should be String type').val()
-  const issueNumber = ctx.validateBody('issue_number').optional().toInt().gte(1, 'the "issue_number" parameter must be 1 or older').val()
+  const createdAt = ctx.validateBody('createdAt').optional().toString().val()
+
   const article = {}
+  const cache = await ArticleModel.findById(id).exec().catch(err => {
+    ctx.log.error(err.message)
+    return null
+  })
 
   title && (article.title = title)
   keywords && (article.keywords = keywords)
   description && (article.description = description)
   tag && (article.tag = tag)
   thumb && (article.thumb = thumb)
-  issueNumber && (article.issueNumber = issueNumber)
+  createdAt && (article.createdAt = new Date(createdAt))
 
   if (state !== undefined) {
     article.state = state
@@ -180,10 +216,16 @@ exports.update = async (ctx, next) => {
     article.renderedContent = marked(content)
   }
 
+  if (cache) {
+    // 如果文章状态由草稿变为发布，更新发布时间
+    if (cache.state !== article.state && article.state === 1) {
+      article.publishedAt = Date.now()
+    }
+  }
+
   const data = await ArticleModel.findByIdAndUpdate(id, article, {
       new: true
     })
-    .select('-content -renderedContent')
     .populate('tag')
     .exec()
     .catch(err => {
@@ -246,7 +288,7 @@ async function getRelatedArticles (ctx, data) {
         ctx.log.error('related articles access failed, err: ', err.message)
         return null
       })
-    
+
       if (articles) {
         data.related = articles
       }

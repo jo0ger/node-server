@@ -9,7 +9,18 @@
 const { TagModel, ArticleModel } = require('../model')
 
 exports.list = async (ctx, next) => {
-  let data = await TagModel.find({}).sort('-createdAt').catch(err => {
+  const keyword = ctx.validateQuery('keyword').optional().toString().val()
+
+  const query = {}
+  // 搜索关键词
+   if (keyword) {
+    const keywordReg = new RegExp(keyword)
+    query.$or = [
+      { name:  keywordReg }
+    ]
+  }
+
+  const data = await TagModel.find(query).sort('-createdAt').catch(err => {
     ctx.log.error(err.message)
     return null
   })
@@ -129,6 +140,23 @@ exports.delete = async (ctx, next) => {
   })
 
   if (data && data.result && data.result.ok) {
+    // 删除所有文章关联关系
+    const articles = await ArticleModel.find({ tag: data._id })
+      .exec()
+      .catch(err => {
+        ctx.log.error(err.message)
+        return []
+      })
+    // TODO: 这里应该需要一个容错机制，保证如果有一篇文章没有删除成功的话，需要在规定次数内反复删除
+    await Promise.all(
+      articles.map(item => {
+        return ArticleModel.findByIdAndUpdate(item._id, {
+          tag: item.tag.filter(tag => tag.toString() !== data._id.toString())
+        }).exec()
+      })
+    ).catch(err => {
+      ctx.log.error(err.message)
+    })
     ctx.success()
   } else {
     ctx.fail()

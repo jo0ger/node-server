@@ -26,8 +26,8 @@ const articleSchema = new mongoose.Schema({
   thumb: { type: String, validate: /.+?\.(jpg|jpeg|gif|bmp|png)/ },
   // 文章状态 （ 0 草稿 | 1 已发布 ）
   state: { type: Number, default: 0 },
-  // github issue
-  issueNumber: { type: Number, default: 1 },
+  // 永久链接
+  permalink: { type: String, validate: /\S+/ },
   // 创建日期
   createdAt: { type: Date, default: Date.now },
   // 更新日期
