@@ -7,14 +7,14 @@
 'use strict'
 
 const router = require('koa-router')()
-const { article, tag, option, user, auth, music } = require('../controller')
+const { article, tag, option, user, auth, music, statistics } = require('../controller')
 const { authenticate } = require('../middleware')
 const isAuthenticated = authenticate.isAuthenticated()
 
 // Article
 router.get('/articles', isAuthenticated, article.list)
 router.get('/articles/:id', isAuthenticated, article.item)
-router.post('/articles', isAuthenticated, article.create)
+router.post('/articles', article.create)
 router.patch('/articles/:id', isAuthenticated, article.update)
 router.delete('/articles/:id', isAuthenticated, article.delete)
 router.post('/articles/:id/like', isAuthenticated, article.like)
@@ -24,7 +24,7 @@ router.get('/tags', isAuthenticated, tag.list)
 router.get('/tags/:id', isAuthenticated, tag.item)
 router.post('/tags', isAuthenticated, tag.create)
 router.patch('/tags/:id', isAuthenticated, tag.update)
-router.delete('/tags/:id', isAuthenticated, tag.delete)
+router.delete('/tags/:id', tag.delete)
 
 // Option
 router.get('/options', isAuthenticated, option.data)
@@ -43,5 +43,8 @@ router.get('/music/songs', isAuthenticated, music.list)
 router.get('/auth/local/logout', isAuthenticated, auth.logout)
 router.post('/auth/local/login', auth.localLogin)
 router.get('/auth/info', isAuthenticated, auth.info)
+
+// Statistics
+router.get('/statistics', isAuthenticated, statistics.data)
 
 module.exports = router
