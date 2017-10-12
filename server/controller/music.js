@@ -156,5 +156,5 @@ exports.updateSongListMap = async function () {
   }
 }
 
-// 每1小时更新一次
-setInterval(exports.updateSongListMap, 1000 * 60 * 60)
+// 每10分钟更新一次
+setInterval(exports.updateSongListMap, 1000 * 60 * 10)
