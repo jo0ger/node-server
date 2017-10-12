@@ -14,6 +14,7 @@ const baseConfig = {
   name: packageInfo.name,
   version: packageInfo.version,
   author: packageInfo.author || 'Jooger',
+  site: 'https://jooger.me',
   env: process.env.NODE_ENV,
   root: path.resolve(__dirname, '../../'),
   port: process.env.PORT || 3001,
