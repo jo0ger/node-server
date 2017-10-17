@@ -98,7 +98,7 @@ exports.item = async (ctx, next) => {
   let queryPs = null
   // 只有前台博客访问文章的时候pv才+1
   if (!ctx._isAuthenticated) {
-    queryPs = ArticleModel.findAndUpdate({ _id: id, state: 1 }, { $inc: { 'meta.pvs': 1 } }, { new: true }).select('-content')
+    queryPs = ArticleModel.findOneAndUpdate({ _id: id, state: 1 }, { $inc: { 'meta.pvs': 1 } }, { new: true }).select('-content')
   } else {
     queryPs = ArticleModel.findById(id)
   }
