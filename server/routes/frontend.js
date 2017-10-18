@@ -24,7 +24,7 @@ router.get('/tags/:id', tag.item)
 
 // Music
 router.get('/music/songs', music.list)
-// router.get('/music/songs/:song_id', music.item)
+router.get('/music/songs/:song_id', music.item)
 // router.get('/music/songs/:song_id/url', music.url)
 // router.get('/music/songs/:song_id/lyric', music.lyric)
 // router.get('/music/songs/cover/:cover_id', music.cover)
