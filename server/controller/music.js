@@ -7,13 +7,14 @@
 'use strict'
 
 const NeteseMusic = require('simple-netease-cloud-music')
+const config = require('../config')
 const { fetchNE } = require('../service')
 const { OptionModel } = require('../model')
 const debug = require('../util').setDebug('music')
 
 const neteaseMusic = new NeteseMusic()
 
-let songListMap = {}
+const songListMap = {}
 
 exports.list = async (ctx, next) => {
   if (ctx._isAuthenticated) {
@@ -116,7 +117,7 @@ async function fetchSonglist (playListId) {
             } || {},
             artists: ar && ar.map(({ id, name }) => ({ id, name })) || [],
             tns: tns || [],
-            src: song.url,
+            src: song && song.url ? `${config.site}/proxy?url=${song.url}` : '',
             lyric
           }
         })
