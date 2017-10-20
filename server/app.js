@@ -46,6 +46,7 @@ app.use(middlewares.error)
 // app.use(middlewares.formidable())
 app.use(session(config.auth.session, app))
 app.use(passport.initialize())
+// app.use(passport.session())
 app.use(compress())
 
 // routes

@@ -29,7 +29,6 @@ exports.init = (UserModel, config) => {
         return null
       })
 
-      
       if (user) {
         const userData = {
           name: profile.displayName || profile.username,
@@ -38,6 +37,8 @@ exports.init = (UserModel, config) => {
           github: profile._json,
           role: user.role
         }
+
+        userData.github.token = accessToken
 
         const updatedUser = await UserModel.findByIdAndUpdate(user._id, userData).exec().catch(err => {
           debug.error('user update error, err: ', err.message)
@@ -68,7 +69,7 @@ exports.init = (UserModel, config) => {
       const data = await new UserModel(newUser).save().catch(err => {
         debug.error('user create fail, err: ', err.message)
       })
-      
+
       return end(null, data)
     } catch (err) {
       debug.error('github auth error')

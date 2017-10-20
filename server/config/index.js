@@ -54,9 +54,9 @@ const baseConfig = {
   },
   sns: {
     github: {
-      clientID: process.env.GITHUB_CLIENT_ID || '5b4d4a7945347d0fd2e2',
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || '8771bd9ae52749cc15b0c9e2c6cb4ecd7f39d9da',
-      callbackURL: process.env.GITHUB_CALLBACK_URL || 'http://127.0.0.1:3001/api/auth/github/login/callback'
+      clientID: 'github client id',
+      clientSecret: 'github client secret',
+      callbackURL: 'github oauth callback url'
     }
   }
 }

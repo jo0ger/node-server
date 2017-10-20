@@ -18,7 +18,7 @@ module.exports = async (ctx, next) => {
 
     ctx.fail(code, err.message)
     ctx.status = 200
-    
+
     if (code === 500) {
       ctx.log.error(
         { req: ctx.req, err },
