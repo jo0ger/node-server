@@ -10,9 +10,10 @@ const NeteseMusic = require('simple-netease-cloud-music')
 const config = require('../config')
 const { fetchNE } = require('../service')
 const { OptionModel } = require('../model')
-const debug = require('../util').setDebug('music')
-const isProd = process.env.NODE_ENV === 'production'
+const { proxy, setDebug } = require('../util')
 
+const isProd = process.env.NODE_ENV === 'production'
+const debug = setDebug('music')
 const neteaseMusic = new NeteseMusic()
 
 const songListMap = {}
@@ -113,12 +114,13 @@ async function fetchSonglist (playListId) {
             duration: dt || 0,
             album: al && {
               name: al.name,
-              cover: al.picUrl,
+              cover: al.picUrl ? `${config.site}${proxy(al.picUrl)}` : '',
               tns: al.tns
             } || {},
             artists: ar && ar.map(({ id, name }) => ({ id, name })) || [],
             tns: tns || [],
-            src: isProd ? (song && song.url ? `${config.site}/proxy?url=${song.url}` : '') : song.url,
+            // src: isProd ? (song && song.url ? `${config.site}/proxy?url=${song.url}` : '') : song.url,
+            src: song && song.url ? `${config.site}${proxy(song.url)}` : '',
             lyric
           }
         })

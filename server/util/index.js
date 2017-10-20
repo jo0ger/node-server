@@ -17,6 +17,8 @@ exports.marked = require('./marked')
 
 exports.encrypt = require('./encrypt')
 
+exports.proxy = require('./proxy')
+
 exports.createObjectId = () => mongoose.Types.ObjectId()
 
 exports.isObjectId = (str = '') => mongoose.Types.ObjectId.isValid(str)
