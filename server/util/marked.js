@@ -49,7 +49,7 @@ renderer.image = function (href, title, text) {
   return `
     <img class="image-view"
       src="${href}"
-      title="${title || text || 'jooger.me'}"
+      title="${title || text || ''}"
       alt="${text || title || href}"
     ${this.options.xhtml ? '/' : ''}>
   `.replace(/\s+/g, ' ').replace('\n', '')

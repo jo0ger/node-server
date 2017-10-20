@@ -12,7 +12,6 @@ const config = require('../config')
 const { UserModel } = require('../model')
 const { bhash, bcompare, setDebug, signToken } = require('../util')
 const debug = setDebug('auth:github')
-
 const { githubPassport } = require('../service')
 
 githubPassport.init(UserModel, config)
@@ -42,7 +41,7 @@ exports.localLogin = async (ctx, next) => {
         id: user._id,
         name: user.name
       })
-      ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: true })
+      ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
       ctx.cookies.set('jooger.me.userid', user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
       debug.success('login success, user: ', user._id)
       ctx.success({
@@ -63,7 +62,7 @@ exports.logout = async (ctx, next) => {
     id: ctx._user._id,
     name: ctx._user.name
   }, false)
-  ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: 0, httpOnly: true })
+  ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: 0, httpOnly: false })
   ctx.cookies.set('jooger.me.userid', ctx._user._id, { signed: false, domain: session.domain, maxAge: 0, httpOnly: false })
   debug.success('logout success, user: ', ctx._user._id)
   ctx.success(null, 'logout success')
@@ -98,7 +97,7 @@ exports.githubLogin = async (ctx, next) => {
     session: false
   }, (err, user) => {
     debug('github auth callback start')
-    const redirectUrl = ctx.session.passport.redirectUrl || '/'
+    const redirectUrl = ctx.session.passport.redirectUrl
     const cookieDomain = config.auth.session.domain || null
 
     const { session } = config.auth
@@ -106,11 +105,11 @@ exports.githubLogin = async (ctx, next) => {
       id: user._id,
       name: user.name
     })
-    ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: true })
+    ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
     ctx.cookies.set('jooger.me.userid', user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
 
     debug('github auth callback finish')
-    debug.success('github login success, user: ', user._id)
+    debug.success('github login success, userid: ', user._id, 'username: ', user.name)
     return ctx.redirect(redirectUrl)
   })(ctx)
 }

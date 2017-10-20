@@ -12,6 +12,7 @@ const jwt = require('jsonwebtoken')
 const passport = require('koa-passport')
 const config = require('../config')
 const { UserModel } = require('../model')
+const debug = require('../util').setDebug('auth')
 const isProd = process.env.NODE_ENV === 'production'
 
 // 开发环境下，请求携带_DEV_参数，视为已验证
@@ -80,12 +81,12 @@ exports.snsAuth = (name = '') => {
     verifyToken(),
     async (ctx, next) => {
       // 如果已经登录
+      const redirectUrl = ctx.query.redirectUrl || config.site
       if (ctx.session._verify) {
-        return ctx.fail(-1, 'you have already logged in')
+        debug.info('you have already logged in, redirecting')
+        return ctx.redirect(redirectUrl)
       }
-      ctx.session.passport = {
-        redirectUrl: ctx.query.redirectUrl || '/'
-      }
+      ctx.session.passport = { redirectUrl }
       await next()
     },
     passport.authenticate(name, {

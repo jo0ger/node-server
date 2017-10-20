@@ -16,5 +16,12 @@ module.exports = {
     session: {
       domain: '.jooger.me'
     }
+  },
+  sns: {
+    github: {
+      clientID: 'cc9133ad08a5fbc3b7bd',
+      clientSecret: '4b98cc1028eddc78e72d5e48657819be50581623',
+      callbackURL: 'https://api.jooger.me/auth/github/login/callback'
+    }
   }
 }

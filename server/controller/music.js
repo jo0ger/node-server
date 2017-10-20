@@ -114,13 +114,12 @@ async function fetchSonglist (playListId) {
             duration: dt || 0,
             album: al && {
               name: al.name,
-              cover: al.picUrl ? `${config.site}${proxy(al.picUrl)}` : '',
+              cover: isProd ? (al.picUrl ? `${config.site}${proxy(al.picUrl)}` : '') : al.picUrl,
               tns: al.tns
             } || {},
             artists: ar && ar.map(({ id, name }) => ({ id, name })) || [],
             tns: tns || [],
-            // src: isProd ? (song && song.url ? `${config.site}/proxy?url=${song.url}` : '') : song.url,
-            src: song && song.url ? `${config.site}${proxy(song.url)}` : '',
+            src: isProd ? (song && song.url ? `${config.site}${proxy(song.url)}` : '') : song.url,
             lyric
           }
         })
