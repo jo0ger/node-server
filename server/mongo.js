@@ -10,7 +10,6 @@ const mongoose = require('mongoose')
 const config = require('./config')
 const { UserModel, OptionModel } = require('./model')
 const { updateOption } = require('./controller/option')
-const { updateSongListMap } = require('./controller/music')
 const { bhash, setDebug } = require('./util')
 const debug = setDebug('mongo:connect')
 
@@ -35,7 +34,6 @@ async function seedOption () {
   }
 
   updateOption()
-  updateSongListMap()
 }
 
 function seedAdmin () {
@@ -44,7 +42,7 @@ function seedAdmin () {
       createAdmin()
     }
   })
-  
+
   function createAdmin () {
     new UserModel({
       role: 0,
