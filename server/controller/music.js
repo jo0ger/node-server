@@ -106,7 +106,7 @@ async function fetchSonglist (playListId) {
           neteaseMusic.url(id),
           neteaseMusic.lyric(id)
         ])
-        .then(([song, lyric]) => [song.data[0] || null, lyric.nolyric ? '' : lyric.lrc.lyric])
+        .then(([song, lyric]) => [song.data[0] || null, (lyric.nolyric || !lyric.lrc) ? '' : lyric.lrc.lyric])
         .then(([song, lyric]) => {
           return {
             id,
