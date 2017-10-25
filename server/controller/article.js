@@ -282,7 +282,7 @@ async function getRelatedArticles (ctx, data) {
   data.related = []
   if (data && data.tag && data.tag.length) {
     const articles = await ArticleModel.find({ _id: { $nin: [ data._id ] }, state: 1, tag: { $in: data.tag.map(t => t._id) }})
-      .select('title thumb createdAt meta')
+      .select('title thumb createdAt publishedAt meta')
       .exec()
       .catch(err => {
         ctx.log.error('related articles access failed, err: ', err.message)
@@ -290,7 +290,7 @@ async function getRelatedArticles (ctx, data) {
       })
 
       if (articles) {
-        data.related = articles
+        data.related = articles.slice(0, 5)
       }
   }
 }
@@ -308,7 +308,7 @@ async function getSiblingArticles (ctx, data) {
       query.state = 1
     }
     let prev = await ArticleModel.findOne(query)
-      .select('title createdAt thumb')
+      .select('title createdAt publishedAt thumb')
       .sort('-createdAt')
       .lt('createdAt', data.createdAt)
       .exec()
@@ -317,7 +317,7 @@ async function getSiblingArticles (ctx, data) {
         return null
       })
     let next = await ArticleModel.findOne(query)
-      .select('title createdAt thumb')
+      .select('title createdAt publishedAt thumb')
       .sort('createdAt')
       .gt('createdAt', data.createdAt)
       .exec()

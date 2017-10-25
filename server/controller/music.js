@@ -157,6 +157,10 @@ exports.updateSongListMap = async function () {
     })
     debug.success('timed update music success...')
   }
+  // GC
+  option = null
+  ids = null
+  list = null
 }
 
 // 每10分钟更新一次
