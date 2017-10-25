@@ -59,9 +59,6 @@ exports.updateOption = async function (option = null) {
   if (data) {
     debug.success('timed update option success...')
   }
-
-  // GC
-  option = null
   return data
 }
 
