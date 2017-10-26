@@ -26,6 +26,7 @@ module.exports = function () {
   seedAdmin()
 }
 
+// 参数初始化
 async function seedOption () {
   const option = await OptionModel.findOne().exec().catch(err => debug.error(err.message))
 
@@ -36,6 +37,7 @@ async function seedOption () {
   updateOption()
 }
 
+// 管理员初始化
 function seedAdmin () {
   UserModel.findOne({ role: 0 }).exec().then(data => {
     if (!data) {

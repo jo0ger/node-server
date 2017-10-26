@@ -20,6 +20,8 @@ const articleSchema = new mongoose.Schema({
   content: { type: String, required: true, validate: /\S+/ },
   // markdown渲染后的htmln内容
   renderedContent: { type: String, required: true, validate: /\S+/ },
+  // 分类
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
   // 标签
   tag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
   // 缩略图 （图片uid, 图片名称，图片URL， 图片大小）
