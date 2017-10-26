@@ -1,3 +1,7 @@
+[![GitHub issues](https://img.shields.io/github/issues/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/issues)
+[![GitHub forks](https://img.shields.io/github/forks/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/network)
+[![GitHub stars](https://img.shields.io/github/stars/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/stargazers)
+
 ## jooger.me-server
 
 My blog's api server build by koa2 and mongoose
