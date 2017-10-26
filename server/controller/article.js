@@ -17,6 +17,17 @@ exports.list = async (ctx, next) => {
   const category = ctx.validateQuery('category').optional().toString().val()
   const tag = ctx.validateQuery('tag').optional().toString().val()
   const keyword = ctx.validateQuery('keyword').optional().toString().val()
+  // 排序仅后台能用，且order和sortBy需同时传入才起作用
+  // -1 desc | 1 asc
+  const order = ctx.validateQuery('order').optional().toInt().isIn(
+    [-1, 1],
+    'invalid "order" parameter, optional value: -1 or 1'
+  ).val()
+  // createdAt | updatedAt | publishedAt | meta.ups | meta.pvs | meta.comments
+  const sortBy = ctx.validateQuery('sort_by').optional().toString().isIn(
+    ['createdAt', 'updatedAt', 'publishedAt', 'meta.ups', 'meta.pvs', 'meta.comments'],
+    'invalid "sort_by" parameter'
+  ).val()
 
   // 过滤条件
   const options = {
@@ -89,6 +100,12 @@ exports.list = async (ctx, next) => {
     query.state = 1
     // 文章列表不需要content和state
     options.select = '-content -renderedContent -state'
+  } else {
+    // 排序
+    if (sortBy && order) {
+      options.sort = {}
+      options.sort[sortBy] = order
+    }
   }
 
   const articles = await ArticleModel.paginate(query, options).catch(err => {
