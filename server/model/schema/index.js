@@ -8,7 +8,7 @@
 
 exports.article = require('./article')
 exports.comment = require('./comment')
+exports.category = require('./category')
 exports.tag = require('./tag')
 exports.user = require('./user')
-// exports.log = require('./log')
 exports.option = require('./option')

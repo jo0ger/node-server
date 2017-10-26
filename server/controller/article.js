@@ -7,13 +7,14 @@
 'use strict'
 
 const config = require('../config')
-const { ArticleModel, TagModel } = require('../model')
+const { ArticleModel, CategoryModel, TagModel } = require('../model')
 const { marked, isObjectId, createObjectId } = require('../util')
 
 exports.list = async (ctx, next) => {
   const pageSize = ctx.validateQuery('per_page').defaultTo(config.pageSize).toInt().gt(0, 'the "per_page" parameter should be greater than 0').val()
   const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, 'the "page" parameter should be greater than 0').val()
   const state = ctx.validateQuery('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
+  const category = ctx.validateQuery('category').optional().toString().val()
   const tag = ctx.validateQuery('tag').optional().toString().val()
   const keyword = ctx.validateQuery('keyword').optional().toString().val()
 
@@ -24,6 +25,10 @@ exports.list = async (ctx, next) => {
     limit: pageSize,
     select: '-content -renderedContent',
     populate: [
+      {
+        path: 'category',
+        select: 'name description'
+      },
       {
         path: 'tag',
         select: 'name description'
@@ -43,8 +48,23 @@ exports.list = async (ctx, next) => {
     const keywordReg = new RegExp(keyword)
     query.$or = [
       { title:  keywordReg }
-      // { description:  keywordReg }
     ]
+  }
+
+  // 分类
+  if (category) {
+    // 如果是id
+    if (isObjectId(category)) {
+      query.category = category
+    } else {
+      // 普通字符串，需要先查到id
+      const c = await CategoryModel.findOne({ name: category }).exec()
+        .catch(err => {
+          ctx.log.error(err.message)
+          return null
+        })
+      query.category = c ? c._id : createObjectId()
+    }
   }
 
   // 标签
@@ -103,7 +123,16 @@ exports.item = async (ctx, next) => {
     queryPs = ArticleModel.findById(id)
   }
 
-  data = await queryPs.populate('tag').exec().catch(err => {
+  data = await queryPs.populate([
+    {
+      path: 'category',
+      select: 'name description'
+    },
+    {
+      path: 'tag',
+      select: 'name description'
+    }
+  ]).exec().catch(err => {
     ctx.log.error(err.message)
     return null
   })
@@ -130,6 +159,7 @@ exports.create = async (ctx, next) => {
     .isString('the "content" parameter should be String type')
     .val()
   const keywords = ctx.validateBody('keywords').optional().defaultTo([]).isArray('the "keywords" parameter should be Array type').val()
+  const category = ctx.validateBody('category').optional().isObjectId().val()
   const tag = ctx.validateBody('tag').optional().isObjectIdArray().val()
   const description = ctx.validateBody('description')
     .optional()
@@ -148,6 +178,7 @@ exports.create = async (ctx, next) => {
   title && (article.title = title)
   keywords && (article.keywords = keywords)
   description && (article.description = description)
+  category && (article.category = category)
   tag && (article.tag = tag)
   thumb && (article.thumb = thumb)
   createdAt && (article.createdAt = new Date(createdAt))
@@ -171,8 +202,10 @@ exports.create = async (ctx, next) => {
     if (!data.permalink) {
       // 更新永久链接
       data = await ArticleModel.findByIdAndUpdate(data._id, {
-        permalink: `https://jooger.me/blog/article/${data._id}`
-      }, { new : true }).exec().catch(err => {
+        permalink: `${config.site}/blog/article/${data._id}`
+      }, {
+        new : true
+      }).exec().catch(err => {
         ctx.log.error(err.message)
         return data
       })
@@ -189,6 +222,7 @@ exports.update = async (ctx, next) => {
   const content = ctx.validateBody('content').optional().isString('the "content" parameter should be String type').val()
   const keywords = ctx.validateBody('keywords').optional().isArray('the "keywords" parameter should be Array type').val()
   const description = ctx.validateBody('description').optional().isString('the "description" parameter should be String type').val()
+  const category = ctx.validateBody('category').optional().isObjectId().val()
   const tag = ctx.validateBody('tag').optional().isObjectIdArray().val()
   const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
   const thumb = ctx.validateBody('thumb').optional().isString('the "thumb" parameter should be String type').val()
@@ -203,6 +237,7 @@ exports.update = async (ctx, next) => {
   title && (article.title = title)
   keywords && (article.keywords = keywords)
   description && (article.description = description)
+  category && (article.category = category)
   tag && (article.tag = tag)
   thumb && (article.thumb = thumb)
   createdAt && (article.createdAt = new Date(createdAt))
@@ -226,7 +261,7 @@ exports.update = async (ctx, next) => {
   const data = await ArticleModel.findByIdAndUpdate(id, article, {
       new: true
     })
-    .populate('tag')
+    .populate('category tag')
     .exec()
     .catch(err => {
       ctx.log.error(err.message)
@@ -274,24 +309,28 @@ exports.like = async (ctx, next) => {
 }
 
 /**
- * 获取相关文章
+ * 根据标签获取相关文章
  * @param  {} ctx           koa ctx
  * @param  {} data          文章数据
  */
 async function getRelatedArticles (ctx, data) {
   data.related = []
-  if (data && data.tag && data.tag.length) {
-    const articles = await ArticleModel.find({ _id: { $nin: [ data._id ] }, state: 1, tag: { $in: data.tag.map(t => t._id) }})
-      .select('title thumb createdAt publishedAt meta')
-      .exec()
-      .catch(err => {
-        ctx.log.error('related articles access failed, err: ', err.message)
-        return null
-      })
+  let { _id, tag = [] } = data
+  const articles = await ArticleModel.find({
+    _id: { $nin: [ _id ] },
+    state: 1,
+    tag: { $in: tag.map(t => t._id) }}
+  )
+  .select('title thumb createdAt publishedAt meta')
+  .exec()
+  .catch(err => {
+    ctx.log.error('related articles access failed, err: ', err.message)
+    return null
+  })
 
-      if (articles) {
-        data.related = articles.slice(0, 5)
-      }
+  if (articles) {
+    // 取前5篇
+    data.related = articles.slice(0, 5)
   }
 }
 

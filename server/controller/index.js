@@ -7,6 +7,7 @@
 'use strict'
 
 exports.article = require('./article')
+exports.category = require('./category')
 exports.tag = require('./tag')
 exports.music = require('./music')
 exports.option = require('./option')
