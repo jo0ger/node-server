@@ -30,10 +30,13 @@ const baseConfig = {
   mongo: {
     option: {
       useMongoClient: true,
-      poolSize: 20
+      poolSize: 20,
+      keepAlive: true,
+      autoReconnect: true,
+      reconnectInterval: 1000,
+      reconnectTries: Number.MAX_VALUE
     }
   },
-  // TODO: Redis
   redis: {
     host: '127.0.0.1',
     port: 6379

@@ -16,15 +16,13 @@ let isConnected = false
 mongoose.Promise = global.Promise
 
 exports.connect = () => {
-  mongoose.connect(config.mongo.uri, config.mongo.option, err => {
-    if (err) {
-      isConnected = false
-      debug.error('连接失败，错误: ', config.mongo.uri, err.message)
-      process.exit(0)
-    }
+  mongoose.connect(config.mongo.uri, config.mongo.option).then(() => {
     debug.success('连接成功')
     isConnected = true
     seed()
+  }, err => {
+    isConnected = false
+    return debug.error('连接失败，错误: ', config.mongo.uri, err.message)
   })
 }
 
