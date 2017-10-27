@@ -17,7 +17,7 @@ const levelMap = {
 }
 const slice = Array.prototype.slice
 
-module.exports = function setDebug (namespace = '') {
+module.exports = function getDebug (namespace = '') {
   const deBug = debug(`[${packageInfo.name}]${namespace ? ' ' + namespace : ''}`)
 
   function d () {

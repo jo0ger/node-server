@@ -10,6 +10,7 @@ module.exports = async (ctx, next) => {
   try {
     await next()
   } catch (err) {
+    // TODO: 错误日志钩子
     let code = err.status || 500
 
     if (err.name === 'ValidationError') {

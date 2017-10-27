@@ -14,6 +14,8 @@ My blog's api server build by koa2 and mongoose
 
 * ~~文章分类api~~ (2017.10.26)
 
+* ~~Redis缓存部分数据~~ (2017.10.27 v1.1)
+
 * 评论api
 
 * 消息api

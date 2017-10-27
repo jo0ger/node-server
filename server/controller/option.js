@@ -8,11 +8,12 @@
 
 const { OptionModel } = require('../model')
 const { getGithubUsersInfo } = require('../service')
-const { updateSongListMap } = require('./music')
-const debug = require('../util').setDebug('option')
+const { updateMusicCache } = require('./music')
+const debug = require('../util').getDebug('Option')
 
 exports.data = async (ctx, next) => {
   const data = await OptionModel.findOne().exec().catch(err => {
+    debug.error('查找失败，错误：', err.message)
     ctx.log.error(err.message)
     return null
   })
@@ -27,7 +28,7 @@ exports.data = async (ctx, next) => {
 exports.update = async (ctx, next) => {
   const option = ctx.request.body
 
-  const data = await exports.updateOption(option)
+  const data = await exports.updateOptionLinks(option)
 
   if (data) {
     ctx.success(data)
@@ -36,10 +37,17 @@ exports.update = async (ctx, next) => {
   }
 }
 
-exports.updateOption = async function (option = null) {
-  debug('timed update option...')
+// update lock
+let lock = false
+exports.updateOptionLinks = async function (option = null) {
+  if (lock) {
+    debug.warn('友链更新中...')
+    return
+  }
+  lock = true
   if (!option) {
     option = await OptionModel.findOne().exec().catch(err => {
+      debug.error('数据查找失败，错误：', err.message)
       ctx.log.error(err.message)
       return {}
     })
@@ -49,16 +57,15 @@ exports.updateOption = async function (option = null) {
   option.links = await generateLinks(option.links)
 
   const data = await OptionModel.findOneAndUpdate({}, option, { new: true }).exec().catch(err => {
+    debug.error('数据更新失败，错误：', err.message)
     ctx.log.error(err.message)
     return null
   })
 
-  // 更新 music list
-  await updateSongListMap()
-
   if (data) {
-    debug.success('timed update option success...')
+    debug.success('友链更新成功')
   }
+  lock = false
   return data
 }
 
@@ -82,6 +89,3 @@ async function generateLinks (links = []) {
   }
   return links
 }
-
-// 每1小时更新一次
-setInterval(exports.updateOption, 1000 * 60 * 60 * 1)

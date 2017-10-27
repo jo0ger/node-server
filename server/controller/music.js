@@ -10,15 +10,16 @@ const NeteseMusic = require('simple-netease-cloud-music')
 const config = require('../config')
 const { fetchNE } = require('../service')
 const { OptionModel } = require('../model')
-const { proxy, setDebug } = require('../util')
+const { proxy, getDebug } = require('../util')
+const redis = require('../redis')
 
 const isProd = process.env.NODE_ENV === 'production'
-const debug = setDebug('music')
+const debug = getDebug('Music')
 const neteaseMusic = new NeteseMusic()
-
-const songListMap = {}
+const cacheKey = 'musicData'
 
 exports.list = async (ctx, next) => {
+  // 后台实时获取
   if (ctx._isAuthenticated) {
     const playListId = ctx.validateQuery('play_list_id')
       .required('the "play_list_id" parameter is required')
@@ -38,24 +39,24 @@ exports.list = async (ctx, next) => {
       return ctx.fail()
     }
 
-    const musicId = option.musicId
+    const playListId = option.musicId
+    const musicData = await redis.get(cacheKey)
 
-    if (songListMap[musicId] && songListMap[musicId].length) {
-      return ctx.success(songListMap[musicId])
+    if (musicData && musicData.id && musicData.list) {
+      return ctx.success(musicData.list)
     }
 
-    const data = await fetchSonglist(musicId)
-    songListMap[musicId] = data
+    const data = await exports.updateMusicCache(playListId)
     ctx.success(data)
   }
 }
 
 exports.item = async (ctx, next) => {
   const songId = ctx.validateParam('song_id')
-  .required('the "song_id" parameter is required')
-  .notEmpty()
-  .isString('the "song_id" parameter should be String type')
-  .val()
+    .required('the "song_id" parameter is required')
+    .notEmpty()
+    .isString('the "song_id" parameter should be String type')
+    .val()
 
   const { songs } = await neteaseMusic.song(songId)
 
@@ -98,66 +99,61 @@ exports.cover = async (ctx, next) => {
   ctx.success(data)
 }
 
-async function fetchSonglist (playListId) {
-  return fetchNE('playlist', playListId).then(({ playlist }) => {
-    return Promise.all(
-      !playlist ? [] : playlist.tracks.map(({ name, id, ar, al, dt, tns }) => {
-        return Promise.all([
-          neteaseMusic.url(id),
-          neteaseMusic.lyric(id)
-        ])
-        .then(([song, lyric]) => [song.data[0] || null, (lyric.nolyric || !lyric.lrc) ? '' : lyric.lrc.lyric])
-        .then(([song, lyric]) => {
-          return {
-            id,
-            name,
-            duration: dt || 0,
-            album: al && {
-              name: al.name,
-              cover: isProd ? (al.picUrl ? `${config.site}${proxy(al.picUrl)}` : '') : al.picUrl,
-              tns: al.tns
-            } || {},
-            artists: ar && ar.map(({ id, name }) => ({ id, name })) || [],
-            tns: tns || [],
-            src: isProd ? (song && song.url ? `${config.site}${proxy(song.url)}` : '') : song.url,
-            lyric
-          }
-        })
+// 获取除了歌曲链接和歌词外其他信息
+function fetchSonglist (playListId) {
+  return neteaseMusic.playlist(playListId).then(({ playlist }) => {
+    return !playlist ? [] : playlist.tracks.map(({ name, id, ar, al, dt, tns }) => {
+      return {
+        id,
+        name,
+        duration: dt || 0,
+        album: al && {
+          name: al.name,
+          cover: isProd ? (al.picUrl ? `${config.site}${proxy(al.picUrl)}` : '') : al.picUrl,
+          tns: al.tns
+        } || {},
+        artists: ar && ar.map(({ id, name }) => ({ id, name })) || [],
+        tns: tns || []
       }
-    ))
+    })
   }).catch(err => {
-    debug.error(err.message)
+    debug.error('歌单列表获取失败，错误：', err.message)
     return []
   })
 }
 
 // 更新song list cache
-exports.updateSongListMap = async function () {
-  debug('timed update music...')
-
-  const option = await OptionModel.findOne({}).exec().catch(err => {
-    debug.error(err.message)
-    return null
-  })
-
-  if (option && option.musicId) {
-    songListMap[option.musicId] = null
-  } else {
-    debug('music playlist id is not found')
+let lock = false
+exports.updateMusicCache = async function (playListId = '') {
+  if (lock) {
+    debug.warn('缓存更新中...')
     return
   }
-
-  const ids = Object.keys(songListMap)
-  const list = await Promise.all(ids.map(playListId => fetchSonglist(playListId)))
-    .catch(err => debug.error('timed update music failed, err: ', err.message))
-
-  if (list && list.length === ids.length) {
-    ids.map((id, index) => {
-      songListMap[id] = list[index]
+  lock = true
+  if (!playListId) {
+    const option = await OptionModel.findOne({}).exec().catch(err => {
+      debug.error('Option查找失败，错误：', err.message)
+      return null
     })
-    debug.success('timed update music success...')
+  
+    if (!option || !option.musicId) {
+      return debug.warn('歌单ID未配置')
+    }
+    playListId = option.musicId
   }
-}
 
-// 每10分钟更新一次
-setInterval(exports.updateSongListMap, 1000 * 60 * 10)
+  const data = await fetchSonglist(playListId)
+  const set = {
+    id: playListId,
+    list: data
+  }
+
+  redis.set(cacheKey, set).then(() => {
+    debug.success('缓存更新成功')
+  }).catch(err => {
+    debug.error('缓存更新失败，错误：', err.message)
+  })
+
+  lock = false
+  return set
+}

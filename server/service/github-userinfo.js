@@ -7,10 +7,10 @@
 'use strict'
 
 const axios = require('axios')
-const { setDebug } = require('../util')
+const { getDebug } = require('../util')
 const config = require('../config')
 const { clientID, clientSecret } = config.sns.github
-const debug = setDebug('github:user')
+const debug = getDebug('Github:User')
 
 const getGithubUsersInfo = (githubNames = '') => {
   if (!githubNames) {
@@ -22,7 +22,6 @@ const getGithubUsersInfo = (githubNames = '') => {
   }
 
   const task = githubNames.map(name => {
-    debug('fetch github user [', name, ']')
     return axios.get(`https://api.github.com/users/${name}`, {
       params: {
         client_id: clientID,
@@ -30,14 +29,13 @@ const getGithubUsersInfo = (githubNames = '') => {
       }
     }).then(res => {
       if (res && res.status === 200) {
-        debug.success('fetch github user success [', name, ']')
+        debug.success('抓取【 %s 】信息成功', name,)
         return res.data
       }
       return null
     })
     .catch(err => {
-      console.error(err)
-      debug.error(err.message)
+      debug.error('抓取【 %s 】信息失败，错误：%s', name, err.message)
       return null
     })
   })

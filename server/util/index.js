@@ -9,7 +9,7 @@
 const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
 
-exports.setDebug = require('./debug')
+exports.getDebug = require('./debug')
 
 exports.signToken = require('./sign-token')
 
@@ -18,6 +18,20 @@ exports.marked = require('./marked')
 exports.encrypt = require('./encrypt')
 
 exports.proxy = require('./proxy')
+
+exports.noop = function () {}
+
+exports.isType = (obj = {}, type = 'Object') => {
+  if (!Array.isArray(type)) {
+    type = [type]
+  }
+  return type.some(t => {
+    if (typeof t !== 'string') {
+      return false
+    }
+    return Object.prototype.toString.call(obj) === `[object ${t}]`
+  })
+}
 
 exports.createObjectId = () => mongoose.Types.ObjectId()
 

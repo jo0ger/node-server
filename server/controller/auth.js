@@ -10,8 +10,8 @@ const jwt = require('jsonwebtoken')
 const passport = require('koa-passport')
 const config = require('../config')
 const { UserModel } = require('../model')
-const { bhash, bcompare, setDebug, signToken } = require('../util')
-const debug = setDebug('auth:github')
+const { bhash, bcompare, getDebug, signToken } = require('../util')
+const debug = getDebug('Github:Auth')
 const { githubPassport } = require('../service')
 
 githubPassport.init(UserModel, config)
@@ -42,8 +42,8 @@ exports.localLogin = async (ctx, next) => {
         name: user.name
       })
       ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
-      ctx.cookies.set('jooger.me.userid', user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
-      debug.success('login success, user: ', user._id)
+      ctx.cookies.set(config.auth.userCookieKey, user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
+      debug.success('登录成功, 用户ID：%s，用户名：%s', user._id, user.name)
       ctx.success({
         id: user._id,
         token
@@ -63,8 +63,8 @@ exports.logout = async (ctx, next) => {
     name: ctx._user.name
   }, false)
   ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: 0, httpOnly: false })
-  ctx.cookies.set('jooger.me.userid', ctx._user._id, { signed: false, domain: session.domain, maxAge: 0, httpOnly: false })
-  debug.success('logout success, user: ', ctx._user._id)
+  ctx.cookies.set(config.auth.userCookieKey, ctx._user._id, { signed: false, domain: session.domain, maxAge: 0, httpOnly: false })
+  debug.success('登出成功, 用户ID：%s，用户名：%s', user._id, user.name)
   ctx.success(null, 'logout success')
 }
 
@@ -96,7 +96,7 @@ exports.githubLogin = async (ctx, next) => {
   await passport.authenticate('github', {
     session: false
   }, (err, user) => {
-    debug('github auth callback start')
+    debug('Github权限验证回调处理开始')
     const redirectUrl = ctx.session.passport.redirectUrl
     const cookieDomain = config.auth.session.domain || null
 
@@ -106,10 +106,10 @@ exports.githubLogin = async (ctx, next) => {
       name: user.name
     })
     ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
-    ctx.cookies.set('jooger.me.userid', user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
+    ctx.cookies.set(config.auth.userCookieKey, user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
 
-    debug('github auth callback finish')
-    debug.success('github login success, userid: ', user._id, 'username: ', user.name)
+    debug('Github权限验证回调处理成功')
+    debug.success('Github权限验证回调处理成功, 用户ID：%s，用户名：%s', user._id, user.name)
     return ctx.redirect(redirectUrl)
   })(ctx)
 }

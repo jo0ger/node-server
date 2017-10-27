@@ -1,6 +1,6 @@
 {
   "name": "jooger.me-server",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon bin/www",
@@ -40,7 +40,6 @@
     "koa-compose": "^4.0.0",
     "koa-compress": "^2.0.0",
     "koa-json": "^2.0.2",
-    "koa-jwt": "^3.2.2",
     "koa-logger": "^2.0.1",
     "koa-onerror": "^1.2.1",
     "koa-passport": "^4.0.0",
@@ -48,9 +47,10 @@
     "koa-session": "^5.5.0",
     "lodash": "^4.17.4",
     "marked": "^0.3.6",
-    "mongoose": "^4.11.12",
+    "mongoose": "^4.12.4",
     "mongoose-paginate": "^5.0.3",
     "passport-github": "^1.1.0",
+    "redis": "^2.8.0",
     "simple-netease-cloud-music": "^0.1.8"
   },
   "devDependencies": {

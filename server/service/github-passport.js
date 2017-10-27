@@ -10,8 +10,8 @@ const passport = require('koa-passport')
 const GithubStrategy = require('passport-github').Strategy
 const config = require('../config')
 const { clientID, clientSecret, callbackURL } = config.sns.github
-const { randomString, setDebug } = require('../util')
-const debug = setDebug('auth:github')
+const { randomString, getDebug } = require('../util')
+const debug = getDebug('Github:Auth')
 
 exports.init = (UserModel, config) => {
   passport.use(new GithubStrategy({
@@ -20,12 +20,12 @@ exports.init = (UserModel, config) => {
     callbackURL,
     passReqToCallback: true
   }, async (req, accessToken, refreshToken, profile, done) => {
-    debug('github auth start')
+    debug('Github权限验证开始...')
     try {
       const user = await UserModel.findOne({
         'github.id': profile.id
       }).catch(err => {
-        debug.error('user check error, err: ', err.message)
+        debug.error('本地用户查找失败, 错误：', err.message)
         return null
       })
 
@@ -41,7 +41,7 @@ exports.init = (UserModel, config) => {
         userData.github.token = accessToken
 
         const updatedUser = await UserModel.findByIdAndUpdate(user._id, userData).exec().catch(err => {
-          debug.error('user update error, err: ', err.message)
+          debug.error('本地用户更新失败, 错误：', err.message)
         }) || user
 
         return end(null, updatedUser)
@@ -58,7 +58,7 @@ exports.init = (UserModel, config) => {
       newUser.github.token = accessToken
 
       const checkUser = await UserModel.findOne({ name: newUser.name }).exec().catch(err => {
-        debug.error('user check error, err: ', err.message)
+        debug.error('本地用户查找失败, 错误：', err.message)
         return true
       })
 
@@ -67,17 +67,17 @@ exports.init = (UserModel, config) => {
       }
 
       const data = await new UserModel(newUser).save().catch(err => {
-        debug.error('user create fail, err: ', err.message)
+        debug.error('本地用户创建失败, 错误：', err.message)
       })
 
       return end(null, data)
     } catch (err) {
-      debug.error('github auth error')
+      debug.error('Github权限验证失败，错误：', err)
       return end(err)
     }
 
     function end (err, data) {
-      debug('github auth finish')
+      debug.success('Github权限验证成功')
       done(err, data)
     }
   }))
