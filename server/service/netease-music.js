@@ -7,8 +7,8 @@
 'use strict'
 
 const axios = require('axios')
-const { encrypt, setDebug } = require('../util')
-const debug = setDebug('netease')
+const { encrypt, getDebug } = require('../util')
+const debug = getDebug('Netease')
 
 const neFetcher = axios.create({
   baseURL: 'http://music.163.com',

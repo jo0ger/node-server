@@ -1,5 +1,5 @@
 /**
- * @desc Formidable
+ * @desc Formidable 上传中间件，暂未使用
  * @author Jooger <zzy1198258955@163.com>
  * @date 10 Oct 2017
  */

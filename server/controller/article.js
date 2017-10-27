@@ -8,7 +8,8 @@
 
 const config = require('../config')
 const { ArticleModel, CategoryModel, TagModel } = require('../model')
-const { marked, isObjectId, createObjectId } = require('../util')
+const { marked, isObjectId, createObjectId, getDebug } = require('../util')
+const debug = getDebug('Article')
 
 exports.list = async (ctx, next) => {
   const pageSize = ctx.validateQuery('per_page').defaultTo(config.pageSize).toInt().gt(0, 'the "per_page" parameter should be greater than 0').val()

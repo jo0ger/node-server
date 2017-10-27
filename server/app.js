@@ -22,7 +22,10 @@ const config = require('./config')
 const app = new Koa()
 
 // connect mongodb
-require('./mongo')()
+require('./mongo').connect()
+
+// connect redis
+require('./redis').connect()
 
 // load custom validations
 bouncer.Validator = require('./validation')
@@ -51,5 +54,8 @@ app.use(compress())
 
 // routes
 require('./routes')(app)
+
+//
+require('./service/crontab').start()
 
 module.exports = app

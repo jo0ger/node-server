@@ -1,5 +1,5 @@
 /**
- * @desc 
+ * @desc Mongodb connect
  * @author Jooger <zzy1198258955@163.com>
  * @date 25 Sep 2017
  */
@@ -9,21 +9,32 @@
 const mongoose = require('mongoose')
 const config = require('./config')
 const { UserModel, OptionModel } = require('./model')
-const { updateOption } = require('./controller/option')
-const { bhash, setDebug } = require('./util')
-const debug = setDebug('mongo:connect')
+const { bhash, getDebug } = require('./util')
+const debug = getDebug('MongoDB')
+let isConnected = false
 
-module.exports = function () {
-  mongoose.Promise = global.Promise
+mongoose.Promise = global.Promise
+
+exports.connect = () => {
   mongoose.connect(config.mongo.uri, config.mongo.option, err => {
     if (err) {
-      debug.error('connect to %s error: ', config.mongo.uri, err.message)
+      isConnected = false
+      debug.error('连接失败，错误: ', config.mongo.uri, err.message)
       process.exit(0)
     }
+    debug.success('连接成功')
+    isConnected = true
+    seed()
   })
+}
 
-  seedOption()
-  seedAdmin()
+exports.seed = seed
+
+function seed () {
+  if (isConnected) {
+    seedOption()
+    seedAdmin()
+  }
 }
 
 // 参数初始化
@@ -33,8 +44,6 @@ async function seedOption () {
   if (!option) {
     await new OptionModel().save().catch(err => debug.error(err.message))
   }
-
-  updateOption()
 }
 
 // 管理员初始化
@@ -43,7 +52,7 @@ function seedAdmin () {
     if (!data) {
       createAdmin()
     }
-  })
+  }).catch(err => debug.error(err.message))
 
   function createAdmin () {
     new UserModel({

@@ -1,5 +1,5 @@
 /**
- * @desc Http url proxy replace
+ * @desc Http url replace to "/proxy/..."
  * @author Jooger <zzy1198258955@163.com>
  * @date 20 Oct 2017
  */

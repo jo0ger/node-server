@@ -34,13 +34,17 @@ const baseConfig = {
     }
   },
   // TODO: Redis
-  redis: {},
+  redis: {
+    host: '127.0.0.1',
+    port: 6379
+  },
   auth: {
     session: {
       key: 'jooger.me.token',
       maxAge: 60000 * 60 * 24 * 7,
       signed: false
     },
+    userCookieKey: 'jooger.me.userid',
     secrets: `${packageInfo.name} ${packageInfo.version}`,
     defaultName: 'Jooger',
     defaultPassword: 'admin_jooger',

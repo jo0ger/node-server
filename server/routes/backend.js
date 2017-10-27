@@ -45,6 +45,9 @@ router.delete('/users/:id', isAuthenticated, user.delete)
 
 // Music
 router.get('/music/songs', isAuthenticated, music.list)
+router.get('/music/songs/:song_id', isAuthenticated, music.item)
+router.get('/music/songs/:song_id/url', isAuthenticated, music.url)
+router.get('/music/songs/:song_id/lyric', isAuthenticated, music.lyric)
 
 // Auth
 router.get('/auth/local/logout', isAuthenticated, auth.logout)
