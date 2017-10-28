@@ -339,7 +339,11 @@ async function getRelatedArticles (ctx, data) {
     state: 1,
     tag: { $in: tag.map(t => t._id) }}
   )
-  .select('title thumb createdAt publishedAt meta')
+  .select('title thumb createdAt publishedAt meta category')
+  .populate({
+    path: 'category',
+    select: 'name description'
+  })
   .exec()
   .catch(err => {
     ctx.log.error('related articles access failed, err: ', err.message)
@@ -347,8 +351,8 @@ async function getRelatedArticles (ctx, data) {
   })
 
   if (articles) {
-    // 取前5篇
-    data.related = articles.slice(0, 5)
+    // 取前10篇
+    data.related = articles.slice(0, 10)
   }
 }
 
@@ -365,7 +369,11 @@ async function getSiblingArticles (ctx, data) {
       query.state = 1
     }
     let prev = await ArticleModel.findOne(query)
-      .select('title createdAt publishedAt thumb')
+      .select('title createdAt publishedAt thumb category')
+      .populate({
+        path: 'category',
+        select: 'name description'
+      })
       .sort('-createdAt')
       .lt('createdAt', data.createdAt)
       .exec()
@@ -374,7 +382,11 @@ async function getSiblingArticles (ctx, data) {
         return null
       })
     let next = await ArticleModel.findOne(query)
-      .select('title createdAt publishedAt thumb')
+      .select('title createdAt publishedAt thumb category')
+      .populate({
+        path: 'category',
+        select: 'name description'
+      })
       .sort('createdAt')
       .gt('createdAt', data.createdAt)
       .exec()
