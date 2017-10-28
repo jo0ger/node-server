@@ -7,6 +7,7 @@
 'use strict'
 
 const config = require('../config')
+const { isType } = require('../util')
 
 module.exports = async (ctx, next) => {
   ctx.success = (data = null, message = config.codeMap[200]) => {
@@ -20,6 +21,11 @@ module.exports = async (ctx, next) => {
   }
 
   ctx.fail = (code = -1, message = '', data = null) => {
+    if (isType(code, 'String')) {
+      data = message || null
+      message = code
+      code = -1
+    }
     ctx.status = 200
     ctx.body = {
       code,

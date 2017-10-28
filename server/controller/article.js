@@ -12,12 +12,15 @@ const { marked, isObjectId, createObjectId, getDebug } = require('../util')
 const debug = getDebug('Article')
 
 exports.list = async (ctx, next) => {
-  const pageSize = ctx.validateQuery('per_page').defaultTo(config.pageSize).toInt().gt(0, 'the "per_page" parameter should be greater than 0').val()
+  const pageSize = ctx.validateQuery('per_page').defaultTo(config.articleLimit).toInt().gt(0, 'the "per_page" parameter should be greater than 0').val()
   const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, 'the "page" parameter should be greater than 0').val()
   const state = ctx.validateQuery('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
   const category = ctx.validateQuery('category').optional().toString().val()
   const tag = ctx.validateQuery('tag').optional().toString().val()
   const keyword = ctx.validateQuery('keyword').optional().toString().val()
+  // 时间区间查询仅后台可用，且依赖于createdAt
+  const startDate = ctx.validateQuery('start_date').optional().toString().val()
+  const endDate = ctx.validateQuery('end_date').optional().toString().val()
   // 排序仅后台能用，且order和sortBy需同时传入才起作用
   // -1 desc | 1 asc
   const order = ctx.validateQuery('order').optional().toInt().isIn(
@@ -106,6 +109,22 @@ exports.list = async (ctx, next) => {
     if (sortBy && order) {
       options.sort = {}
       options.sort[sortBy] = order
+    }
+
+    // 起始日期
+    if (startDate) {
+      const $gte = new Date(startDate)
+      if ($gte.toString() !== 'Invalid Date') {
+        query.createdAt = { $gte }
+      }
+    }
+
+    // 结束日期
+    if (endDate) {
+      const $lte = new Date(endDate)
+      if ($lte.toString() !== 'Invalid Date') {
+        query.createdAt = Object.assign({}, query.createdAt, { $lte })
+      }
     }
   }
 
@@ -269,16 +288,7 @@ exports.update = async (ctx, next) => {
     article.renderedContent = marked(content)
   }
 
-  if (cache) {
-    // 如果文章状态由草稿变为发布，更新发布时间
-    if (cache.state !== article.state && article.state === 1) {
-      article.publishedAt = Date.now()
-    }
-  }
-
-  const data = await ArticleModel.findByIdAndUpdate(id, article, {
-      new: true
-    })
+  const data = await ArticleModel.findByIdAndUpdate(id, article, { new: true })
     .populate('category tag')
     .exec()
     .catch(err => {

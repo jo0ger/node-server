@@ -7,7 +7,7 @@
 'use strict'
 
 const router = require('koa-router')()
-const { article, category, tag, music, option, user, auth } = require('../controller')
+const { article, category, tag, comment, music, option, user, auth } = require('../controller')
 const { authenticate } = require('../middleware')
 const isAuthenticated = authenticate.isAuthenticated()
 const snsAuth = authenticate.snsAuth
@@ -17,6 +17,12 @@ const snsLogout = authenticate.snsLogout()
 router.get('/articles', article.list)
 router.get('/articles/:id', article.item)
 router.post('/articles/:id/like', article.like)
+
+// Comment
+router.get('/comments', comment.list)
+router.get('/comments/:id', comment.item)
+router.post('/comments', comment.create)
+router.post('/comments/:id/like', comment.like)
 
 // Tag
 router.get('/tags', tag.list)

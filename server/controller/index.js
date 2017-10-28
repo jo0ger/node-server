@@ -9,6 +9,7 @@
 exports.article = require('./article')
 exports.category = require('./category')
 exports.tag = require('./tag')
+exports.comment = require('./comment')
 exports.music = require('./music')
 exports.option = require('./option')
 exports.user = require('./user')

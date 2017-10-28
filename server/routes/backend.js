@@ -7,31 +7,39 @@
 'use strict'
 
 const router = require('koa-router')()
-const { article, category, tag, option, user, auth, music, statistics } = require('../controller')
+const { article, category, tag, comment, option, user, auth, music, statistics } = require('../controller')
 const { authenticate } = require('../middleware')
 const isAuthenticated = authenticate.isAuthenticated()
 
 // Article
 router.get('/articles', isAuthenticated, article.list)
 router.get('/articles/:id', isAuthenticated, article.item)
-router.post('/articles', article.create)
+router.post('/articles',isAuthenticated,  article.create)
 router.patch('/articles/:id', isAuthenticated, article.update)
 router.delete('/articles/:id', isAuthenticated, article.delete)
 router.post('/articles/:id/like', isAuthenticated, article.like)
+
+// Comment
+router.get('/comments', isAuthenticated, comment.list)
+router.get('/comments/:id', isAuthenticated, comment.item)
+router.post('/comments', isAuthenticated, comment.create)
+router.patch('/comments/:id', isAuthenticated, comment.update)
+router.delete('/comments/:id', isAuthenticated, comment.delete)
+router.post('/comments/:id/like', isAuthenticated, comment.like)
 
 // Tag
 router.get('/tags', isAuthenticated, tag.list)
 router.get('/tags/:id', isAuthenticated, tag.item)
 router.post('/tags', isAuthenticated, tag.create)
 router.patch('/tags/:id', isAuthenticated, tag.update)
-router.delete('/tags/:id', tag.delete)
+router.delete('/tags/:id', isAuthenticated, tag.delete)
 
 // Category
 router.get('/categories', isAuthenticated, category.list)
 router.get('/categories/:id', isAuthenticated, category.item)
 router.post('/categories', isAuthenticated, category.create)
 router.patch('/categories/:id', isAuthenticated, category.update)
-router.delete('/categories/:id', category.delete)
+router.delete('/categories/:id', isAuthenticated, category.delete)
 
 // Option
 router.get('/options', isAuthenticated, option.data)
