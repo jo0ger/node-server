@@ -18,5 +18,8 @@ module.exports = {
       clientSecret: '8771bd9ae52749cc15b0c9e2c6cb4ecd7f39d9da',
       callbackURL: 'http://127.0.0.1:3001/auth/github/login/callback'
     }
+  },
+  akismet: {
+    apiKey: '7fa12f4a1d08'
   }
 }
