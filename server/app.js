@@ -55,7 +55,10 @@ app.use(compress())
 // routes
 require('./routes')(app)
 
-//
+// crontab
 require('./service/crontab').start()
+
+// akismet
+require('./akismet').start()
 
 module.exports = app

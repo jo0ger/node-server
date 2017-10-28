@@ -69,10 +69,7 @@ const baseConfig = {
     }
   },
   akismet: {
-    apiKey: 'akismet api key',
-    activeSites: [
-      packageInfo.site
-    ]
+    apiKey: 'akismet api key'
   }
 }
 
