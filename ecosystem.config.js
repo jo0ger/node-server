@@ -13,7 +13,7 @@ module.exports = {
     name: packageInfo.name,
     script: './bin/www',
     cwd: __dirname,
-    watch: true,
+    watch: false,
     ignore_watch: ['[\/\\]\./', 'node_modules'],
     env: {
       NODE_ENV: 'production'
@@ -33,7 +33,7 @@ module.exports = {
       ref  : 'origin/master',
       repo : packageInfo.repository.url,
       path : '/root/www/' + packageInfo.name,
-      'post-deploy' : 'git pull && cnpm install && pm2 stop all && pm2 startOrReload ecosystem.config.js && pm2 start all'
+      'post-deploy' : 'git pull && cnpm install && pm2 startOrReload ecosystem.config.js'
     }
   }
 }

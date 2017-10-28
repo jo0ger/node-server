@@ -23,5 +23,8 @@ module.exports = {
       clientSecret: '4b98cc1028eddc78e72d5e48657819be50581623',
       callbackURL: 'https://api.jooger.me/auth/github/login/callback'
     }
+  },
+  akismet: {
+    apiKey: '7fa12f4a1d08'
   }
 }

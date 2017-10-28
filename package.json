@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon bin/www",
     "debug": "cross-env NODE_ENV=development nodemon --inspect bin/www",
+    "prod": "cross-env NODE_ENV=production nodemon bin/www",
     "pm2": "pm2 startOrReload ecosystem.config.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "pm2 deploy ecosystem.config.js production"
   },
+  "site": "https://jooger.me",
   "repository": {
     "type": "https",
     "url": "https://github.com/jo0ger/jooger.me-server.git"
@@ -16,7 +18,10 @@
   "keywords": [
     "jooger.me",
     "server",
-    "api"
+    "api",
+    "Nodejs",
+    "Koa2",
+    "MongoDB"
   ],
   "author": "Jooger",
   "license": "MIT",
@@ -25,13 +30,16 @@
   },
   "bin": "./node_modules/.bin/",
   "dependencies": {
+    "akismet-api": "^3.0.0",
     "axios": "^0.16.2",
     "bcryptjs": "^2.4.3",
     "big-integer": "^1.6.25",
     "crypto": "^1.0.1",
     "debug": "^2.6.9",
     "formidable": "^1.1.1",
+    "geoip-lite": "^1.2.1",
     "highlight.js": "^9.12.0",
+    "jsonwebtoken": "^8.1.0",
     "koa": "^2.2.0",
     "koa-bodyparser": "^3.2.0",
     "koa-bouncer": "^6.0.0",
@@ -48,6 +56,7 @@
     "marked": "^0.3.6",
     "mongoose": "^4.12.4",
     "mongoose-paginate": "^5.0.3",
+    "nodemailer": "^4.3.1",
     "passport-github": "^1.1.0",
     "redis": "^2.8.0",
     "simple-netease-cloud-music": "^0.1.8"

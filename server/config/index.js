@@ -14,11 +14,10 @@ const baseConfig = {
   name: packageInfo.name,
   version: packageInfo.version,
   author: packageInfo.author || 'Jooger',
-  site: 'https://jooger.me',
+  site: packageInfo.site,
   env: process.env.NODE_ENV,
   root: path.resolve(__dirname, '../../'),
   port: process.env.PORT || 3001,
-  pageSize: 15,
   codeMap: {
     '-1': 'fail',
     '200': 'success',
@@ -27,6 +26,9 @@ const baseConfig = {
     '500': 'server error',
     '10001': 'params error'
   },
+  articleLimit: 15,
+  commentLimit: 99,
+  commentSpamLimit: 3,
   mongo: {
     option: {
       useMongoClient: true,
@@ -65,6 +67,12 @@ const baseConfig = {
       clientSecret: 'github client secret',
       callbackURL: 'github oauth callback url'
     }
+  },
+  akismet: {
+    apiKey: 'akismet api key',
+    activeSites: [
+      packageInfo.site
+    ]
   }
 }
 

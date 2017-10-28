@@ -56,7 +56,7 @@ exports.isAuthenticated = () => {
       if (!user) {
         return ctx.fail(401, '用户不存在')
       }
-      ctx._user = user
+      ctx._user = user.toObject()
       ctx._isAuthenticated = true
       await next()
     }
