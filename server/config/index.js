@@ -51,7 +51,7 @@ const baseConfig = {
     },
     userCookieKey: 'jooger.me.userid',
     secrets: `${packageInfo.name} ${packageInfo.version}`,
-    defaultName: 'Jooger',
+    defaultName: 'jo0ger',
     defaultPassword: 'admin_jooger',
     // 允许请求的域名
     allowedOrigins: [

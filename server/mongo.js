@@ -6,10 +6,11 @@
 
 'use strict'
 
-const mongoose = require('mongoose')
 const config = require('./config')
-const { UserModel, OptionModel } = require('./model')
+const mongoose = require('mongoose')
 const { bhash, getDebug } = require('./util')
+const { UserModel, OptionModel } = require('./model')
+const { getGithubUsersInfo } = require('./service')
 const debug = getDebug('MongoDB')
 let isConnected = false
 
@@ -45,19 +46,47 @@ async function seedOption () {
 }
 
 // 管理员初始化
-function seedAdmin () {
-  UserModel.findOne({ role: 0 }).exec().then(data => {
-    if (!data) {
-      createAdmin()
-    }
-  }).catch(err => debug.error(err.message))
+async function seedAdmin () {
+  const admin = await UserModel.findOne({ role: 0 }).exec()
+    .catch(err => debug.error('初始化管理员查询失败，错误：', err.message))
+  if (!admin) {
+    createAdmin()
+  }
+}
 
-  function createAdmin () {
-    new UserModel({
-      role: 0,
-      password: bhash(config.auth.defaultPassword)
-    })
-    .save()
-    .catch(err => debug.error(err.message))
+async function createAdmin () {
+  let data = await getGithubUsersInfo(config.auth.defaultName)
+    
+  if (!data || !data[0]) {
+    return fail('未找到Github用户数据')
+  }
+  data = data[0]
+  const result = await new UserModel({
+    role: 0,
+    name: data.name,
+    password: bhash(config.auth.defaultPassword),
+    slogan: data.bio,
+    avatar: data.avatar_url,
+    github: {
+      id: data.id,
+      email: data.email,
+      login: data.login,
+      name: data.name,
+      blog: data.blog
+    }
+  })
+  .save()
+  .catch(err => {
+    fail(err.message)
+  })
+
+  if (!result || !result._id) {
+    fail('本地入库失败')
+  } else {
+    debug.success('初始化管理员成功')
+  }
+  
+  function fail (msg = '') {
+    debug.error('初始化管理员失败，错误：', msg)
   }
 }
