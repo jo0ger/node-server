@@ -19,6 +19,8 @@ const userSchema = new mongoose.Schema({
   avatar: { type: String, default: '' },
   // 角色 0 管理员 | 1 普通用户
   role: { type: Number, default: 1 },
+  // 是否被禁言
+  mute: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   github: {
