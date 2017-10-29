@@ -137,7 +137,7 @@ exports.updateMusicCache = async function (playListId = '') {
       debug.error('Option查找失败，错误：', err.message)
       return null
     })
-  
+
     if (!option || !option.musicId) {
       return debug.warn('歌单ID未配置')
     }
@@ -151,9 +151,9 @@ exports.updateMusicCache = async function (playListId = '') {
   }
 
   redis.set(cacheKey, set).then(() => {
-    debug.success('缓存更新成功')
+    debug.success('缓存更新成功，歌单ID：', playListId)
   }).catch(err => {
-    debug.error('缓存更新失败，错误：', err.message)
+    debug.error('缓存更新失败，歌单ID：%s，错误：%s', playListId, err.message)
   })
 
   lock = false

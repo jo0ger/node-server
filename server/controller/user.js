@@ -150,6 +150,9 @@ exports.updateGithubInfo = async () => {
   const updates = await getGithubUsersInfo(users.map(user => user.github.login))
   Promise.all(
     updates.map((data, index) => {
+      if (!data) {
+        return null
+      }
       const user = users[index]
       const u = {
         github: {
@@ -169,7 +172,7 @@ exports.updateGithubInfo = async () => {
       return UserModel.findByIdAndUpdate(user._id, u).exec().catch(err => {
         debug.error('用户Github信息更新失败，错误：', err.message)
       })
-    })
+    }).filter(ps => !!ps)
   ).then(() => {
     debug.success('全部用户Github信息更新成功')
   })

@@ -4,7 +4,7 @@
 
 ## jooger.me-server
 
-My blog's api server build by koa2 and mongoose
+⚡️ My blog's api server build with koa2 and mongoose
 
 ## TODOS
 
@@ -31,3 +31,5 @@ My blog's api server build by koa2 and mongoose
 * 日志api
 
 * 统计api
+
+* GC优化

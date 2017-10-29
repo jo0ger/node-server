@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: config.email,
-    pass: '19950102zzy'
+    pass: process.env['163Pass'] || '163邮箱密码'
   }
 })
 
@@ -26,9 +26,9 @@ exports.start = async () => {
     transporter.verify((err, success) => {
       if (err) {
         isVerify = false
-        debug.error('服务初始化失败，将在1分钟后重试，错误：', err.message)
+        debug.error('服务启动失败，将在1分钟后重试，错误：', err.message)
         reject(err)
-        setTimeout(verifyMailClient, 60 * 1000)
+        setTimeout(exports.start, 60 * 1000)
       } else {
         isVerify = true
         debug.success('服务启动成功')
