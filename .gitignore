@@ -22,3 +22,8 @@ npm-debug.log
 .idea
 
 .DS_Store
+package-lock.json
+
+# pm2
+ecosystem.config.js
+process.js

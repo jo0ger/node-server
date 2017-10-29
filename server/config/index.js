@@ -64,13 +64,13 @@ const baseConfig = {
   },
   sns: {
     github: {
-      clientID: 'github client id',
-      clientSecret: 'github client secret',
+      clientID: process.env.githubClientID || 'github client id',
+      clientSecret: process.env.githubClientSecret || 'github client secret',
       callbackURL: 'github oauth callback url'
     }
   },
   akismet: {
-    apiKey: 'akismet api key'
+    apiKey: process.env.akismetApikey || 'akismet api key'
   }
 }
 
