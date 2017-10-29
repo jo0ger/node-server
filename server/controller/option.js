@@ -9,7 +9,8 @@
 const { OptionModel } = require('../model')
 const { getGithubUsersInfo } = require('../service')
 const { updateMusicCache } = require('./music')
-const debug = require('../util').getDebug('Option')
+const { getDebug, proxy } = require('../util')
+const debug = getDebug('Option')
 
 exports.data = async (ctx, next) => {
   const data = await OptionModel.findOne().exec().catch(err => {
@@ -79,7 +80,7 @@ async function generateLinks (links = []) {
       return links.map((link, index) => {
         const userInfo = usersInfo[index]
         if (userInfo) {
-          link.avatar = userInfo.avatar_url
+          link.avatar = proxy(userInfo.avatar_url)
           link.slogan = userInfo.bio
           link.site = link.site || userInfo.blog
         }

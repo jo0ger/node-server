@@ -8,10 +8,11 @@
 
 const geoip = require('geoip-lite')
 const config = require('../config')
-const { getAkismetClient } = require('../akismet')
+const { akismet, mailer } = require('../plugins')
 const { CommentModel, UserModel, ArticleModel } = require('../model')
 const { marked, isObjectId, createObjectId, getDebug } = require('../util')
 const debug = getDebug('Comment')
+const isProd = process.env.NODE_ENV === 'development'
 
 exports.list = async (ctx, next) => {
   const pageSize = ctx.validateQuery('per_page').defaultTo(config.commentLimit).toInt().gt(0, '每页评论数量必须大于0').val()
@@ -113,9 +114,9 @@ exports.list = async (ctx, next) => {
   if (!ctx._isAuthenticated) {
     // 将评论状态重置为1
     query.state = 1
-    query.akimetSpam = false
+    query.spam = false
     // 评论列表不需要content和state
-    options.select = '-content -state -updatedAt -akimetSpam -type'
+    options.select = '-content -state -updatedAt -spam -type'
   } else {
     // 排序
     if (sortBy && order) {
@@ -166,8 +167,8 @@ exports.item = async (ctx, next) => {
   let data = null
   let queryPs = null
   if (!ctx._isAuthenticated) {
-    queryPs = CommentModel.findById(id, { state: 1, akimetSpam: false })
-      .select('-content -state -updatedAt -type -akimetSpam')
+    queryPs = CommentModel.findById(id, { state: 1, spam: false })
+      .select('-content -state -updatedAt -type -spam')
       .populate({
         path: 'author',
         select: 'github'
@@ -213,17 +214,6 @@ exports.create = async (ctx, next) => {
   const req = ctx.req
   const comment = { content }
 
-  const user = await UserModel.findById(author).select('github').exec().catch(err => {
-    debug.error('用户查找失败，错误：', err.message)
-    ctx.log.error(err.message)
-    return null
-  })
-
-  if (!user) {
-    return ctx.fail('用户不存在')
-  }
-
-  
   if (type === undefined || type === 0) {
     if (!article) {
       return ctx.fail('缺少文章ID参数')
@@ -233,6 +223,35 @@ exports.create = async (ctx, next) => {
   
   if (parent && !forward || !parent && forward) {
     return ctx.fail('父评论ID和前置评论ID必须同时存在')
+  }
+  
+  const user = await UserModel.findById(author).select('github').exec().catch(err => {
+    debug.error('用户查找失败，错误：', err.message)
+    ctx.log.error(err.message)
+    return null
+  })
+
+  if (!user) {
+    return ctx.fail('用户不存在')
+  } else if (user.mute) {
+    // 如果被禁言
+    return ctx.fail('您已经被禁言')
+  }
+
+  if (!checkUserSpam(user)) {
+    return ctx.fail('您的垃圾评论数量已达到最大限制，已被禁言')
+  }
+
+  if (state !== undefined) {
+    comment.state = state
+  }
+
+  if (type !== undefined) {
+    comment.type = type
+  }
+
+  if (sticky !== undefined) {
+    comment.sticky = sticky
   }
 
   // 获取ip
@@ -251,8 +270,9 @@ exports.create = async (ctx, next) => {
   comment.meta.referer = req.headers.referer || ''
 
   // 先判断是不是垃圾邮件
-  const akismetClient = getAkismetClient()
+  const akismetClient = akismet.getAkismetClient()
   let isSpam = false
+  // 永链
   const permalink = getPermalink(comment)
   if (akismetClient) {
     isSpam = await akismetClient.checkSpam({
@@ -265,7 +285,7 @@ exports.create = async (ctx, next) => {
       comment_author_email : user.github.email,
       comment_author_url : user.github.blog,
       comment_content : content,
-      is_test : process.env.NODE_ENV === 'development'
+      is_test : isProd
     })
   }
 
@@ -279,18 +299,6 @@ exports.create = async (ctx, next) => {
   comment.renderedContent = marked(content)
   comment.author = author
 
-  if (state !== undefined) {
-    comment.state = state
-  }
-
-  if (type !== undefined) {
-    comment.type = type
-  }
-
-  if (sticky !== undefined) {
-    comment.sticky = sticky
-  }
-
   let data = await new CommentModel(comment).save().catch(err => {
     ctx.log.error(err.message)
     return null
@@ -302,7 +310,7 @@ exports.create = async (ctx, next) => {
       p = p.select('-content -state -updatedAt')
         .populate({
           path: 'author',
-          select: 'github'
+          select: 'name github'
         })
         .populate({
           path: 'parent',
@@ -320,6 +328,11 @@ exports.create = async (ctx, next) => {
         return null
       })
     ctx.success(data)
+    // 如果是文章评论，则更新文章评论数量
+    if (type === 0) {
+      updateArticleCommentCount([comment.article])
+    }
+    sendEmailToAdminAndUser(data, permalink)
   } else {
     ctx.fail()
   }
@@ -328,9 +341,8 @@ exports.create = async (ctx, next) => {
 exports.update = async (ctx, next) => {
   const id = ctx.validateParam('id').required('评论ID参数无效').toString().isObjectId('评论ID参数无效').val()
   const content = ctx.validateBody('content').optional().isString('内容参数必须是字符串类型').val()
-  const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], '评论状态参数无效').val()
+  const state = ctx.validateBody('state').optional().toInt().isIn([-2, 0, 1, 2], '评论状态参数无效').val()
   const sticky = ctx.validateBody('sticky').optional().toInt().isIn([0, 1], '置顶参数无效').val()
-  const akimetSpam = ctx.validateBody('akimet_spam').optional().toBoolean().val()
   const comment = {}
   let cache = await CommentModel.findById(id)
     .populate('author')
@@ -348,16 +360,43 @@ exports.update = async (ctx, next) => {
     comment.renderedContent = marked(content)
   }
 
-  if (state !== undefined) {
-    comment.state = state
-  }
-
   if (sticky !== undefined) {
     comment.sticky = sticky
   }
-
-  if (akimetSpam !== undefined) {
-    comment.akimetSpam = akimetSpam
+  
+  // 状态修改是涉及到spam修改
+  if (state !== undefined) {
+    comment.state = state
+    const akismetClient = akismet.getAkismetClient()
+    const permalink = getPermalink(cache)
+    const opt = {
+      user_ip : cache.meta.ip,                 // Required! 
+      user_agent : cache.meta.ua,           // Required! 
+      referrer : cache.meta.referer,           // Required! 
+      permalink,
+      comment_type : getCommentType(cache.type),
+      comment_author : cache.author.github.login,
+      comment_author_email : cache.author.github.email,
+      comment_author_url : cache.author.github.blog,
+      comment_content : cache.content,
+      is_test : isProd
+    }
+  
+    if (cache.state === -2 && state !== -2) {
+      // 垃圾评论转为正常评论
+      if (cache.spam) {
+        comment.spam = false
+        // 报告给Akismet
+        akismetClient.submitSpam(opt)
+      }
+    } else if (cache.state !== -2 && state === -2) {
+      // 正常评论转为垃圾评论
+      if (!cache.spam) {
+        comment.spam = true
+        // 报告给Akismet
+        akismetClient.submitHam(opt)
+      }
+    }
   }
 
   let p = CommentModel.findByIdAndUpdate(id, comment, { new: true })
@@ -420,6 +459,7 @@ exports.like = async (ctx, next) => {
   }
 }
 
+// 获取永久链接
 function getPermalink (comment = {}) {
   const { type, article } = comment
   switch (type) {
@@ -428,10 +468,12 @@ function getPermalink (comment = {}) {
       break
     // TODO: 其他页面或组件的permalink
     default:
+      return ''
       break
   }
 }
 
+// 评论类型说明
 function getCommentType (type) {
   switch (type) {
     case 0:
@@ -440,5 +482,97 @@ function getCommentType (type) {
     default:
       return '其他评论'
       break
+  }
+}
+
+// 检测用户以往spam评论
+async function checkUserSpam (user) {
+  const userComments = await CommentModel.find({
+    author: user._id
+  })
+  .exec()
+  .catch(err => {
+    debug.error('用户历史评论获取失败，错误：', err.message)
+    return []
+  })
+
+  const spamComments = userComments.filter(c => c.spam)
+  // 如果用户以往评论中spam评论数量大于等于spam限制
+  if (spamComments.length >= config.commentSpamLimit) {
+    if (!user.mute) {
+      // 将用户禁言
+      await UserModel.update({ _id: user._id }, {
+        mute: true
+      })
+      .exec()
+      .then(() => {
+        debug.success('用户禁言成功，用户：', user.name)
+      })
+      .catch(err => {
+        debug.error('用户禁言失败，请手动禁言，错误：', err.message)
+      })
+    }
+    return false
+  }
+  return true
+}
+
+// 更新文章的meta.comments评论数量
+async function updateArticleCommentCount (articleIds = []) {
+  if (!articleIds.length) {
+    return
+  }
+  // TIP: 这里必须$in的是一个ObjectId对象数组，而不能只是id字符串数组
+  articleIds = [...new Set(articleIds)].filter(id => isObjectId(id)).map(id => createObjectId(id))
+  const counts = await CommentModel.aggregate([
+    { $match: { state: 1, article: { $in: articleIds } } },
+    { $group: { _id: '$article', total_count: { $sum: 1 } } }
+  ])
+  .exec()
+  .catch(err => {
+    debug.error('更新文章评论数量前聚合评论数据操作失败，错误：', err.message)
+    return []
+  })
+  Promise.all(counts.map(count => ArticleModel.update(
+    { _id: count._id },
+    { $set: { 'meta.comments': count.total_count } }
+  ).exec().catch(err => {
+    debug.error('文章评论数量更新失败，错误：', err.message)
+  }))).then(() => {
+    debug.success('文章评论数量更新成功')
+  })
+}
+
+// 发送邮件
+async function sendEmailToAdminAndUser (comment, permalink) {
+  const { type, article } = comment
+  let adminTitle = '博客有新的留言'
+  if (type == 0) {
+    // 文章评论
+    const at = await ArticleModel.findById(article).exec()
+    if (at && at._id) {
+      adminTitle = `博客文章 [${at.title}] 有了新的评论`
+    }
+  }
+  // 发送给管理员邮箱config.email
+  mailer.send({
+    subject: adminTitle,
+    text: `来自 ${comment.author.github.name} 的${type == 0 ? '评论' : '留言'}：${comment.content}`,
+    html: `<p>来自 ${comment.author.github.name} 的${type == 0 ? '评论' : '留言'} <a href="${permalink}" target="_blank">[ 点击查看 ]</a>：${comment.renderedContent}</p>`
+  }, true)
+
+  // 发送给被评论者
+  if (comment.forward) {
+    const forwardAuthor = await UserModel.findById(comment.forward.author).exec().catch(err => null)
+    if (forwardAuthor) {
+      mailer.send({
+        to: forwardAuthor.github.email,
+        subject: '你在Jooger的博客的评论有了新的回复',
+        text: `来自 ${comment.author.name} 的回复：${comment.content}`,
+        html: `<p>来自 ${comment.author.name} 的回复 <a href="${permalink}" target="_blank">[ 点击查看 ]</a>：${comment.renderedContent}</p>`
+      })
+    } else {
+      debug.warn('给被评论者邮件失败')
+    }
   }
 }

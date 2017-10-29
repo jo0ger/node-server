@@ -8,7 +8,7 @@
 
 const mongoose = require('mongoose')
 const Validator = require('koa-bouncer').Validator
-const { isObjectId } = require('./util')
+const { isObjectId } = require('../util')
 
 Validator.addMethod('notEmpty', function (tip) {
   this.isString(`the "${this.key}" parameter should be String type`)

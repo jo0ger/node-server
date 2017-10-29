@@ -1,7 +1,8 @@
 {
   "name": "jooger.me-server",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
+  "description": "🔥 My blog's api server build by koa2 and mongoose",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon bin/www",
     "debug": "cross-env NODE_ENV=development nodemon --inspect bin/www",
@@ -10,7 +11,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "pm2 deploy ecosystem.config.js production"
   },
+  "author": "Jooger",
   "site": "https://jooger.me",
+  "email": "zzy1198258955@163.com",
   "repository": {
     "type": "https",
     "url": "https://github.com/jo0ger/jooger.me-server.git"
@@ -23,7 +26,6 @@
     "Koa2",
     "MongoDB"
   ],
-  "author": "Jooger",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jo0ger/jooger.me-server/issues"

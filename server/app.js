@@ -18,17 +18,19 @@ const bodyparser = require('koa-bodyparser')
 const koaBunyanLogger = require('koa-bunyan-logger')
 const middlewares = require('./middleware')
 const config = require('./config')
+const { mongo, redis, akismet, validation, mailer } = require('./plugins')
+const { crontab } = require('./service')
 
 const app = new Koa()
 
 // connect mongodb
-require('./mongo').connect()
+mongo.connect()
 
 // connect redis
-require('./redis').connect()
+redis.connect()
 
 // load custom validations
-bouncer.Validator = require('./validation')
+bouncer.Validator = validation
 
 // error handler
 onerror(app)
@@ -55,10 +57,13 @@ app.use(compress())
 // routes
 require('./routes')(app)
 
-// crontab
-require('./service/crontab').start()
-
 // akismet
-require('./akismet').start()
+akismet.start()
+
+// mailer
+mailer.start()
+
+// crontab
+crontab.start()
 
 module.exports = app

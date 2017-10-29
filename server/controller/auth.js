@@ -11,7 +11,8 @@ const passport = require('koa-passport')
 const config = require('../config')
 const { UserModel } = require('../model')
 const { bhash, bcompare, getDebug, signToken } = require('../util')
-const debug = getDebug('Github:Auth')
+const debug = getDebug('Auth')
+const debugGithub = getDebug('Github:Auth')
 const { githubPassport } = require('../service')
 
 githubPassport.init(UserModel, config)
@@ -96,7 +97,7 @@ exports.githubLogin = async (ctx, next) => {
   await passport.authenticate('github', {
     session: false
   }, (err, user) => {
-    debug('Github权限验证回调处理开始')
+    debugGithub('Github权限验证回调处理开始')
     const redirectUrl = ctx.session.passport.redirectUrl
     const cookieDomain = config.auth.session.domain || null
 
@@ -108,8 +109,8 @@ exports.githubLogin = async (ctx, next) => {
     ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
     ctx.cookies.set(config.auth.userCookieKey, user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
 
-    debug('Github权限验证回调处理成功')
-    debug.success('Github权限验证回调处理成功, 用户ID：%s，用户名：%s', user._id, user.name)
+    debugGithub('Github权限验证回调处理成功')
+    debugGithub.success('Github权限验证回调处理成功, 用户ID：%s，用户名：%s', user._id, user.name)
     return ctx.redirect(redirectUrl)
   })(ctx)
 }

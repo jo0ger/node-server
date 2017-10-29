@@ -16,7 +16,7 @@ const commentSchema = new mongoose.Schema({
   content: { type: String, required: true, validate: /\S+/ }, // 评论内容
   renderedContent: { type: String, required: true, validate: /\S+/ }, // marked渲染后的内容
   state: { type: Number, default: 1 },  // 状态 -2 垃圾评论 | -1 已删除 | 0 待审核 | 1 通过
-  akimetSpam: { type: Boolean, default: false },  // Akismet判定是否是垃圾评论，方便后台check
+  spam: { type: Boolean, default: false },  // Akismet判定是否是垃圾评论，方便后台check
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   ups: { type: Number, default: 0 }, // 点赞数
   sticky: { type: Number, default: 0 }, // 是否置顶 0 否 | 1 是
