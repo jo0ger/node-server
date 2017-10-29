@@ -10,7 +10,7 @@ const passport = require('koa-passport')
 const GithubStrategy = require('passport-github').Strategy
 const config = require('../config')
 const { clientID, clientSecret, callbackURL } = config.sns.github
-const { randomString, getDebug } = require('../util')
+const { randomString, getDebug, proxy } = require('../util')
 const debug = getDebug('Github:Auth')
 
 exports.init = (UserModel, config) => {
@@ -32,7 +32,7 @@ exports.init = (UserModel, config) => {
       if (user) {
         const userData = {
           name: profile.displayName || profile.username,
-          avatar: profile._json.avatar_url,
+          avatar: proxy(profile._json.avatar_url),
           slogan: profile._json.bio,
           github: profile._json,
           role: user.role
@@ -49,7 +49,7 @@ exports.init = (UserModel, config) => {
 
       const newUser = {
         name: profile.displayName || profile.username,
-        avatar: profile._json.avatar_url,
+        avatar: proxy(profile._json.avatar_url),
         slogan: profile._json.bio,
         github: profile._json,
         role: 1

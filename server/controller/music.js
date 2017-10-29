@@ -11,7 +11,7 @@ const config = require('../config')
 const { fetchNE } = require('../service')
 const { OptionModel } = require('../model')
 const { proxy, getDebug } = require('../util')
-const redis = require('../redis')
+const { redis } = require('../plugins')
 
 const isProd = process.env.NODE_ENV === 'production'
 const debug = getDebug('Music')

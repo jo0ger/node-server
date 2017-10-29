@@ -7,8 +7,8 @@
 'use strict'
 
 const redis = require('redis')
-const config = require('./config')
-const { getDebug, isType } = require('./util')
+const config = require('../config')
+const { getDebug, isType } = require('../util')
 const debug = getDebug('Redis')
 let client = null
 const cache = {}

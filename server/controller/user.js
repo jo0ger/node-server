@@ -6,14 +6,16 @@
 
 'use strict'
 
-const { UserModel } = require('../model')
-const { bhash, bcompare } = require('../util')
 const config = require('../config')
+const { UserModel } = require('../model')
+const { bhash, bcompare, getDebug } = require('../util')
+const { getGithubUsersInfo } = require('../service')
+const debug = getDebug('User')
 
 exports.list = async (ctx, next) => {
   let select = '-password'
   if (!ctx._isAuthenticated) {
-    select += ' -createdAt -updatedAt'
+    select += ' -createdAt -updatedAt -role'
   }
 
   const data = await UserModel.find({})
@@ -62,7 +64,7 @@ exports.update = async (ctx, next) => {
   const description = ctx.validateBody('description').optional().isString('the "description" parameter should be String type').val()
   const avatar = ctx.validateBody('avatar').optional().isString('the "avatar" parameter should be String type').val()
   const role = ctx.validateBody('role').optional().toInt().isIn([0, 1], 'the "role" parameter is not the expected value').val()
-
+  const mute = ctx.validateBody('mute').optional().toBoolean().val()
   const user = {}
 
   name && (user.name = name)
@@ -72,6 +74,10 @@ exports.update = async (ctx, next) => {
 
   if (role !== undefined) {
     user.role = role
+  }
+
+  if (mute !== undefined) {
+    user.mute = mute
   }
 
   if (password !== undefined) {
@@ -131,4 +137,40 @@ exports.me = async (ctx, next) => {
   } else {
     ctx.fail()
   }
+}
+
+// 更新用户的Github信息
+exports.updateGithubInfo = async () => {
+  const users = await UserModel.find({})
+    .exec()
+    .catch(err => {
+      debug.error('用户查找失败，错误：', err.message)
+      return []
+    })
+  const updates = await getGithubUsersInfo(users.map(user => user.github.login))
+  Promise.all(
+    updates.map((data, index) => {
+      const user = users[index]
+      const u = {
+        github: {
+          id: data.id,
+          email: data.email,
+          login: data.login,
+          name: data.name,
+          blog: data.blog
+        }
+      }
+      // 非管理员更新其他信息，管理员只更新github信息
+      if (user.role !== 0) {
+        u.name = data.name
+        u.slogan = data.bio
+        u.avatar = proxy(data.avatar_url)
+      }
+      return UserModel.findByIdAndUpdate(user._id, u).exec().catch(err => {
+        debug.error('用户Github信息更新失败，错误：', err.message)
+      })
+    })
+  ).then(() => {
+    debug.success('全部用户Github信息更新成功')
+  })
 }

@@ -16,13 +16,15 @@ My blog's api server build by koa2 and mongoose
 
 * ~~Redis缓存部分数据~~ (2017.10.27 v1.1)
 
-* ~~评论api~~ (2017.10.29)
+* ~~评论api~~ (2017.10.28)
 
 * ~~评论定位 [geoip](https://github.com/bluesmoon/node-geoip)~~ (2017.10.29)
 
-* ~~垃圾评论过滤 [akismet](https://github.com/chrisfosterelli/akismet-api)~~ (2017.10.30)
+* ~~垃圾评论过滤 [akismet](https://github.com/chrisfosterelli/akismet-api)~~ (2017.10.29)
 
-* 评论发送邮件 [nodemailer](https://github.com/nodemailer/nodemailer)
+* ~~用户禁言~~ （2017.10.29）
+
+* ~~评论发送邮件 [nodemailer](https://github.com/nodemailer/nodemailer)~~ (2017.10.29)
 
 * 消息api
 

@@ -6,11 +6,11 @@
 
 'use strict'
 
-const config = require('./config')
+const config = require('../config')
 const mongoose = require('mongoose')
-const { bhash, getDebug } = require('./util')
-const { UserModel, OptionModel } = require('./model')
-const { getGithubUsersInfo } = require('./service')
+const { bhash, getDebug, proxy } = require('../util')
+const { UserModel, OptionModel } = require('../model')
+const { getGithubUsersInfo } = require('../service')
 const debug = getDebug('MongoDB')
 let isConnected = false
 
@@ -66,7 +66,7 @@ async function createAdmin () {
     name: data.name,
     password: bhash(config.auth.defaultPassword),
     slogan: data.bio,
-    avatar: data.avatar_url,
+    avatar: proxy(data.avatar_url),
     github: {
       id: data.id,
       email: data.email,

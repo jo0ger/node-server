@@ -33,7 +33,9 @@ exports.isType = (obj = {}, type = 'Object') => {
   })
 }
 
-exports.createObjectId = () => mongoose.Types.ObjectId()
+exports.createObjectId = (id = '') => {
+  return id ? mongoose.Types.ObjectId(id) : mongoose.Types.ObjectId()
+}
 
 exports.isObjectId = (str = '') => mongoose.Types.ObjectId.isValid(str)
 

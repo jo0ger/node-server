@@ -7,8 +7,8 @@
 'use strict'
 
 const akismet = require('akismet-api')
-const config = require('./config')
-const { isType, getDebug } = require('./util')
+const config = require('../config')
+const { isType, getDebug } = require('../util')
 const debug = getDebug('Akismet')
 let akismetClient = null
 

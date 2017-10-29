@@ -15,6 +15,7 @@ const baseConfig = {
   version: packageInfo.version,
   author: packageInfo.author || 'Jooger',
   site: packageInfo.site,
+  email: packageInfo.email,
   env: process.env.NODE_ENV,
   root: path.resolve(__dirname, '../../'),
   port: process.env.PORT || 3001,
