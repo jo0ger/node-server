@@ -8,6 +8,7 @@
 
 const geoip = require('geoip-lite')
 const config = require('../config')
+const { getAkismetClient } = require('../akismet')
 const { CommentModel, UserModel, ArticleModel } = require('../model')
 const { marked, isObjectId, createObjectId, getDebug } = require('../util')
 const debug = getDebug('Comment')
@@ -210,36 +211,28 @@ exports.create = async (ctx, next) => {
   const parent = ctx.validateBody('parent').optional().toString().isObjectId('父评论ID参数无效').val()
   const forward = ctx.validateBody('forward').optional().toString().isObjectId('前置评论ID参数无效').val()
   const req = ctx.req
-  const comment = {
-    content,
-    renderedContent: marked(content)
+  const comment = { content }
+
+  const user = await UserModel.findById(author).select('github').exec().catch(err => {
+    debug.error('用户查找失败，错误：', err.message)
+    ctx.log.error(err.message)
+    return null
+  })
+
+  if (!user) {
+    return ctx.fail('用户不存在')
   }
 
+  
   if (type === undefined || type === 0) {
     if (!article) {
       return ctx.fail('缺少文章ID参数')
     }
     comment.article = article
   }
-
+  
   if (parent && !forward || !parent && forward) {
     return ctx.fail('父评论ID和前置评论ID必须同时存在')
-  }
-
-  author && (comment.author = author)
-  parent && (comment.parent = parent)
-  forward && (comment.forward = forward)
-
-  if (state !== undefined) {
-    comment.state = state
-  }
-
-  if (type !== undefined) {
-    comment.type = type
-  }
-
-  if (sticky !== undefined) {
-    comment.sticky = sticky
   }
 
   // 获取ip
@@ -256,6 +249,47 @@ exports.create = async (ctx, next) => {
   comment.meta.ip = ip
   comment.meta.ua = req.headers['user-agent'] || ''
   comment.meta.referer = req.headers.referer || ''
+
+  // 先判断是不是垃圾邮件
+  const akismetClient = getAkismetClient()
+  let isSpam = false
+  const permalink = getPermalink(comment)
+  if (akismetClient) {
+    isSpam = await akismetClient.checkSpam({
+      user_ip : ip,                             // Required! 
+      user_agent : comment.meta.ua,             // Required! 
+      referrer : comment.meta.referer,          // Required! 
+      permalink,
+      comment_type : getCommentType(type),
+      comment_author : user.github.login,
+      comment_author_email : user.github.email,
+      comment_author_url : user.github.blog,
+      comment_content : content,
+      is_test : process.env.NODE_ENV === 'development'
+    })
+  }
+
+  // 如果是Spam评论
+  if (isSpam) {
+    return ctx.fail('检测为垃圾评论，该评论将不会显示')
+  }
+
+  parent && (comment.parent = parent)
+  forward && (comment.forward = forward)
+  comment.renderedContent = marked(content)
+  comment.author = author
+
+  if (state !== undefined) {
+    comment.state = state
+  }
+
+  if (type !== undefined) {
+    comment.type = type
+  }
+
+  if (sticky !== undefined) {
+    comment.sticky = sticky
+  }
 
   let data = await new CommentModel(comment).save().catch(err => {
     ctx.log.error(err.message)
@@ -383,5 +417,28 @@ exports.like = async (ctx, next) => {
     ctx.success()
   } else {
     ctx.fail('评论不存在')
+  }
+}
+
+function getPermalink (comment = {}) {
+  const { type, article } = comment
+  switch (type) {
+    case 0:
+    return `${config.site}/blog/article/${article}`
+      break
+    // TODO: 其他页面或组件的permalink
+    default:
+      break
+  }
+}
+
+function getCommentType (type) {
+  switch (type) {
+    case 0:
+      return '博客文章评论'
+      break
+    default:
+      return '其他评论'
+      break
   }
 }
