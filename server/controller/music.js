@@ -42,10 +42,12 @@ exports.list = async (ctx, next) => {
     const playListId = option.musicId
     const musicData = await redis.get(cacheKey)
 
-    if (musicData && musicData.id && musicData.list) {
-      return ctx.success(musicData.list)
+    // hit
+    if (musicData && musicData.id === playListId) {
+      return ctx.success(musicData.list || [])
     }
 
+    // update cache
     const data = await exports.updateMusicCache(playListId)
     ctx.success(data)
   }
