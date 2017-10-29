@@ -18,7 +18,7 @@ const bodyparser = require('koa-bodyparser')
 const koaBunyanLogger = require('koa-bunyan-logger')
 const middlewares = require('./middleware')
 const config = require('./config')
-const { mongo, redis, akismet, validation, mailer } = require('./plugins')
+const { mongo, redis, akismet, validation, mailer, gc } = require('./plugins')
 const { crontab } = require('./service')
 
 const app = new Koa()
@@ -65,5 +65,8 @@ mailer.start()
 
 // crontab
 crontab.start()
+
+// v8 gc
+gc.start()
 
 module.exports = app

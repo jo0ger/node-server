@@ -96,12 +96,12 @@ jooger.me-server
 
 * ~~评论发送邮件 [nodemailer](https://github.com/nodemailer/nodemailer)~~ (2017.10.29)
 
+* ~~GC优化~~ (2017.10.30)
+
 * 消息api
 
 * 日志api
 
 * 统计api
-
-* GC优化
 
 * 完善API文档
