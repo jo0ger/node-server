@@ -4,7 +4,77 @@
 
 ## jooger.me-server
 
-⚡️ My blog's api server build with koa2 and mongoose
+⚡️ My blog's api server build with koa2 and mongoose，a RESTful application.
+
+## Online site
+
+* jooger.me: [https://jooger.me](https://jooger.me)
+
+* jooger.me-server: [https://api.jooger.me](https://api.jooger.me)
+
+* jooger.me-admin: [https://admin.jooger.me](https://admin.jooger.me)
+
+## Build Setup
+
+``` bash
+# install dependencies
+$ npm install # Or yarn install
+
+# serve at localhost:3001 in development env
+$ npm run dev
+
+# serve at localhost:3001 in production env
+$ npm run prod
+
+# serve with pm2 in development env
+$ npm run pm2
+
+# serve with pm2 in production env
+$npm run pm2:prod
+
+# run pm2 deploy, need ecosystem.config.js at root path
+$ npm run deploy
+
+# test code (TODO)
+$ npm run test
+```
+
+## Directory tree
+
+```
+jooger.me-server
+|____api.md                             // api文档（带完善）
+|____bin                                // 启动目录
+|____ecosystem.config.js                // pm2启动文件，需要自己手动创建
+|____LICENSE                            // LICENSE(MIT)
+|____logs                               // 日志目录，在ecosystem.config.js中配置
+|____server                             // 程序主目录
+| |____app.js                           // App程序入口
+| |____config                           // 配置文件目录
+| | |____development.js                 // 开发环境配置
+| | |____production.js                  // 生产环境配置
+| | |____test.js                        // 测试环境配置
+| |____controller                       // Controllers
+| |____middleware                       // Koa中间件
+| |____model                            // 数据持久化模型
+| |____plugins                          // 插件目录
+| | |____akismet.js                     // 评论反垃圾
+| | |____mailer.js                      // 邮件客户端
+| | |____mongo.js                       // MongoDB驱动（mongoose）
+| | |____redis.js                       // Redis
+| | |____validation.js                  // 额外的校验规则
+| |____routes                           // 路由目录
+| | |____backend.js                     // 后台路由
+| | |____frontend.js                    // 前台路由
+| |____service                          // 服务目录
+| | |____crontab.js                     // 定时更新任务
+| | |____github-passport.js             // Github验证
+| | |____github-userinfo.js             // 获取Github用户信息
+| | |____netease-music.js               // 网易云音乐api
+| |____util                             // 常用工具
+|____test                               // 测试目录
+
+```
 
 ## TODOS
 
@@ -33,3 +103,5 @@
 * 统计api
 
 * GC优化
+
+* 完善API文档

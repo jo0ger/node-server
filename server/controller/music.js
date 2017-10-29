@@ -49,7 +49,7 @@ exports.list = async (ctx, next) => {
 
     // update cache
     const data = await exports.updateMusicCache(playListId)
-    ctx.success(data)
+    ctx.success(data.list)
   }
 }
 
