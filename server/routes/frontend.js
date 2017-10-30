@@ -7,7 +7,17 @@
 'use strict'
 
 const router = require('koa-router')()
-const { article, category, tag, comment, music, option, user, auth } = require('../controller')
+const {
+	article,
+	category,
+	tag,
+	comment,
+	music,
+	option,
+	user,
+	auth,
+	moment
+} = require('../controller')
 const { authenticate } = require('../middleware')
 const isAuthenticated = authenticate.isAuthenticated()
 const snsAuth = authenticate.snsAuth
@@ -49,5 +59,8 @@ router.get('/users/:id', user.item)
 router.get('/auth/logout', isAuthenticated, auth.logout)
 router.get('/auth/github/login', snsAuth('github'))
       .get('/callback', auth.githubLogin)
+
+// Moment
+router.get('/moments', moment.list)
 
 module.exports = router

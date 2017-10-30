@@ -20,7 +20,7 @@ const commentSchema = new mongoose.Schema({
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   ups: { type: Number, default: 0 }, // 点赞数
   sticky: { type: Number, default: 0 }, // 是否置顶 0 否 | 1 是
-  type: { type: Number, default: 0 }, // 类型 0 文章评论 | 1 其他（保留）
+  type: { type: Number, default: 0 }, // 类型 0 文章评论 | 1 站内留言 | 2 其他（保留）
   meta: {
     ip: String, // 用户IP
     location: Object,  // IP所在地
