@@ -10,7 +10,7 @@ const NeteseMusic = require('simple-netease-cloud-music')
 const config = require('../config')
 const { fetchNE } = require('../service')
 const { OptionModel } = require('../model')
-const { proxy, getDebug } = require('../util')
+const { proxy, getDebug, isType } = require('../util')
 const { redis } = require('../plugins')
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -72,7 +72,18 @@ exports.url = async (ctx, next) => {
   .isString('the "song_id" parameter should be String type')
   .val()
 
-  const data = await neteaseMusic.url(songId)
+  const data = await neteaseMusic.url(songId).then(data => {
+    if (!isProd) {
+      return data.data || []
+    }
+    if (isType(data.data, 'Array')) {
+      return data.data.map(item => {
+        item.url = proxy(item.url)
+        return item
+      })
+    }
+    return []
+  })
 
   ctx.success(data)
 }
@@ -111,7 +122,7 @@ function fetchSonglist (playListId) {
         duration: dt || 0,
         album: al && {
           name: al.name,
-          cover: isProd ? (al.picUrl ? `${config.site}${proxy(al.picUrl)}` : '') : al.picUrl,
+          cover: isProd ? (proxy(al.picUrl) || '') : al.picUrl,
           tns: al.tns
         } || {},
         artists: ar && ar.map(({ id, name }) => ({ id, name })) || [],

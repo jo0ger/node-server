@@ -96,7 +96,7 @@ jooger.me-server
 
 * ~~评论发送邮件 [nodemailer](https://github.com/nodemailer/nodemailer)~~ (2017.10.29)
 
-* ~~GC优化~~ (2017.10.30)
+* ~~GC优化~~ (2017.10.30，linux下需要预先安装g++)
 
 * 消息api
 
