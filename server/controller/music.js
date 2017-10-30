@@ -49,7 +49,7 @@ exports.list = async (ctx, next) => {
 
     // update cache
     const data = await exports.updateMusicCache(playListId)
-    ctx.success(data.list)
+    ctx.success(data && data.list || [])
   }
 }
 
@@ -140,7 +140,7 @@ let lock = false
 exports.updateMusicCache = async function (playListId = '') {
   if (lock) {
     debug.warn('缓存更新中...')
-    return
+    return null
   }
   lock = true
   if (!playListId) {
@@ -150,7 +150,8 @@ exports.updateMusicCache = async function (playListId = '') {
     })
 
     if (!option || !option.musicId) {
-      return debug.warn('歌单ID未配置')
+      debug.warn('歌单ID未配置')
+      return null
     }
     playListId = option.musicId
   }
