@@ -7,7 +7,18 @@
 'use strict'
 
 const router = require('koa-router')()
-const { article, category, tag, comment, option, user, auth, music, statistics } = require('../controller')
+const {
+  article,
+  category,
+  tag,
+  comment,
+  option,
+  user,
+  auth,
+  music,
+  statistics,
+  moment
+} = require('../controller')
 const { authenticate } = require('../middleware')
 const isAuthenticated = authenticate.isAuthenticated()
 
@@ -61,6 +72,12 @@ router.get('/music/songs/:song_id/lyric', isAuthenticated, music.lyric)
 router.get('/auth/local/logout', isAuthenticated, auth.logout)
 router.post('/auth/local/login', auth.localLogin)
 router.get('/auth/info', isAuthenticated, auth.info)
+
+// Moment
+router.get('/moments', isAuthenticated, moment.list)
+router.post('/moments', isAuthenticated, moment.create)
+router.patch('/moments/:id', isAuthenticated, moment.update)
+router.delete('/moments/:id', isAuthenticated, moment.delete)
 
 // Statistics
 // TODO:

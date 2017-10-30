@@ -29,6 +29,7 @@ const baseConfig = {
   },
   articleLimit: 15,
   commentLimit: 99,
+  momentLimit: 10,
   commentSpamLimit: 3,
   mongo: {
     option: {

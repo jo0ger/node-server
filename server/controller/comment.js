@@ -6,11 +6,10 @@
 
 'use strict'
 
-const geoip = require('geoip-lite')
 const config = require('../config')
 const { akismet, mailer } = require('../plugins')
 const { CommentModel, UserModel, ArticleModel } = require('../model')
-const { marked, isObjectId, createObjectId, getDebug } = require('../util')
+const { marked, isObjectId, createObjectId, getDebug, getLocation } = require('../util')
 const debug = getDebug('Comment')
 const isProd = process.env.NODE_ENV === 'development'
 
@@ -254,15 +253,7 @@ exports.create = async (ctx, next) => {
     comment.sticky = sticky
   }
 
-  // 获取ip
-  const ip = (req.headers['x-forwarded-for'] || 
-    req.headers['x-real-ip'] || 
-    req.connection.remoteAddress || 
-    req.socket.remoteAddress ||
-    req.connection.socket.remoteAddress ||
-    req.ip ||
-    req.ips[0]).replace('::ffff:', '')
-  const location = geoip.lookup(ip)
+  const { ip, location } = getLocation(req)
   comment.meta = {}
   comment.meta.location = location || null
   comment.meta.ip = ip
@@ -332,6 +323,7 @@ exports.create = async (ctx, next) => {
     if (type === 0) {
       updateArticleCommentCount([comment.article])
     }
+    // 发送邮件通知站主和被评论者
     sendEmailToAdminAndUser(data, permalink)
   } else {
     ctx.fail()
@@ -465,8 +457,8 @@ function getPermalink (comment = {}) {
   switch (type) {
     case 0:
     return `${config.site}/blog/article/${article}`
-      break
-    // TODO: 其他页面或组件的permalink
+    case 1:
+    return `${config.site}/guestbook`
     default:
       return ''
       break
@@ -479,8 +471,10 @@ function getCommentType (type) {
     case 0:
       return '博客文章评论'
       break
+    case 1:
+      return '个人站点留言'
     default:
-      return '其他评论'
+      return '评论'
       break
   }
 }
@@ -546,19 +540,26 @@ async function updateArticleCommentCount (articleIds = []) {
 // 发送邮件
 async function sendEmailToAdminAndUser (comment, permalink) {
   const { type, article } = comment
-  let adminTitle = '博客有新的留言'
-  if (type == 0) {
+  let adminTitle = '位置的评论'
+  let adminType = '评论'
+  if (type === 0) {
     // 文章评论
     const at = await ArticleModel.findById(article).exec()
     if (at && at._id) {
       adminTitle = `博客文章 [${at.title}] 有了新的评论`
     }
+    adminType = '评论'
+  } else if (type === 1) {
+    // 站内留言
+    adminTitle = `个人站点有新的留言`
+    adminType = '留言'
   }
+
   // 发送给管理员邮箱config.email
   mailer.send({
     subject: adminTitle,
-    text: `来自 ${comment.author.github.name} 的${type == 0 ? '评论' : '留言'}：${comment.content}`,
-    html: `<p>来自 ${comment.author.github.name} 的${type == 0 ? '评论' : '留言'} <a href="${permalink}" target="_blank">[ 点击查看 ]</a>：${comment.renderedContent}</p>`
+    text: `来自 ${comment.author.github.name} 的${adminType}：${comment.content}`,
+    html: `<p>来自 ${comment.author.github.name} 的${adminType} <a href="${permalink}" target="_blank">[ 点击查看 ]</a>：${comment.renderedContent}</p>`
   }, true)
 
   // 发送给被评论者

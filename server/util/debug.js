@@ -16,7 +16,7 @@ const levelMap = {
   },
   info: {
     level: 6,
-    emoji: '🤗'
+    emoji: '⚡️'
   },
   warn: {
     level: 3,

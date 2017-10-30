@@ -92,11 +92,13 @@ jooger.me-server
 
 * ~~垃圾评论过滤 [akismet](https://github.com/chrisfosterelli/akismet-api)~~ (2017.10.29)
 
-* ~~用户禁言~~ （2017.10.29）
+* ~~用户禁言~~ (2017.10.29)
 
 * ~~评论发送邮件 [nodemailer](https://github.com/nodemailer/nodemailer)~~ (2017.10.29)
 
 * ~~GC优化~~ (2017.10.30，linux下需要预先安装g++)
+
+* ~~个人动态api~~ (2017.10.30)
 
 * 消息api
 

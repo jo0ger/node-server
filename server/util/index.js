@@ -19,6 +19,8 @@ exports.encrypt = require('./encrypt')
 
 exports.proxy = require('./proxy')
 
+exports.getLocation = require('./location')
+
 exports.noop = function () {}
 
 exports.isType = (obj = {}, type = 'Object') => {
