@@ -11,6 +11,7 @@ const config = require('../config')
 const { getDebug, isType } = require('../util')
 const debug = getDebug('Redis')
 let client = null
+let connected = false
 const cache = {}
 
 exports.connect = () => {
@@ -20,14 +21,17 @@ exports.connect = () => {
   client = redis.createClient(config.redis)
   client.on('error', err => {
     debug.error('连接失败, 错误: ', err.message)
-    client = null
+    connected = false
   })
-  client.on('connect', () => debug.success('连接成功'))
+  client.on('connect', () => {
+    debug.success('连接成功')
+    connected = true
+  })
   client.on('reconnecting', () => debug('正在重连中...'))
 }
 
 exports.set = (key = '', value = '') => new Promise((resolve, reject) => {
-  if (client) {
+  if (connected) {
     if (!isType(value, 'String')) {
       try {
 				value = JSON.stringify(value)
@@ -51,7 +55,7 @@ exports.set = (key = '', value = '') => new Promise((resolve, reject) => {
 
 
 exports.get = (key = '') => new Promise((resolve, reject) => {
-  if (client) {
+  if (connected) {
     client.get(key, (err, res) => {
       if (err) {
         debug.error('读取【 %s 】失败，错误：%s', key, err.message)
