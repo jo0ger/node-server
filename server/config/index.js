@@ -52,7 +52,8 @@ const baseConfig = {
       signed: false
     },
     userCookieKey: 'jooger.me.userid',
-    secrets: `${packageInfo.name} ${packageInfo.version}`,
+    secrets: `${packageInfo.name}-secrets`,
+    // 初始化管理员，默认github账户名
     defaultName: 'jo0ger',
     defaultPassword: 'admin_jooger',
     // 允许请求的域名
@@ -65,6 +66,8 @@ const baseConfig = {
   },
   sns: {
     github: {
+      // 登陆后的token的cookie名，每个第三方登录方式必备项
+      key: 'jooger.me.github.token',
       clientID: process.env.githubClientID || 'github client id',
       clientSecret: process.env.githubClientSecret || 'github client secret',
       callbackURL: 'github oauth callback url'

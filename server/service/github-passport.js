@@ -55,7 +55,7 @@ exports.init = (UserModel, config) => {
         role: 1
       }
 
-      newUser.github.token = accessToken
+      // newUser.github.token = accessToken
 
       const checkUser = await UserModel.findOne({ name: newUser.name }).exec().catch(err => {
         debug.error('本地用户查找失败, 错误：', err.message)

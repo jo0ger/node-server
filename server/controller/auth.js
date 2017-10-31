@@ -106,7 +106,7 @@ exports.githubLogin = async (ctx, next) => {
       id: user._id,
       name: user.name
     })
-    ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
+    ctx.cookies.set(config.sns.github.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
     ctx.cookies.set(config.auth.userCookieKey, user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
 
     debugGithub('Github权限验证回调处理成功')

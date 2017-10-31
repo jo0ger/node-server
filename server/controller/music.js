@@ -131,7 +131,7 @@ function fetchSonglist (playListId) {
     })
   }).catch(err => {
     debug.error('歌单列表获取失败，错误：', err.message)
-    return []
+    return null
   })
 }
 
@@ -140,7 +140,7 @@ let lock = false
 exports.updateMusicCache = async function (playListId = '') {
   if (lock) {
     debug.warn('缓存更新中...')
-    return null
+    return redis.get(cacheKey) || null
   }
   lock = true
   if (!playListId) {
@@ -151,12 +151,17 @@ exports.updateMusicCache = async function (playListId = '') {
 
     if (!option || !option.musicId) {
       debug.warn('歌单ID未配置')
-      return null
+      lock = false
+      return redis.get(cacheKey) || null
     }
     playListId = option.musicId
   }
 
   const data = await fetchSonglist(playListId)
+  if (!data) {
+    lock = false
+    return redis.get(cacheKey) || null
+  }
   const set = {
     id: playListId,
     list: data
