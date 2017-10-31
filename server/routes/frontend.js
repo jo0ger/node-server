@@ -19,7 +19,7 @@ const {
 	moment
 } = require('../controller')
 const { authenticate } = require('../middleware')
-const isAuthenticated = authenticate.isAuthenticated()
+const isSnsAuthenticated = authenticate.isSnsAuthenticated()
 const snsAuth = authenticate.snsAuth
 const snsLogout = authenticate.snsLogout()
 
@@ -53,10 +53,10 @@ router.get('/options', option.data)
 
 // User
 router.get('/users/me', user.me)
-router.get('/users/:id', user.item)
+router.get('/users/:id', isSnsAuthenticated, user.item)
 
 // Auth
-router.get('/auth/logout', isAuthenticated, auth.logout)
+router.get('/auth/logout', isSnsAuthenticated, auth.logout)
 router.get('/auth/github/login', snsAuth('github'))
       .get('/callback', auth.githubLogin)
 

@@ -35,14 +35,13 @@ exports.list = async (ctx, next) => {
 
 exports.item = async (ctx, next) => {
   const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
-
-  let select = '-password'
-
-  if (!ctx._isAuthenticated) {
-    select += ' -role -createdAt -updatedAt'
+  let select = '-password -role -createdAt -updatedAt'
+  
+  if (ctx._isAuthenticated) {
+    select = '-password'
   }
 
-  const data = await UserModel.findById(id)
+  let data = await UserModel.findById(id)
     .select(select)
     .exec()
     .catch(err => {
@@ -51,6 +50,13 @@ exports.item = async (ctx, next) => {
     })
 
   if (data) {
+    if (ctx._isSnsAuthenticated && id === ctx._user._id) {
+      // 如果前台已登录而且查询的是本人，返回token
+      data = {
+        info: data,
+        token: ctx.session._snsToken
+      }
+    }
     ctx.success(data)
   } else {
     ctx.fail()
