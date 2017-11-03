@@ -12,7 +12,7 @@ const config = require('../config')
 const { clientID, clientSecret } = config.sns.github
 const debug = getDebug('Github:User')
 
-const getGithubUsersInfo = (githubNames = '') => {
+exports.getGithubUsersInfo = (githubNames = '') => {
   if (!githubNames) {
     return null
   } else if (typeof githubNames === 'string') {
@@ -26,6 +26,10 @@ const getGithubUsersInfo = (githubNames = '') => {
       params: {
         client_id: clientID,
         client_secret: clientSecret
+      }
+    }, {
+      headers: {
+        Accept: 'application/json'
       }
     }).then(res => {
       if (res && res.status === 200) {
@@ -43,4 +47,13 @@ const getGithubUsersInfo = (githubNames = '') => {
   return Promise.all(task)
 }
 
-module.exports = getGithubUsersInfo
+exports.getGithubAuthUserInfo = (access_token = '') => {
+  return axios.get('https://api.github.com/user', {
+    params: { access_token }
+  }).then(res => {
+    return res.data
+  }).catch(err => {
+    debug.error('获取用户信息失败，错误：', err.message)
+    return null
+  })
+}

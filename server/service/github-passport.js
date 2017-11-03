@@ -37,14 +37,15 @@ exports.init = (UserModel, config) => {
           github: profile._json,
           role: user.role
         }
-
-        userData.github.token = accessToken
-
+        // userData.github.token = accessToken
         const updatedUser = await UserModel.findByIdAndUpdate(user._id, userData).exec().catch(err => {
           debug.error('本地用户更新失败, 错误：', err.message)
         }) || user
 
-        return end(null, updatedUser)
+        return end(null, {
+          ...updatedUser.toObject(),
+          token: accessToken
+        })
       }
 
       const newUser = {
@@ -70,7 +71,10 @@ exports.init = (UserModel, config) => {
         debug.error('本地用户创建失败, 错误：', err.message)
       })
 
-      return end(null, data)
+      return end(null, {
+        ...data.toObject(),
+        token: access
+      })
     } catch (err) {
       debug.error('Github权限验证失败，错误：', err)
       return end(err)

@@ -18,10 +18,10 @@ const {
 	auth,
 	moment
 } = require('../controller')
-const { authenticate } = require('../middleware')
-const isSnsAuthenticated = authenticate.isSnsAuthenticated()
-const snsAuth = authenticate.snsAuth
-const snsLogout = authenticate.snsLogout()
+// const { authenticate } = require('../middleware')
+// const isSnsAuthenticated = authenticate.isSnsAuthenticated()
+// const snsAuth = authenticate.snsAuth
+// const snsLogout = authenticate.snsLogout()
 
 // Article
 router.get('/articles', article.list)
@@ -53,12 +53,15 @@ router.get('/options', option.data)
 
 // User
 router.get('/users/me', user.me)
-router.get('/users/:id', isSnsAuthenticated, user.item)
+// router.get('/users/:id', isSnsAuthenticated, user.item)
 
 // Auth
-router.get('/auth/logout', isSnsAuthenticated, auth.logout)
-router.get('/auth/github/login', snsAuth('github'))
-      .get('/callback', auth.githubLogin)
+// router.get('/auth/info', isSnsAuthenticated, auth.info)
+// router.get('/auth/logout', isSnsAuthenticated, auth.logout)
+// router.get('/auth/github/login', snsAuth('github'))
+// 			.get('/callback', auth.githubLogin)
+router.get('/auth/github/token', auth.fetchGithubToken)
+router.get('/auth/github/user', auth.fetchGithubUser)
 
 // Moment
 router.get('/moments', moment.list)

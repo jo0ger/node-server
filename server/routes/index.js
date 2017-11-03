@@ -16,6 +16,7 @@ module.exports = app => {
   router.use('*', header)
 
   router.get('/', async (ctx, next) => {
+    ctx.log.error('Got a request from %s for %s', ctx.request.ip, ctx.path)
   	ctx.body = {
   	  name: config.name,
   	  version: config.version,

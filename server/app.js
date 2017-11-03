@@ -16,10 +16,13 @@ const passport = require('koa-passport')
 const compress = require('koa-compress')
 const bodyparser = require('koa-bodyparser')
 const koaBunyanLogger = require('koa-bunyan-logger')
+
+const packageInfo = require('../package.json')
 const middlewares = require('./middleware')
 const config = require('./config')
 const { mongo, redis, akismet, validation, mailer, gc } = require('./plugins')
 const { crontab } = require('./service')
+const isProd = process.env.NODE_ENV === 'production'
 
 const app = new Koa()
 
@@ -43,7 +46,12 @@ app.use(bodyparser({
 }))
 app.use(json())
 app.use(logger())
-app.use(koaBunyanLogger())
+app.use(koaBunyanLogger({
+  name: packageInfo.name,
+  level: 'debug'
+}))
+// app.use(koaBunyanLogger.requestIdContext())
+// app.use(koaBunyanLogger.requestLogger())
 app.use(bouncer.middleware())
 app.use(middlewares.response)
 app.use(middlewares.error)
@@ -66,7 +74,11 @@ mailer.start()
 // crontab
 crontab.start()
 
-// v8 gc
-gc.start()
+if (isProd) {
+  // v8 gc
+  gc.start()
+}
+
+app.on('error', function () {})
 
 module.exports = app
