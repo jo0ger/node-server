@@ -10,12 +10,11 @@ const jwt = require('jsonwebtoken')
 const passport = require('koa-passport')
 const config = require('../config')
 const { UserModel } = require('../model')
-const { bhash, bcompare, getDebug, signToken } = require('../util')
+const { bhash, bcompare, getDebug, signToken, proxy, randomString } = require('../util')
 const debug = getDebug('Auth')
 const debugGithub = getDebug('Github:Auth')
-const { githubPassport } = require('../service')
-
-githubPassport.init(UserModel, config)
+const { getGithubToken, getGithubAuthUserInfo } = require('../service')
+const isProd = process.env.NODE_ENV === 'production'
 
 exports.localLogin = async (ctx, next) => {
   const name = ctx.validateBody('name')
@@ -71,17 +70,22 @@ exports.logout = async (ctx, next) => {
 
 exports.info = async (ctx, next) => {
   const adminId = ctx._user._id
-  if (!adminId) {
+  if (!adminId && !ctx._isSnsAuthenticated && !ctx._isAuthenticated) {
     return ctx.fail(401)
   }
+  let data = null
+  if (ctx._isSnsAuthenticated) {
+    // TODO: 第三方信息获取
+  } else if (ctx._isAuthenticated) {
+    data = await UserModel.findById(adminId)
+      .select('-password')
+      .exec()
+      .catch(err => {
+        ctx.log.error(err.message)
+        return null
+      })
+  }
 
-  const data = await UserModel.findById(adminId)
-    .select('-password')
-    .exec()
-    .catch(err => {
-      ctx.log.error(err.message)
-      return null
-    })
   if (data) {
     ctx.success({
       info: data,
@@ -93,24 +97,90 @@ exports.info = async (ctx, next) => {
 }
 
 // github login
-exports.githubLogin = async (ctx, next) => {
-  await passport.authenticate('github', {
-    session: false
-  }, (err, user) => {
-    debugGithub('Github权限验证回调处理开始')
-    const redirectUrl = ctx.session.passport.redirectUrl
-    const cookieDomain = config.auth.session.domain || null
+// exports.githubLogin = async (ctx, next) => {
+//   await passport.authenticate('github', {
+//     session: false
+//   }, (err, user) => {
+//     debugGithub('Github权限验证回调处理开始')
+//     const redirectUrl = ctx.session.passport.redirectUrl
 
-    const { session } = config.auth
-    const token = signToken({
-      id: user._id,
-      name: user.name
+//     const { session } = config.auth
+//     const opt = { signed: false, maxAge: session.maxAge, httpOnly: false }
+//     opt.domain = session.domain || null
+//     ctx.cookies.set(config.sns.github.key, user.token, opt)
+//     ctx.cookies.set(config.auth.userCookieKey, user._id, opt)
+
+//     debugGithub.success('Github权限验证回调处理成功, 用户ID：%s，用户名：%s', user._id, user.name)
+//     return ctx.redirect(redirectUrl)
+//   })(ctx)
+// }
+
+exports.fetchGithubToken = async (ctx, next) => {
+  const code = ctx.validateQuery('code').required('缺少code参数').toString().val()
+  const token = await getGithubToken(code)
+  if (token) {
+    ctx.success(token)
+  } else {
+    ctx.fail('Token获取失败')
+  }
+}
+
+exports.fetchGithubUser = async (ctx, next) => {
+  const accessToken = ctx.validateQuery('access_token').required('缺少access_token参数').toString().val()
+  const data = await getGithubAuthUserInfo(accessToken)
+  if (!data) {
+    return ctx.fail('用户信息获取失败')
+  }
+  const user = await createLocalUserFromGithub(data)
+  if (user) {
+    ctx.success(user)
+  } else {
+    ctx.fail('用户信息获取失败')
+  }
+}
+
+async function createLocalUserFromGithub (githubUser) {
+  const user = await UserModel.findOne({
+    'github.id': githubUser.id
+  }).catch(err => {
+    debug.error('本地用户查找失败, 错误：', err.message)
+    return null
+  })
+
+  if (user) {
+    const userData = {
+      name: githubUser.username || githubUser.login,
+      avatar: proxy(githubUser.avatar_url),
+      slogan: githubUser.bio,
+      github: githubUser,
+      role: user.role
+    }
+    const updatedUser = await UserModel.findByIdAndUpdate(user._id, userData)
+      .select('-password -role -createdAt -updatedAt')
+      .exec().catch(err => {
+        debug.error('本地用户更新失败, 错误：', err.message)
+      }) || user
+
+    return updatedUser.toObject()
+  } else {
+    const newUser = {
+      name: githubUser.username || githubUser.login,
+      avatar: proxy(githubUser.avatar_url),
+      slogan: githubUser.bio,
+      github: githubUser,
+      role: 1
+    }
+
+    const checkUser = await UserModel.findOne({ name: newUser.name }).exec().catch(err => {
+      debug.error('本地用户查找失败, 错误：', err.message)
+      return true
     })
-    ctx.cookies.set(config.sns.github.key, token, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
-    ctx.cookies.set(config.auth.userCookieKey, user._id, { signed: false, domain: session.domain, maxAge: session.maxAge, httpOnly: false })
 
-    debugGithub('Github权限验证回调处理成功')
-    debugGithub.success('Github权限验证回调处理成功, 用户ID：%s，用户名：%s', user._id, user.name)
-    return ctx.redirect(redirectUrl)
-  })(ctx)
+    if (checkUser) {
+      newUser.name += '-' + randomString()
+    }
+
+    const data = await new UserModel(newUser).save().catch(err => debug.error('本地用户创建失败, 错误：', err.message))
+    return data && data.toObject() || null
+  }
 }

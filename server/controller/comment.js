@@ -21,6 +21,7 @@ exports.list = async (ctx, next) => {
   const author = ctx.validateQuery('author').optional().toString().isObjectId('用户ID参数无效').val()
   const article = ctx.validateQuery('article').optional().toString().isObjectId('文章ID参数无效').val()
   const keyword = ctx.validateQuery('keyword').optional().toString().val()
+  const parent = ctx.validateQuery('parent').optional().toString().isObjectId('父评论ID参数无效').val()
   // 时间区间查询仅后台可用，且依赖于createdAt
   const startDate = ctx.validateQuery('start_date').optional().toString().val()
   const endDate = ctx.validateQuery('end_date').optional().toString().val()
@@ -39,7 +40,7 @@ exports.list = async (ctx, next) => {
     populate: [
       {
         path: 'author',
-        select: !ctx._isAuthenticated ? 'github' : ''
+        select: !ctx._isAuthenticated ? 'github avatar name' : ''
       },
       {
         path: 'parent',
@@ -53,6 +54,10 @@ exports.list = async (ctx, next) => {
         select: 'author meta sticky ups',
         match: {
           state: 1
+        },
+        populate: {
+          path: 'author',
+          select: 'avatar github name'
         }
       }
     ]
@@ -109,6 +114,20 @@ exports.list = async (ctx, next) => {
     }
   }
 
+  // 排序
+  if (sortBy && order) {
+    options.sort = {}
+    options.sort[sortBy] = order
+  }
+
+  if (parent) {
+    // 获取子评论
+    query.parent = parent
+  } else {
+    // 获取父评论
+    query.parent = { $exists: false }
+  }
+
   // 未通过权限校验（前台获取评论列表）
   if (!ctx._isAuthenticated) {
     // 将评论状态重置为1
@@ -117,12 +136,6 @@ exports.list = async (ctx, next) => {
     // 评论列表不需要content和state
     options.select = '-content -state -updatedAt -spam -type'
   } else {
-    // 排序
-    if (sortBy && order) {
-      options.sort = {}
-      options.sort[sortBy] = order
-    }
-
     // 起始日期
     if (startDate) {
       const $gte = new Date(startDate)
@@ -146,8 +159,23 @@ exports.list = async (ctx, next) => {
   })
 
   if (comments) {
+    const data = []
+    // 查询子评论数量
+    await Promise.all(comments.docs.map(doc => {
+      doc = doc.toObject()
+      doc.subCount = 0
+      data.push(doc)
+      return CommentModel.count({ parent: doc._id }).exec()
+      .then(count => {
+        doc.subCount = count
+      })
+      .catch(err => {
+        ctx.log.error(err)
+        doc.subCount = 0
+      })
+    }))
     ctx.success({
-      list: comments.docs,
+      list: data,
       pagination: {
         total: comments.total,
         current_page: comments.page > comments.pages ? comments.pages : comments.page,

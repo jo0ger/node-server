@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
     email: { type: String, default: '' },
     login: { type: String, default: '' },
     name: { type: String, default: '' },
-    blog: { type: String, default: '' }
+    blog: { type: String, default: '' },
   }
 })
 

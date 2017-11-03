@@ -1,6 +1,6 @@
 {
   "name": "jooger.me-server",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "description": "🔥 My blog's api server build by koa2 and mongoose",
   "scripts": {
@@ -14,7 +14,7 @@
   },
   "author": "Jooger",
   "site": "https://jooger.me",
-  "email": "zzy1198258955@163.com",
+  "email": "iamjooger@gmail.com",
   "repository": {
     "type": "https",
     "url": "https://github.com/jo0ger/jooger.me-server.git"

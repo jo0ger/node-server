@@ -6,7 +6,11 @@
 
 'use strict'
 
-exports.githubPassport = require('./github-passport')
-exports.getGithubUsersInfo = require('./github-userinfo')
+const { getGithubUsersInfo, getGithubAuthUserInfo } = require('./github-userinfo')
+
+// exports.githubPassport = require('./github-passport')
+exports.getGithubUsersInfo = getGithubUsersInfo
+exports.getGithubAuthUserInfo = getGithubAuthUserInfo
+exports.getGithubToken = require('./github-token')
 exports.fetchNE = require('./netease-music')
 exports.crontab = require('./crontab')
