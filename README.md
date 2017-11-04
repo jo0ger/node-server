@@ -101,6 +101,8 @@ jooger.me-server
 
 * ~~个人动态api~~ (2017.10.30)
 
+* 邮件模板
+
 * 消息api
 
 * 日志api
