@@ -146,10 +146,10 @@ async function createLocalUserFromGithub (githubUser) {
     debug.error('本地用户查找失败, 错误：', err.message)
     return null
   })
-
+  console.log(githubUser)
   if (user) {
     const userData = {
-      name: githubUser.username || githubUser.login,
+      name: githubUser.name || githubUser.login,
       avatar: proxy(githubUser.avatar_url),
       slogan: githubUser.bio,
       github: githubUser,
@@ -164,7 +164,7 @@ async function createLocalUserFromGithub (githubUser) {
     return updatedUser.toObject()
   } else {
     const newUser = {
-      name: githubUser.username || githubUser.login,
+      name: githubUser.name || githubUser.login,
       avatar: proxy(githubUser.avatar_url),
       slogan: githubUser.bio,
       github: githubUser,

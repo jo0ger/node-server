@@ -60,7 +60,6 @@ const baseConfig = {
     allowedOrigins: [
       'jooger.me',
       'www.jooger.me',
-      'blog.jooger.me',
       'admin.jooger.me'
     ]
   },

@@ -82,7 +82,7 @@ async function generateLinks (links = []) {
         if (userInfo) {
           link.avatar = proxy(userInfo.avatar_url)
           link.slogan = userInfo.bio
-          link.site = link.site || userInfo.blog
+          link.site = link.site || userInfo.blog || userInfo.url
         }
         return link
       })
