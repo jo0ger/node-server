@@ -587,7 +587,7 @@ async function sendEmailToAdminAndUser (comment, permalink) {
   mailer.send({
     subject: adminTitle,
     text: `来自 ${comment.author.github.name} 的${adminType}：${comment.content}`,
-    html: `<p>来自 ${comment.author.github.name} 的${adminType} <a href="${permalink}" target="_blank">[ 点击查看 ]</a>：${comment.renderedContent}</p>`
+    html: `<p>来自 <a href="${comment.author.github.blog || 'javascript:;'}" target="_blank">${comment.author.github.name}</a> 的${adminType} <a href="${permalink}" target="_blank">[ 点击查看 ]</a>：${comment.renderedContent}</p>`
   }, true)
 
   // 发送给被评论者
@@ -596,9 +596,9 @@ async function sendEmailToAdminAndUser (comment, permalink) {
     if (forwardAuthor) {
       mailer.send({
         to: forwardAuthor.github.email,
-        subject: '你在Jooger的博客的评论有了新的回复',
+        subject: '你在 Jooger 的博客的评论有了新的回复',
         text: `来自 ${comment.author.name} 的回复：${comment.content}`,
-        html: `<p>来自 ${comment.author.name} 的回复 <a href="${permalink}" target="_blank">[ 点击查看 ]</a>：${comment.renderedContent}</p>`
+        html: `<p>来自 <a href="${comment.author.github.blog || 'javascript:;'}" target="_blank">${comment.author.name}</a> 的回复 <a href="${permalink}" target="_blank">[ 点击查看 ]</a>：${comment.renderedContent}</p>`
       })
     } else {
       debug.warn('给被评论者邮件失败')
