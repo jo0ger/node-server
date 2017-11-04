@@ -36,18 +36,21 @@ class AkismetClient {
 
   async verifyKey () {
     let valid = true
+    let error = ''
     if (!isValidKey) {
       await this.client.verifyKey().then(v => {
         valid = v
         if (v) {
           isValidKey = true
         } else {
-          debug.error(`无效的Apikey`)
+          error = '无效的Apikey'
           this.client = null
         }
-      }).catch(err => debug.error('Apikey验证失败，错误：', err.message))
+      }).catch(err => {
+        error = 'Apikey验证失败，错误：' + err.message
+      })
     }
-    return { valid, client: this }
+    return { valid, client: this, error }
   }
 
   // 检测是否是spam
@@ -123,13 +126,13 @@ exports.start = async () => {
   const akismetConfig = config.akismet
   const { apiKey } = akismetConfig
   const site = config.site
-  const { valid, client } = await new AkismetClient(apiKey, site).verifyKey()
+  const { valid, client, error } = await new AkismetClient(apiKey, site).verifyKey()
 
   if (valid) {
     debug.success('服务启动成功')
     akismetClient = client
   } else {
-    debug.error('服务启动失败')
+    debug.error('服务启动失败', error ? `，${error}` : '')
   }
 }
 

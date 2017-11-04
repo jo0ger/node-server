@@ -35,7 +35,7 @@ exports.start = async () => {
         resolve()
       }
     })
-  })
+  }).catch(() => ({}))
 }
 
 /**
