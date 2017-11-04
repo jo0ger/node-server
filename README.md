@@ -1,6 +1,7 @@
-[![GitHub issues](https://img.shields.io/github/issues/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/issues)
 [![GitHub forks](https://img.shields.io/github/forks/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/network)
 [![GitHub stars](https://img.shields.io/github/stars/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/commits/master)
 
 ## jooger.me-server
 
@@ -43,7 +44,7 @@ $ npm run test
 
 ```
 jooger.me-server
-|____api.md                             // api文档（带完善）
+|____api.md                             // api文档（待完善）
 |____bin                                // 启动目录
 |____ecosystem.config.js                // pm2启动文件，需要自己手动创建
 |____LICENSE                            // LICENSE(MIT)

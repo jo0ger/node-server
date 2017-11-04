@@ -72,7 +72,7 @@ async function createAdmin () {
       email: data.email,
       login: data.login,
       name: data.name,
-      blog: data.blog
+      blog: data.blog || data.url
     }
   })
   .save()
