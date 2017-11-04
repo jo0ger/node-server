@@ -166,7 +166,7 @@ exports.updateGithubInfo = async () => {
           email: data.email,
           login: data.login,
           name: data.name,
-          blog: data.blog
+          blog: data.blog || data.url
         }
       }
       // 非管理员更新其他信息，管理员只更新github信息

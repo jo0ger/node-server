@@ -152,7 +152,7 @@ exports.list = async (ctx, next) => {
       }
     }
   }
-
+  
   const comments = await CommentModel.paginate(query, options).catch(err => {
     ctx.log.error(err.message)
     return null
