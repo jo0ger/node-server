@@ -41,7 +41,7 @@ renderer.link = function (href, title, text) {
     class="${isImage ? 'img-link' : 'link'}"
     ${isImage && 'onclick=""'}
     title="${title || ''}"
-    ${isOrigin ? '' : 'rel="external nofollow"'}>${text}</a>
+    ${isOrigin ? '' : 'rel="noopener external nofollow"'}>${text}</a>
   `.replace(/\s+/g, ' ').replace('\n', '')
 }
 
