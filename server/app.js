@@ -50,8 +50,6 @@ app.use(koaBunyanLogger({
   name: packageInfo.name,
   level: 'debug'
 }))
-// app.use(koaBunyanLogger.requestIdContext())
-// app.use(koaBunyanLogger.requestLogger())
 app.use(bouncer.middleware())
 app.use(middlewares.response)
 app.use(middlewares.error)
@@ -59,7 +57,6 @@ app.use(middlewares.error)
 // app.use(middlewares.formidable())
 app.use(session(config.auth.session, app))
 app.use(passport.initialize())
-// app.use(passport.session())
 app.use(compress())
 
 // routes
