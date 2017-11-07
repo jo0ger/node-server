@@ -8,7 +8,7 @@
 
 const config = require('../config')
 const { UserModel } = require('../model')
-const { bhash, bcompare, getDebug } = require('../util')
+const { bhash, bcompare, getDebug, proxy } = require('../util')
 const { getGithubUsersInfo } = require('../service')
 const debug = getDebug('User')
 
