@@ -54,7 +54,6 @@ function verifyToken () {
 //     if (config.sns[name]) {
 //       const token = ctx.cookies.get(config.sns[name].key, { signed: false })
 
-//       console.log(token, config.sns[name].key)
 //       if (token) {
 //         ctx.session._snsVerify = true
 //         ctx.session._snsToken = token
