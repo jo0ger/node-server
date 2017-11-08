@@ -30,6 +30,7 @@ const baseConfig = {
   articleLimit: 15,
   commentLimit: 99,
   momentLimit: 10,
+  // 垃圾评论允许的最大发布次数
   commentSpamLimit: 3,
   mongo: {
     option: {
