@@ -50,13 +50,6 @@ exports.item = async (ctx, next) => {
     })
 
   if (data) {
-    if (ctx._isSnsAuthenticated && id === ctx._user._id) {
-      // 如果前台已登录而且查询的是本人，返回token
-      data = {
-        info: data,
-        token: ctx.session._snsToken
-      }
-    }
     ctx.success(data)
   } else {
     ctx.fail()
@@ -130,7 +123,7 @@ exports.delete = async (ctx, next) => {
 
 exports.me = async (ctx, next) => {
   const data = await UserModel
-    .findOne({ name: config.author })
+    .findOne({ name: config.author, role: 0 })
     .select('-password -role -createdAt -updatedAt -github')
     .exec()
     .catch(err => {

@@ -30,7 +30,8 @@ exports.connect = () => {
   client.on('reconnecting', () => debug('正在重连中...'))
 }
 
-exports.set = (key = '', value = '') => new Promise((resolve, reject) => {
+// 默认 1小时 过期
+exports.set = (key = '', value = '', expired = 60 * 60) => new Promise((resolve, reject) => {
   if (connected) {
     if (!isType(value, 'String')) {
       try {
@@ -40,7 +41,7 @@ exports.set = (key = '', value = '') => new Promise((resolve, reject) => {
 				value = value.toString()
 			}
     }
-    client.set(key, value, (err, res) => {
+    client.set(key, value, 'EX', expired, (err, res) => {
       if (err) {
         debug.error('存储【 %s 】失败，错误：%s', key, err.message)
         return reject(err)
