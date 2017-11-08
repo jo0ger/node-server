@@ -12,6 +12,7 @@ const { fetchNE } = require('../service')
 const { OptionModel } = require('../model')
 const { proxy, getDebug, isType } = require('../util')
 const { redis } = require('../plugins')
+const expired = 60 * 10 // 过期时间10分钟
 
 const isProd = process.env.NODE_ENV === 'production'
 const debug = getDebug('Music')
@@ -167,8 +168,9 @@ exports.updateMusicCache = async function (playListId = '') {
     id: playListId,
     list: data
   }
-
-  redis.set(cacheKey, set).then(() => {
+  
+  // 设置10分钟过期
+  redis.set(cacheKey, set, expired).then(() => {
     debug.success('缓存更新成功，歌单ID：', playListId)
   }).catch(err => {
     debug.error('缓存更新失败，歌单ID：%s，错误：%s', playListId, err.message)
