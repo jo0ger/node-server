@@ -17,7 +17,7 @@ const expired = 60 * 10 // 过期时间10分钟
 const isProd = process.env.NODE_ENV === 'production'
 const debug = getDebug('Music')
 const neteaseMusic = new NeteseMusic()
-const cacheKey = 'musicData'
+const cacheKey = 'music-data'
 
 exports.list = async (ctx, next) => {
   // 后台实时获取
