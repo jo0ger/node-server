@@ -115,8 +115,8 @@ exports.cover = async (ctx, next) => {
 
 // 获取除了歌曲链接和歌词外其他信息
 function fetchSonglist (playListId) {
-  // return neteaseMusic.playlist(playListId).then(({ playlist }) => {
-  return fetchNE('playlist', playListId).then(({ playlist }) => {
+  return neteaseMusic._playlist(playListId).then(({ playlist }) => {
+  // return fetchNE('playlist', playListId).then(({ playlist }) => {
     return !playlist ? [] : playlist.tracks.map(({ name, id, ar, al, dt, tns }) => {
       return {
         id,
