@@ -148,6 +148,35 @@ exports.list = async (ctx, next) => {
   }
 }
 
+exports.hot = async (ctx, next) => {
+  const limit = ctx.validateQuery('limit').defaultTo(config.hotLimit).toInt().gt(0, 'the "limit" parameter should be greater than 0').val()
+  const data = await ArticleModel.find()
+    .sort('-meta.comments -meta.ups -meta.pvs')
+    .select('-content -renderedContent -state')
+    .populate([
+      {
+        path: 'category',
+        select: 'name'
+      },
+      {
+        path: 'tag',
+        select: 'name'
+      }
+    ])
+    .limit(limit)
+    .catch(err => {
+      ctx.log.error(err.message)
+      return null
+    })
+  if (data) {
+    ctx.success({
+      list: data
+    })
+  } else {
+    ctx.fail()
+  }
+}
+
 exports.item = async (ctx, next) => {
   const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
 
