@@ -28,6 +28,7 @@ const baseConfig = {
     '10001': 'params error'
   },
   articleLimit: 15,
+  hotLimit: 9,
   commentLimit: 99,
   momentLimit: 10,
   // 垃圾评论允许的最大发布次数
