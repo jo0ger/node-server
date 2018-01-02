@@ -1,6 +1,6 @@
 /**
  * @desc Config entry
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 25 Sep 2017
  */
 
@@ -27,8 +27,8 @@ const baseConfig = {
     '500': 'server error',
     '10001': 'params error'
   },
-  articleLimit: 15,
-  hotLimit: 9,
+  articleLimit: 3,
+  hotLimit: 5,
   commentLimit: 99,
   momentLimit: 10,
   // 垃圾评论允许的最大发布次数

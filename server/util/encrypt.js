@@ -1,6 +1,6 @@
 /**
  * @desc 
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 30 Sep 2017
  */
 

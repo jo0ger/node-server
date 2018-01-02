@@ -1,6 +1,6 @@
 /**
  * @desc Category controll
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 26 Oct 2017
  */
 

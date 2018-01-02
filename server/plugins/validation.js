@@ -1,6 +1,6 @@
 /**
  * @desc Custom Validations for koa-bouncer
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 25 Sep 2017
  */
 

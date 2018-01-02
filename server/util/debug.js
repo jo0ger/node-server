@@ -1,6 +1,6 @@
 /**
  * @desc Debug wrapper for debug
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 27 Sep 2017
  */
 

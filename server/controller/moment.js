@@ -1,6 +1,6 @@
 /**
  * @desc Moment controller
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 30 Oct 2017
  */
 
