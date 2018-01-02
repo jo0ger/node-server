@@ -1,6 +1,6 @@
 /**
  * @desc 开发环境配置
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 25 Sep 2017
  */
 

@@ -1,6 +1,6 @@
 /**
  * @desc Http url replace to "/proxy/..."
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 20 Oct 2017
  */
 

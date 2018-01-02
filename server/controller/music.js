@@ -1,6 +1,6 @@
 /**
  * @desc Music controller
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 26 Sep 2017
  */
 
@@ -73,7 +73,9 @@ exports.url = async (ctx, next) => {
   .isString('the "song_id" parameter should be String type')
   .val()
 
-  const data = await neteaseMusic.url(songId).then(data => {
+  // BUG: 库出错了，暂时不用此库请求URL
+  // const data = await neteaseMusic.url(songId).then(data => {
+  const data = await fetchNE('songUrl', songId).then(data => {
     if (!isProd) {
       return data.data || []
     }

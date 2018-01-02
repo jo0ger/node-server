@@ -1,6 +1,6 @@
 /**
  * @desc Article controller
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 25 Sep 2017
  */
 
@@ -42,7 +42,7 @@ exports.list = async (ctx, next) => {
     populate: [
       {
         path: 'category',
-        select: 'name description'
+        select: 'name description extends'
       },
       {
         path: 'tag',
@@ -192,11 +192,11 @@ exports.item = async (ctx, next) => {
   data = await queryPs.populate([
     {
       path: 'category',
-      select: 'name description'
+      select: 'name description extends'
     },
     {
       path: 'tag',
-      select: 'name description'
+      select: 'name description extends'
     }
   ]).exec().catch(err => {
     ctx.log.error(err.message)
@@ -348,10 +348,11 @@ exports.delete = async (ctx, next) => {
 
 exports.like = async (ctx, next) => {
   const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
+  const like = ctx.validateBody('like').optional().defaultTo(true).toBoolean().val()
 
   const data = await ArticleModel.findByIdAndUpdate(id, {
     $inc: {
-      'meta.ups': 1
+      'meta.ups': like ? 1 : -1
     }
   }).catch(err => {
     ctx.log.error(err.message)

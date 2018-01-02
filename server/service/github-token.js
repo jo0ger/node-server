@@ -1,6 +1,6 @@
 /**
  * @desc Github access_token
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 2 Nov 2017
  */
 

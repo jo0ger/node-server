@@ -1,6 +1,6 @@
 /**
  * @desc Comment controller
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 28 Oct 2017
  */
 
