@@ -7,7 +7,7 @@
 'use strict'
 
 exports.start = () => {
-  const { option, music, user } = require('../controller')
+  const { option, user } = require('../controller')
   // 友链 每1小时更新一次
   option.updateOptionLinks()
   setInterval(option.updateOptionLinks.bind(option), 1000 * 60 * 60 * 1)
