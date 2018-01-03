@@ -45,12 +45,12 @@ exports.list = async (ctx, next) => {
 
     // hit
     if (musicData && musicData.id === playListId) {
-      return ctx.success(musicData.list || [])
+      return ctx.success(musicData.data || [])
     }
 
     // update cache
     const data = await exports.updateMusicCache(playListId)
-    ctx.success(data && data.list || [])
+    ctx.success(data && data.data || {})
   }
 }
 
@@ -118,8 +118,10 @@ exports.cover = async (ctx, next) => {
 // 获取除了歌曲链接和歌词外其他信息
 function fetchSonglist (playListId) {
   return neteaseMusic._playlist(playListId).then(({ playlist }) => {
-  // return fetchNE('playlist', playListId).then(({ playlist }) => {
-    return !playlist ? [] : playlist.tracks.map(({ name, id, ar, al, dt, tns }) => {
+    if (!playlist) {
+      return null
+    }
+    const tracks =  playlist.tracks.map(({ name, id, ar, al, dt, tns }) => {
       return {
         id,
         name,
@@ -133,6 +135,12 @@ function fetchSonglist (playListId) {
         tns: tns || []
       }
     })
+    return {
+      tracks,
+      name: playlist.name,
+      description: playlist.description,
+      tags: playlist.tags
+    }
   }).catch(err => {
     debug.error('歌单列表获取失败，错误：', err.message)
     return null
@@ -168,7 +176,7 @@ exports.updateMusicCache = async function (playListId = '') {
   }
   const set = {
     id: playListId,
-    list: data
+    data
   }
   
   // 设置10分钟过期
