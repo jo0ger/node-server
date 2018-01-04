@@ -10,6 +10,7 @@ const { CategoryModel, ArticleModel } = require('../model')
 
 exports.list = async (ctx, next) => {
   const keyword = ctx.validateQuery('keyword').optional().toString().val()
+  const rank = ctx.validateQuery('rank').defaultTo(1).toInt().isIn([0, 1], 'the "rank" parameter is not the expected value').val()
 
   const query = {}
   // 搜索关键词
@@ -20,7 +21,12 @@ exports.list = async (ctx, next) => {
     ]
   }
 
-  const data = await CategoryModel.find(query).sort('-createdAt').catch(err => {
+  let sort = '-createdAt'
+  if (rank) {
+    sort = 'list ' + sort
+  }
+
+  const data = await CategoryModel.find(query).sort(sort).catch(err => {
     ctx.log.error(err.message)
     return null
   })
@@ -77,6 +83,15 @@ exports.create = async (ctx, next) => {
     .optional()
     .isString('the "description" parameter should be String type')
     .val()
+  const list = ctx.validateBody('list')
+    .defaultTo(1)
+    .toInt()
+    .isNumeric('the "list" parameter should be Number type')
+    .val()
+  const ext = ctx.validateBody('extends')
+    .optional()
+    .isArray('the "extends" parameter should be Array type')
+    .val()
 
   const { length } = await CategoryModel.find({ name }).exec().catch(err => {
     ctx.log.error(err.message)
@@ -86,7 +101,9 @@ exports.create = async (ctx, next) => {
   if (!length) {
     const data = await new CategoryModel({
       name,
-      description
+      description,
+      extends: ext,
+      list
     }).save().catch(err => {
       ctx.log.error(err.message)
       return null
