@@ -77,6 +77,10 @@ exports.create = async (ctx, next) => {
     .optional()
     .isString('the "description" parameter should be String type')
     .val()
+  const ext = ctx.validateBody('extends')
+    .optional()
+    .isArray('the "extends" parameter should be Array type')
+    .val()
 
   const { length } = await TagModel.find({ name }).exec().catch(err => {
     ctx.log.error(err.message)
@@ -86,7 +90,8 @@ exports.create = async (ctx, next) => {
   if (!length) {
     const data = await new TagModel({
       name,
-      description
+      description,
+      extends: ext
     }).save().catch(err => {
       ctx.log.error(err.message)
       return null
