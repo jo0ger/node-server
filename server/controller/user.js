@@ -14,6 +14,7 @@ const debug = getDebug('User')
 
 exports.list = async (ctx, next) => {
   let select = '-password'
+
   if (!ctx._isAuthenticated) {
     select += ' -createdAt -updatedAt -role'
   }
@@ -35,13 +36,13 @@ exports.list = async (ctx, next) => {
 
 exports.item = async (ctx, next) => {
   const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
-  let select = '-password -role -createdAt -updatedAt'
-  
-  if (ctx._isAuthenticated) {
-    select = '-password'
+  let select = '-password'
+
+  if (!ctx._isAuthenticated) {
+    select += ' -createdAt -updatedAt -role -github'
   }
 
-  let data = await UserModel.findById(id)
+  const data = await UserModel.findById(id)
     .select(select)
     .exec()
     .catch(err => {
@@ -58,18 +59,20 @@ exports.item = async (ctx, next) => {
 
 exports.update = async (ctx, next) => {
   const name = ctx.validateBody('name').optional().isString('the "name" parameter should be String type').val()
-  const password = ctx.validateBody('password').optional().isString('the "password" parameter should be String type').val()
-  const slogan = ctx.validateBody('slogan').optional().isString('the "slogan" parameter should be String type').val()
-  const description = ctx.validateBody('description').optional().isString('the "description" parameter should be String type').val()
+  const email = ctx.validateBody('email').optional().isString('the "email" parameter should be String type').isEmail('Invalid email format').val()
+  const site = ctx.validateBody('site').optional().isString('the "site" parameter should be String type').val()
   const avatar = ctx.validateBody('avatar').optional().isString('the "avatar" parameter should be String type').val()
-  const role = ctx.validateBody('role').optional().toInt().isIn([0, 1], 'the "role" parameter is not the expected value').val()
+  const slogan = ctx.validateBody('slogan').optional().isString('the "slogan" parameter should be String type').val()
+  const role = ctx.validateBody('role').optional().toInt().isIn(Object.values(config.roleMap), 'the "role" parameter is not the expected value').val()
+  const password = ctx.validateBody('password').optional().isString('the "password" parameter should be String type').val()
   const mute = ctx.validateBody('mute').optional().toBoolean().val()
   const user = {}
 
   name && (user.name = name)
   slogan && (user.slogan = slogan)
-  description && (user.description = description)
+  site && (user.site = site)
   avatar && (user.avatar = avatar)
+  email && (user.email = email)
 
   if (role !== undefined) {
     user.role = role
@@ -123,7 +126,7 @@ exports.delete = async (ctx, next) => {
 
 exports.me = async (ctx, next) => {
   const data = await UserModel
-    .findOne({ name: config.author, role: 0 })
+    .findOne({ 'github.login': config.author, role: 0 })
     .select('-password -role -createdAt -updatedAt -github')
     .exec()
     .catch(err => {
@@ -146,33 +149,36 @@ exports.updateGithubInfo = async () => {
       debug.error('用户查找失败，错误：', err.message)
       return []
     })
-  const updates = await getGithubUsersInfo(users.map(user => user.github.login))
+  const githubUsers = users.reduce((sum, user) => {
+    if (user.role === config.roleMap.GITHUB_USER || (user.role === config.roleMap.ADMIN && user.github.login)) {
+      sum.push(user)
+    }
+    return sum
+  }, [])
+  const updates = await getGithubUsersInfo(githubUsers.map(user => user.github.login))
   Promise.all(
-    updates.map((data, index) => {
-      if (!data) {
-        return null
-      }
-      const user = users[index]
+    updates.reduce((tasks, data, index) => {
+      const user = githubUsers[index]
       const u = {
+        name: data.name,
+        email: data.email,
+        avatar: proxy(data.avatar_url),
+        site: data.blog || data.url,
+        slogan: data.bio,
         github: {
           id: data.id,
-          email: data.email,
-          login: data.login,
-          name: data.name,
-          blog: data.blog || data.url
+          login: data.login
         }
       }
-      // 非管理员更新其他信息，管理员只更新github信息
-      if (user.role !== 0) {
-        u.name = data.name
-        u.slogan = data.bio
-        u.avatar = proxy(data.avatar_url)
-      }
-      return UserModel.findByIdAndUpdate(user._id, u).exec().catch(err => {
-        debug.error('用户Github信息更新失败，错误：', err.message)
-      })
-    }).filter(ps => !!ps)
+      tasks.push(
+        UserModel.findByIdAndUpdate(user._id, u).exec().catch(err => {
+          debug.error('Github用户信息更新失败，错误：', err.message)
+          return null
+        })
+      )
+      return tasks
+    }, [])
   ).then(() => {
-    debug.success('全部用户Github信息更新成功')
+    debug.success('所有Github用户信息更新成功')
   })
 }

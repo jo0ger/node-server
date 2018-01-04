@@ -40,7 +40,7 @@ exports.list = async (ctx, next) => {
     populate: [
       {
         path: 'author',
-        select: !ctx._isAuthenticated ? 'github avatar name' : ''
+        select: !ctx._isAuthenticated ? 'github avatar name site' : ''
       },
       {
         path: 'parent',

@@ -33,7 +33,7 @@ exports.getGithubUsersInfo = (githubNames = '') => {
       }
     }).then(res => {
       if (res && res.status === 200) {
-        debug.success('抓取【 %s 】信息成功', name,)
+        debug.success('抓取【 %s 】信息成功', name)
         return res.data
       }
       return null
