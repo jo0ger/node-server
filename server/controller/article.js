@@ -388,19 +388,21 @@ exports.archive = async (ctx, next) => {
           $push: {
              title: '$title',
              _id: '$_id',
-             create_at: '$createdAt'
+             createdAt: '$createdAt'
           }
         }
       }
     }
   ])
 
+  let count = 0
   if (data && data.length) {
     data = [...new Set(data.map(item => item._id.year))].map(year => {
       const months = []
       data.forEach(item => {
         const { _id, articles } = item
         if (year === _id.year) {
+          count += articles.length
           months.push({
             month: _id.month,
             monthStr: getMonthFromNum(_id.month),
@@ -414,7 +416,10 @@ exports.archive = async (ctx, next) => {
       }
     })
   }
-  ctx.success(data || [])
+  ctx.success({
+    count,
+    list: data || []
+  })
 }
 
 /**
