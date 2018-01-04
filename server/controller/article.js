@@ -369,6 +369,7 @@ exports.like = async (ctx, next) => {
 exports.archive = async (ctx, next) => {
   let data = await ArticleModel.aggregate([
     { $match: { state: 1 } },
+    { $sort: { createdAt: 1 } },
     {
       $project: {
         year: { $year: '$createdAt' },
