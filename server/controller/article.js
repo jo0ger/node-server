@@ -8,7 +8,7 @@
 
 const config = require('../config')
 const { ArticleModel, CategoryModel, TagModel } = require('../model')
-const { marked, isObjectId, createObjectId, getDebug } = require('../util')
+const { marked, isObjectId, createObjectId, getDebug, getMonthFromNum } = require('../util')
 const debug = getDebug('Article')
 
 exports.list = async (ctx, next) => {
@@ -364,6 +364,56 @@ exports.like = async (ctx, next) => {
   } else {
     ctx.fail(-1, 'the article not found')
   }
+}
+
+exports.archive = async (ctx, next) => {
+  let data = await ArticleModel.aggregate([
+    { $match: { state: 1 } },
+    {
+      $project: {
+        year: { $year: '$createdAt' },
+        month: { $month: '$createdAt' },
+        title: 1,
+        createdAt: 1
+      }
+    },
+    {
+      $group: {
+        _id: {
+          year: '$year',
+          month: '$month'
+        },
+        articles: {
+          $push: {
+             title: '$title',
+             _id: '$_id',
+             create_at: '$createdAt'
+          }
+        }
+      }
+    }
+  ])
+
+  if (data && data.length) {
+    data = [...new Set(data.map(item => item._id.year))].map(year => {
+      const months = []
+      data.forEach(item => {
+        const { _id, articles } = item
+        if (year === _id.year) {
+          months.push({
+            month: _id.month,
+            monthStr: getMonthFromNum(_id.month),
+            articles
+          })
+        }
+      })
+      return {
+        year,
+        months
+      }
+    })
+  }
+  ctx.success(data || [])
 }
 
 /**

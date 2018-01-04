@@ -59,3 +59,19 @@ exports.randomString = (length = 8) => {
   }
   return id
 }
+
+const monthMap = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+]
+exports.getMonthFromNum = (num = 1) => monthMap[num - 1] || ''
