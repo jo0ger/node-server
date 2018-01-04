@@ -224,7 +224,7 @@ exports.create = async (ctx, next) => {
     .notEmpty()
     .isString('the "content" parameter should be String type')
     .val()
-  const keywords = ctx.validateBody('keywords').optional().defaultTo([]).isArray('the "keywords" parameter should be Array type').val()
+  const keywords = ctx.validateBody('keywords').defaultTo([]).isArray('the "keywords" parameter should be Array type').val()
   const category = ctx.validateBody('category').optional().isObjectId().val()
   const tag = ctx.validateBody('tag').optional().isObjectIdArray().val()
   const description = ctx.validateBody('description')
@@ -348,7 +348,7 @@ exports.delete = async (ctx, next) => {
 
 exports.like = async (ctx, next) => {
   const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
-  const like = ctx.validateBody('like').optional().defaultTo(true).toBoolean().val()
+  const like = ctx.validateBody('like').defaultTo(true).toBoolean().val()
 
   const data = await ArticleModel.findByIdAndUpdate(id, {
     $inc: {

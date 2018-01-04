@@ -13,6 +13,8 @@ const categorySchema = new mongoose.Schema({
   description: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  // 排序 首页分类展示顺序
+  list: { type: Number, default: 1 },
   extends: [{
     key: { type: String, validate: /\S+/ },
     value: { type: String, validate: /\S+/ }
