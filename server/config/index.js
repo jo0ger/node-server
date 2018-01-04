@@ -13,9 +13,9 @@ const packageInfo = require('../../package.json')
 const baseConfig = {
   name: packageInfo.name,
   version: packageInfo.version,
-  author: packageInfo.author || 'Jooger',
-  site: packageInfo.site,
-  email: packageInfo.email,
+  author: packageInfo.author.name,
+  site: packageInfo.author.url,
+  email: packageInfo.author.email,
   env: process.env.NODE_ENV,
   root: path.resolve(__dirname, '../../'),
   port: process.env.PORT || 3001,
@@ -27,9 +27,15 @@ const baseConfig = {
     '500': 'server error',
     '10001': 'params error'
   },
+  // 角色
+  roleMap: {
+    ADMIN: 0,
+    USER: 1,
+    GITHUB_USER: 2
+  },
   articleLimit: 3,
   hotLimit: 7,
-  commentLimit: 99,
+  commentLimit: 20,
   momentLimit: 10,
   // 垃圾评论允许的最大发布次数
   commentSpamLimit: 3,
@@ -56,7 +62,7 @@ const baseConfig = {
     userCookieKey: 'jooger.me.userid',
     secrets: `${packageInfo.name}-secrets`,
     // 初始化管理员，默认github账户名
-    defaultName: 'jo0ger',
+    defaultName: packageInfo.author.name,
     defaultPassword: 'admin_jooger',
     // 允许请求的域名
     allowedOrigins: [

@@ -47,7 +47,10 @@ async function seedOption () {
 
 // 管理员初始化
 async function seedAdmin () {
-  const admin = await UserModel.findOne({ role: 0 }).exec()
+  const admin = await UserModel.findOne({
+    role: config.roleMap.ADMIN,
+    'github.login': config.author
+  }).exec()
     .catch(err => debug.error('初始化管理员查询失败，错误：', err.message))
   if (!admin) {
     createAdmin()
@@ -62,23 +65,20 @@ async function createAdmin () {
   }
   data = data[0]
   const result = await new UserModel({
-    role: 0,
+    role: config.roleMap.ADMIN,
     name: data.name,
+    email: data.email,
     password: bhash(config.auth.defaultPassword),
     slogan: data.bio,
+    site: data.blog || data.url,
     avatar: proxy(data.avatar_url),
     github: {
       id: data.id,
-      email: data.email,
-      login: data.login,
-      name: data.name,
-      blog: data.blog || data.url
+      login: data.login
     }
   })
   .save()
-  .catch(err => {
-    fail(err.message)
-  })
+  .catch(err => fail(err.message))
 
   if (!result || !result._id) {
     fail('本地入库失败')
