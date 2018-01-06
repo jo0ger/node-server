@@ -9,7 +9,7 @@
 const config = require('../config')
 const { akismet, mailer } = require('../plugins')
 const { CommentModel, UserModel, ArticleModel } = require('../model')
-const { marked, isObjectId, createObjectId, getDebug, getLocation } = require('../util')
+const { isType, marked, isObjectId, createObjectId, getDebug, getLocation, gravatar } = require('../util')
 const debug = getDebug('Comment')
 const isProd = process.env.NODE_ENV === 'development'
 
@@ -190,7 +190,7 @@ exports.list = async (ctx, next) => {
 
 exports.item = async (ctx, next) => {
   const id = ctx.validateParam('id').required('评论ID参数无效').toString().isObjectId('评论ID参数无效').val()
-  
+
   let data = null
   let queryPs = null
   if (!ctx._isAuthenticated) {
@@ -231,13 +231,14 @@ exports.create = async (ctx, next) => {
     .notEmpty()
     .isString('内容参数必须是字符串类型')
     .val()
-  const author = ctx.validateBody('author').required('用户ID参数必填').toString().isObjectId('用户ID参数无效').val()
   const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], '评论状态参数无效').val()
   const sticky = ctx.validateBody('sticky').optional().toInt().isIn([0, 1], '置顶参数无效').val()
   const type = ctx.validateBody('type').defaultTo(0).toInt().isIn([0, 1], '评论类型参数无效').val()
   const article = ctx.validateBody('article').optional().toString().isObjectId('文章ID参数无效').val()
   const parent = ctx.validateBody('parent').optional().toString().isObjectId('父评论ID参数无效').val()
   const forward = ctx.validateBody('forward').optional().toString().isObjectId('前置评论ID参数无效').val()
+  // ObjectId | { id, name, email, site }
+  const author = ctx.validateBody('author').required('作者参数无效').val()
   const req = ctx.req
   const comment = { content }
 
@@ -247,23 +248,19 @@ exports.create = async (ctx, next) => {
     }
     comment.article = article
   }
-  
+
   if (parent && !forward || !parent && forward) {
     return ctx.fail('父评论ID和前置评论ID必须同时存在')
   }
-  
-  const user = await UserModel.findById(author).select('github').exec().catch(err => {
-    debug.error('用户查找失败，错误：', err.message)
-    ctx.log.error(err.message)
-    return null
-  })
 
+  const user = await checkAuthor.call(ctx, author)
   if (!user) {
-    return ctx.fail('用户不存在')
+    return ctx.fail('作者不存在')
   } else if (user.mute) {
     // 如果被禁言
     return ctx.fail('您已经被禁言')
   }
+  comment.author = user._id
 
   if (!checkUserSpam(user)) {
     return ctx.fail('您的垃圾评论数量已达到最大限制，已被禁言')
@@ -300,9 +297,9 @@ exports.create = async (ctx, next) => {
       referrer : comment.meta.referer,          // Required! 
       permalink,
       comment_type : getCommentType(type),
-      comment_author : user.github.login,
-      comment_author_email : user.github.email,
-      comment_author_url : user.github.blog,
+      comment_author : user.name,
+      comment_author_email : user.email,
+      comment_author_url : user.site,
       comment_content : content,
       is_test : isProd
     })
@@ -316,7 +313,6 @@ exports.create = async (ctx, next) => {
   parent && (comment.parent = parent)
   forward && (comment.forward = forward)
   comment.renderedContent = marked(content)
-  comment.author = author
 
   let data = await new CommentModel(comment).save().catch(err => {
     ctx.log.error(err.message)
@@ -329,7 +325,7 @@ exports.create = async (ctx, next) => {
       p = p.select('-content -state -updatedAt')
         .populate({
           path: 'author',
-          select: 'name github'
+          select: 'name site avatar role mute email'
         })
         .populate({
           path: 'parent',
@@ -462,10 +458,11 @@ exports.delete = async (ctx, next) => {
 
 exports.like = async (ctx, next) => {
   const id = ctx.validateParam('id').required('评论ID参数无效').toString().isObjectId('评论ID参数无效').val()
+  const like = ctx.validateBody('like').defaultTo(true).toBoolean().val()
 
   const data = await CommentModel.findByIdAndUpdate(id, {
     $inc: {
-      ups: 1
+      ups: like ? 1 : -1
     }
   }).catch(err => {
     ctx.log.error(err.message)
@@ -604,4 +601,63 @@ async function sendEmailToAdminAndUser (comment, permalink) {
       debug.warn('给被评论者邮件失败')
     }
   }
+}
+
+// 验证作者
+async function checkAuthor (author) {
+  let user = null
+  if (isObjectId(author)) {
+    user = await findUser({
+      _id: author
+    })
+  } else if (isType(author, 'Object')) {
+    // 需要创建或更新用户
+    const update = {}
+    author.name && (update.name = author.name)
+    author.site && (update.site = author.site)
+    if (author.email) {
+      update.avatar = gravatar(author.email)
+      update.email = author.email
+    }
+    if (author.id) {
+      // 更新
+      if (isObjectId(author.id)) {
+        user = await UserModel.findByIdAndUpdate(author.id, update, {
+          new : true
+        }).exec().catch(err => {
+          debug.error('用户更新失败，错误：', err.message)
+          this.log.error(err.message)
+          return null
+        })
+        if (user) {
+          debug.success(`用户【${user.name}】更新成功`)
+        }
+      }
+    } else {
+      // 创建
+      user = await new UserModel({
+        ...update,
+        role: config.roleMap.USER
+      })
+      .save()
+      .catch(err => {
+        debug.error('用户创建失败，错误：', err.message)
+        this.log.error(err.message)
+        return null
+      })
+      if (user) {
+        debug.success(`用户【${user.name}】创建成功`)
+      }
+    }
+  }
+  return user
+}
+
+async function findUser (query = {}, update) {
+  const user = await UserModel.findOne(query).select('-password').exec().catch(err => {
+    debug.error('用户查找失败，错误：', err.message)
+    ctx.log.error(err.message)
+    return null
+  })
+  return user
 }

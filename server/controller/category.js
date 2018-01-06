@@ -86,7 +86,6 @@ exports.create = async (ctx, next) => {
   const list = ctx.validateBody('list')
     .defaultTo(1)
     .toInt()
-    .isNumeric('the "list" parameter should be Number type')
     .val()
   const ext = ctx.validateBody('extends')
     .optional()
@@ -129,11 +128,16 @@ exports.update = async (ctx, next) => {
     .optional()
     .isString('the "description" parameter should be String type')
     .val()
+  const list = ctx.validateBody('list')
+    .optional()
+    .toInt()
+    .val()
 
   const tag = {}
 
   name && (tag.name = name)
   description && (tag.description = description)
+  list && (tag.list = list)
 
   const data = await CategoryModel.findByIdAndUpdate(id, tag, {
     new: true

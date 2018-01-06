@@ -21,6 +21,8 @@ exports.proxy = require('./proxy')
 
 exports.getLocation = require('./location')
 
+exports.gravatar = require('./gravatar')
+
 exports.noop = function () {}
 
 exports.isType = (obj = {}, type = 'Object') => {

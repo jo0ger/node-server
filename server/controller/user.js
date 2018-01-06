@@ -39,7 +39,7 @@ exports.item = async (ctx, next) => {
   let select = '-password'
 
   if (!ctx._isAuthenticated) {
-    select += ' -createdAt -updatedAt -role -github'
+    select += ' -createdAt -updatedAt -github'
   }
 
   const data = await UserModel.findById(id)

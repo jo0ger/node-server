@@ -51,6 +51,7 @@ router.get('/options', option.data)
 
 // User
 router.get('/users/me', user.me)
+router.get('/users/:id', user.item)
 
 // Auth
 router.get('/auth/github/token', auth.fetchGithubToken)
