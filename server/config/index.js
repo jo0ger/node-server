@@ -61,6 +61,7 @@ const baseConfig = {
     },
     userCookieKey: 'jooger.me.userid',
     secrets: `${packageInfo.name}-secrets`,
+    defaultAvatar: 'http://static.jooger.me/img/common/default-avatar.png',
     // 初始化管理员，默认github账户名
     defaultName: packageInfo.author.name,
     defaultPassword: 'admin_jooger',

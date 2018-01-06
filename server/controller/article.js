@@ -268,7 +268,7 @@ exports.create = async (ctx, next) => {
     if (!data.permalink) {
       // 更新永久链接
       data = await ArticleModel.findByIdAndUpdate(data._id, {
-        permalink: `${config.site}/blog/article/${data._id}`
+        permalink: `${config.site}/article/${data._id}`
       }, {
         new : true
       }).exec().catch(err => {
