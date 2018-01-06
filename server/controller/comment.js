@@ -342,7 +342,7 @@ exports.create = async (ctx, next) => {
         ctx.log.error(err.message)
         return null
       })
-    ctx.success(data)
+    ctx.success(data, '评论成功')
     // 如果是文章评论，则更新文章评论数量
     if (type === 0) {
       updateArticleCommentCount([comment.article])
@@ -350,7 +350,7 @@ exports.create = async (ctx, next) => {
     // 发送邮件通知站主和被评论者
     sendEmailToAdminAndUser(data, permalink)
   } else {
-    ctx.fail()
+    ctx.fail('评论失败')
   }
 }
 
