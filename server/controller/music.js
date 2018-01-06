@@ -37,7 +37,7 @@ exports.list = async (ctx, next) => {
     })
 
     if (!option || !option.musicId) {
-      return ctx.fail()
+      return ctx.fail('歌单未找到')
     }
 
     const playListId = option.musicId

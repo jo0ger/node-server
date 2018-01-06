@@ -20,12 +20,12 @@ const baseConfig = {
   root: path.resolve(__dirname, '../../'),
   port: process.env.PORT || 3001,
   codeMap: {
-    '-1': 'fail',
-    '200': 'success',
-    '401': 'authentication failure',
-    '403': 'forbidden',
-    '500': 'server error',
-    '10001': 'params error'
+    '-1': '请求失败',
+    '200': '请求成功',
+    '401': '权限校验失败',
+    '403': 'Forbidden',
+    '500': '服务器错误',
+    '10001': '参数错误'
   },
   // 角色
   roleMap: {
