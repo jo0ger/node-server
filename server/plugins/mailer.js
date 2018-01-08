@@ -10,19 +10,23 @@ const nodemailer = require('nodemailer')
 const config = require('../config')
 const { getDebug } = require('../util')
 const debug = getDebug('Mailer')
+const isProd = process.env.NODE_ENV === 'production'
 
 let isVerify = false
-const transporter = nodemailer.createTransport({
+const transporter = isProd ? nodemailer.createTransport({
   service: '163',
   secure: true,
   auth: {
     user: config.email,
     pass: process.env['163Pass'] || '163邮箱密码'
   }
-})
+}) : null
 
 exports.start = async () => {
   return new Promise((resolve, reject) => {
+    if (!transporter) {
+      return
+    }
     transporter.verify((err, success) => {
       if (err) {
         isVerify = false
