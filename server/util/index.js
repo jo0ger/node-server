@@ -8,6 +8,7 @@
 
 const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
+const validator = require('validator')
 
 exports.getDebug = require('./debug')
 
@@ -77,3 +78,14 @@ const monthMap = [
   'December'
 ]
 exports.getMonthFromNum = (num = 1) => monthMap[num - 1] || ''
+
+Object.keys(validator).forEach(key => {
+  exports[key] = function () {
+    return validator[key].apply(validator, arguments)
+  }
+})
+
+exports.isSiteUrl = (site = '') => validator.isURL(site, {
+  protocols: ['http', 'https'],
+  require_protocol: true
+})

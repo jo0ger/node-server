@@ -8,12 +8,13 @@
 
 const mongoose = require('mongoose')
 const config = require('../../config')
+const { isEmail, isSiteUrl } = require('../../util')
 
 const userSchema = new mongoose.Schema({
   name: { type: String, default: config.auth.defaultName, required: true },
-  email: { type: String, required: true, validate: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/ },
+  email: { type: String, required: true, validate: isEmail },
   avatar: { type: String, required: true },
-  site: { type: String, validate: /^((https|http):\/\/)+[A-Za-z0-9]+\.[A-Za-z0-9]+[\/=\?%\-&_~`@[\]\':+!]*([^<>\"\"])*$/ },
+  site: { type: String, validate: isSiteUrl },
   slogan: { type: String },
   // 角色 0 管理员 | 1 普通用户 | 2 github用户
   role: { type: Number, default: 1 },
