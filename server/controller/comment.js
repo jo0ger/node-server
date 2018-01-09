@@ -494,10 +494,10 @@ function getPermalink (comment = {}) {
 function getCommentType (type) {
   switch (type) {
     case 0:
-      return '博客文章评论'
+      return '文章评论'
       break
     case 1:
-      return '个人站点留言'
+      return '站点留言'
     default:
       return '评论'
       break
