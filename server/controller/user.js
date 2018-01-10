@@ -61,6 +61,7 @@ exports.update = async (ctx, next) => {
   const name = ctx.validateBody('name').optional().isString('the "name" parameter should be String type').val()
   const email = ctx.validateBody('email').optional().isString('the "email" parameter should be String type').isEmail('Invalid email format').val()
   const site = ctx.validateBody('site').optional().isString('the "site" parameter should be String type').val()
+  const description = ctx.validateBody('description').optional().isString('the "description" parameter should be String type').val()
   const avatar = ctx.validateBody('avatar').optional().isString('the "avatar" parameter should be String type').val()
   const slogan = ctx.validateBody('slogan').optional().isString('the "slogan" parameter should be String type').val()
   const role = ctx.validateBody('role').optional().toInt().isIn(Object.values(config.roleMap), 'the "role" parameter is not the expected value').val()
@@ -71,6 +72,7 @@ exports.update = async (ctx, next) => {
   name && (user.name = name)
   slogan && (user.slogan = slogan)
   site && (user.site = site)
+  description && (user.description = description)
   avatar && (user.avatar = avatar)
   email && (user.email = email)
 
@@ -127,7 +129,7 @@ exports.delete = async (ctx, next) => {
 exports.me = async (ctx, next) => {
   const data = await UserModel
     .findOne({ 'github.login': config.author, role: 0 })
-    .select('-password -role -createdAt -updatedAt -github')
+    .select('-password -role -createdAt -updatedAt -github -mute')
     .exec()
     .catch(err => {
       ctx.log.error(err.message)
@@ -140,6 +142,8 @@ exports.me = async (ctx, next) => {
     ctx.fail()
   }
 }
+
+exports.guest = async (ctx, next) => {}
 
 // 更新用户的Github信息
 exports.updateGithubInfo = async () => {
