@@ -7,7 +7,7 @@
 'use strict'
 
 const config = require('../config')
-const { UserModel } = require('../model')
+const { UserModel, CommentModel } = require('../model')
 const { bhash, bcompare, getDebug, proxy } = require('../util')
 const { getGithubUsersInfo } = require('../service')
 const debug = getDebug('User')
@@ -143,7 +143,32 @@ exports.me = async (ctx, next) => {
   }
 }
 
-exports.guest = async (ctx, next) => {}
+exports.guests = async (ctx, next) => {
+  // $lookup尝试失败，只能循环查询用户了
+  let data = await CommentModel.aggregate([
+    {
+      $match: {
+        $nor: [
+          {
+            'github.login': config.author,
+            role: 0
+          }
+        ]
+      }
+    },
+    { $sort: { createdAt: -1 } },
+    {
+      $group: {
+        _id: '$author'
+      }
+    }
+  ])
+  const list = await Promise.all((data || []).map(item => UserModel.findById(item._id).select('name avatar site')))
+  ctx.success({
+    list,
+    total: list.length
+  })
+}
 
 // 更新用户的Github信息
 exports.updateGithubInfo = async () => {
