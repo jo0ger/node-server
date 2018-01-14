@@ -126,7 +126,7 @@ exports.delete = async (ctx, next) => {
   }
 }
 
-exports.me = async (ctx, next) => {
+exports.blogger = async (ctx, next) => {
   const data = await UserModel
     .findOne({ 'github.login': config.author, role: 0 })
     .select('-password -role -createdAt -updatedAt -github -mute')
@@ -147,23 +147,29 @@ exports.guests = async (ctx, next) => {
   // $lookup尝试失败，只能循环查询用户了
   let data = await CommentModel.aggregate([
     {
-      $match: {
-        $nor: [
-          {
-            'github.login': config.author,
-            role: 0
-          }
-        ]
+      $sort: {
+        createdAt: -1
       }
     },
-    { $sort: { createdAt: -1 } },
     {
       $group: {
         _id: '$author'
       }
     }
   ])
-  const list = await Promise.all((data || []).map(item => UserModel.findById(item._id).select('name avatar site')))
+  let list = await Promise.all((data || []).map((item) => {
+    return UserModel.findOne({
+      _id: item._id,
+      $nor: [
+        {
+          role: config.roleMap.ADMIN
+        }, {
+          'github.login': config.author
+        }
+      ]
+    }).select('name site avatar')
+  }))
+  list = list.filter(item => !!item)
   ctx.success({
     list,
     total: list.length
