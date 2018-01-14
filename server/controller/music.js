@@ -136,6 +136,7 @@ function fetchSonglist (playListId) {
       }
     })
     return {
+      id: playListId,
       tracks,
       name: playlist.name,
       description: playlist.description,

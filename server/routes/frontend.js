@@ -50,7 +50,7 @@ router.get('/music/songs/:song_id/lyric', music.lyric)
 router.get('/options', option.data)
 
 // User
-router.get('/users/me', user.me)
+router.get('/users/blogger', user.blogger)
 router.get('/users/guests', user.guests)
 router.get('/users/:id', user.item)
 
