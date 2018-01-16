@@ -72,6 +72,8 @@ async function createAdmin () {
     slogan: data.bio,
     site: data.blog || data.url,
     avatar: proxy(data.avatar_url),
+    company: data.company,
+    location: data.location,
     github: {
       id: data.id,
       login: data.login

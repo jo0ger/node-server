@@ -193,6 +193,7 @@ exports.updateGithubInfo = async () => {
   const updates = await getGithubUsersInfo(githubUsers.map(user => user.github.login))
   Promise.all(
     updates.reduce((tasks, data, index) => {
+      console.log(data)
       const user = githubUsers[index]
       const u = {
         name: data.name,
@@ -200,6 +201,8 @@ exports.updateGithubInfo = async () => {
         avatar: proxy(data.avatar_url),
         site: data.blog || data.url,
         slogan: data.bio,
+        company: data.company,
+        location: data.location,
         github: {
           id: data.id,
           login: data.login
