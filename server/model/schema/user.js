@@ -23,11 +23,13 @@ const userSchema = new mongoose.Schema({
   password: { type: String },
   // 是否被禁言
   mute: { type: Boolean, default: false },
+  company: { type: String, default: '' },
+  location: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   github: {
     id: { type: String, default: '' },
-    login: { type: String, default: '' },
+    login: { type: String, default: '' }
   }
 })
 
