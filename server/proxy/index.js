@@ -1,0 +1,11 @@
+/**
+ * @desc Model proxy entrance
+ * @author Jooger <iamjooger@gmail.com>
+ * @date 26 Jan 2018
+ */
+
+'use strict'
+
+module.exports = {
+  ArticleProxy: require('./article')
+}

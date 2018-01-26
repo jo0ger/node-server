@@ -48,7 +48,7 @@ async function seedOption () {
 // 管理员初始化
 async function seedAdmin () {
   const admin = await UserModel.findOne({
-    role: config.roleMap.ADMIN,
+    role: config.constant.roleMap.ADMIN,
     'github.login': config.author
   }).exec()
     .catch(err => debug.error('初始化管理员查询失败，错误：', err.message))
@@ -65,7 +65,7 @@ async function createAdmin () {
   }
   data = data[0]
   const result = await new UserModel({
-    role: config.roleMap.ADMIN,
+    role: config.constant.roleMap.ADMIN,
     name: data.name,
     email: data.email,
     password: bhash(config.auth.defaultPassword),

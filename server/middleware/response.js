@@ -8,9 +8,11 @@
 
 const config = require('../config')
 const { isType } = require('../util')
+const successMsg = config.constant.codeMap['200']
+const failMsg = config.constant.codeMap['-1']
 
 module.exports = async (ctx, next) => {
-  ctx.success = (data = null, message = config.codeMap[200]) => {
+  ctx.success = (data = null, message = successMsg) => {
     ctx.status = 200
     ctx.body = {
       code: 200,
@@ -30,7 +32,7 @@ module.exports = async (ctx, next) => {
     ctx.body = {
       code,
       success: false,
-      message: message || config.codeMap[code] || config.codeMap['-1'],
+      message: message || config.constant.codeMap[code] || failMsg,
       data
     }
   }

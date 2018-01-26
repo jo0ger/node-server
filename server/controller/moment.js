@@ -12,7 +12,7 @@ const { getDebug, getLocation } = require('../util')
 const debug = getDebug('Moment')
 
 exports.list = async (ctx, next) => {
-  const pageSize = ctx.validateQuery('per_page').defaultTo(config.momentLimit).toInt().gt(0, '每页数量必须大于0').val()
+  const pageSize = ctx.validateQuery('per_page').defaultTo(config.limit.momentLimit).toInt().gt(0, '每页数量必须大于0').val()
   const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, '页码参数必须大于0').val()
   const state = ctx.validateQuery('state').optional().toInt().isIn([0, 1], '个人动态状态参数无效').val()
   const keyword = ctx.validateQuery('keyword').optional().toString().val()

@@ -11,9 +11,9 @@ const Validator = require('koa-bouncer').Validator
 const { isObjectId } = require('../util')
 
 Validator.addMethod('notEmpty', function (tip) {
-  this.isString(`the "${this.key}" parameter should be String type`)
+  this.isString(`${this.key}参数格式错误，期望格式：String`)
   if (this.val().length === 0) {
-    this.throwError(tip || `the "${this.key}" parameter should not be empty value`)
+    this.throwError(tip || `${this.key}参数不能为空`)
   }
   return this
 })
@@ -23,7 +23,7 @@ Validator.addMethod('isObjectId', function (tip) {
   if (val !== undefined) {
     this.toString()
     if (!mongoose.Types.ObjectId.isValid(val)) {
-      this.throwError(tip || `the "${this.key}" parameter should be ObjectId type`)
+      this.throwError(tip || `${this.key}参数格式错误，期望格式：ObjectId`)
     }
   }
   return this
@@ -35,7 +35,7 @@ Validator.addMethod('isObjectIdArray', function (tip) {
     this.isArray()
     val.forEach(data => {
       if (!isObjectId(data)) {
-        this.throwError(tip || `the "${this.key}" parameter contains a data(${data}) that is not ObjectId type`)
+        this.throwError(tip || `${this.key}参数格式错误，期望格式：[ObjectId]`)
       }
     })
   }

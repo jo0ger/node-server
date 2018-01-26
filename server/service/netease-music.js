@@ -1,5 +1,5 @@
 /**
- * @desc 网易云音乐 TEST (暂未使用)
+ * @desc 网易云音乐 TEST (备用)
  * @author Jooger <iamjooger@gmail.com>
  * @date 30 Sep 2017
  */
