@@ -7,14 +7,16 @@
 'use strict'
 
 const config = require('../config')
+const { ArticleProxy } = require('../proxy')
 const { ArticleModel, CategoryModel, TagModel } = require('../model')
-const { marked, isObjectId, createObjectId, getDebug, getMonthFromNum } = require('../util')
+const { marked, isObjectId, createObjectId, getDebug, getMonthFromNum, getDocsPagination } = require('../util')
 const debug = getDebug('Article')
 
+// 文章列表
 exports.list = async (ctx, next) => {
-  const pageSize = ctx.validateQuery('per_page').defaultTo(config.articleLimit).toInt().gt(0, 'the "per_page" parameter should be greater than 0').val()
-  const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, 'the "page" parameter should be greater than 0').val()
-  const state = ctx.validateQuery('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
+  const pageSize = ctx.validateQuery('per_page').defaultTo(config.limit.articleLimit).toInt().gt(0, 'per_page参数必须大于0').val()
+  const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, 'page参数必须大于0').val()
+  const state = ctx.validateQuery('state').optional().toInt().isIn([0, 1], 'state参数错误').val()
   const category = ctx.validateQuery('category').optional().toString().val()
   const tag = ctx.validateQuery('tag').optional().toString().val()
   const keyword = ctx.validateQuery('keyword').optional().toString().val()
@@ -25,17 +27,19 @@ exports.list = async (ctx, next) => {
   // -1 desc | 1 asc
   const order = ctx.validateQuery('order').optional().toInt().isIn(
     [-1, 1],
-    'invalid "order" parameter, optional value: -1 or 1'
+    'order参数错误'
   ).val()
   // createdAt | updatedAt | publishedAt | meta.ups | meta.pvs | meta.comments
   const sortBy = ctx.validateQuery('sort_by').optional().toString().isIn(
     ['createdAt', 'updatedAt', 'publishedAt', 'meta.ups', 'meta.pvs', 'meta.comments'],
-    'invalid "sort_by" parameter'
+    'sort_by参数错误'
   ).val()
 
   // 过滤条件
   const options = {
-    sort: { createdAt: -1 },
+    sort: {
+      createdAt: -1
+    },
     page,
     limit: pageSize,
     select: '-content -renderedContent',
@@ -43,8 +47,7 @@ exports.list = async (ctx, next) => {
       {
         path: 'category',
         select: 'name description extends'
-      },
-      {
+      }, {
         path: 'tag',
         select: 'name description'
       }
@@ -128,117 +131,81 @@ exports.list = async (ctx, next) => {
     }
   }
 
-  const articles = await ArticleModel.paginate(query, options).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
+  const articles = await ArticleProxy.paginate(query, options)
 
-  if (articles) {
-    ctx.success({
-      list: articles.docs,
-      pagination: {
-        total: articles.total,
-        current_page: articles.page > articles.pages ? articles.pages : articles.page,
-        total_page: articles.pages,
-        per_page: articles.limit
-      }
-    })
-  } else {
-    ctx.fail(-1, 'the article list access failed')
-  }
+  articles
+    ? ctx.success(getDocsPaginationData(articles), '文章列表获取成功')
+    : ctx.fail('文章列表获取失败')
 }
 
+// 热门文章
 exports.hot = async (ctx, next) => {
-  const limit = ctx.validateQuery('limit').defaultTo(config.hotLimit).toInt().gt(0, 'the "limit" parameter should be greater than 0').val()
-  const data = await ArticleModel.find()
+  const limit = ctx.validateQuery('limit').defaultTo(config.limit.hotLimit).toInt().gt(0, 'limit参数必须大于0').val()
+  const data = await ArticleProxy.find()
     .sort('-meta.comments -meta.ups -meta.pvs')
     .select('-content -renderedContent -state')
     .populate([
       {
         path: 'category',
         select: 'name'
-      },
-      {
+      }, {
         path: 'tag',
         select: 'name'
       }
     ])
     .limit(limit)
-    .catch(err => {
-      ctx.log.error(err.message)
-      return null
-    })
-  if (data) {
-    ctx.success({
-      list: data
-    })
-  } else {
-    ctx.fail()
-  }
+  data
+    ? ctx.success({ list: data }, '热门文章获取成功')
+    : ctx.fail('热门文章获取失败')
 }
 
+// 文章详情
 exports.item = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
+  const id = ctx.validateParam('id').required('缺少文章ID').toString().isObjectId().val()
 
   let data = null
-  let queryPs = null
+  let query = null
   // 只有前台博客访问文章的时候pv才+1
   if (!ctx._isAuthenticated) {
-    queryPs = ArticleModel.findOneAndUpdate({ _id: id, state: 1 }, { $inc: { 'meta.pvs': 1 } }, { new: true }).select('-content')
+    query = ArticleProxy.updateOne({ _id: id, state: 1 }, { $inc: { 'meta.pvs': 1 } }).select('-content')
   } else {
-    queryPs = ArticleModel.findById(id)
+    query = ArticleProxy.getById(id)
   }
 
-  data = await queryPs.populate([
+  data = await query.populate([
     {
       path: 'category',
       select: 'name description extends'
-    },
-    {
+    }, {
       path: 'tag',
       select: 'name description extends'
     }
-  ]).exec().catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
+  ]).exec()
 
   if (data) {
     data = data.toObject()
-    await getRelatedArticles(ctx, data)
-    await getSiblingArticles(ctx, data)
-    ctx.success(data)
+    await Promise.all([
+      getRelatedArticles(ctx, data),
+      getSiblingArticles(ctx, data)
+    ])
+    ctx.success(data, '文章详情获取成功')
   } else {
-    ctx.fail(-1, 'the article not found')
+    ctx.fail('文章详情获取失败')
   }
 }
 
+// 文章创建
 exports.create = async (ctx, next) => {
-  const title = ctx.validateBody('title')
-    .required('the "title" parameter is required')
-    .notEmpty()
-    .isString('the "title" parameter should be String type')
-    .val()
-  const content = ctx.validateBody('content')
-    .required('the "content" parameter is required')
-    .notEmpty()
-    .isString('the "content" parameter should be String type')
-    .val()
-  const keywords = ctx.validateBody('keywords').defaultTo([]).isArray('the "keywords" parameter should be Array type').val()
+  const title = ctx.validateBody('title').required('缺少文章标题').notEmpty().val()
+  const content = ctx.validateBody('content').required('缺少文章内容').notEmpty().val()
+  const keywords = ctx.validateBody('keywords').optional().toArray().val()
   const category = ctx.validateBody('category').optional().isObjectId().val()
   const tag = ctx.validateBody('tag').optional().isObjectIdArray().val()
-  const description = ctx.validateBody('description')
-    .optional()
-    .isString('the "description" parameter should be String type')
-    .val()
-  const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
-  const thumb = ctx.validateBody('thumb').optional().isString('the "thumb" parameter should be String type').val()
+  const description = ctx.validateBody('description').optional().val()
+  const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'state参数错误').val()
+  const thumb = ctx.validateBody('thumb').optional().val()
   const createdAt = ctx.validateBody('createdAt').optional().toString().val()
-  const permalink = ctx.validateBody('permalink')
-    .optional()
-    .isString('the "permalink" parameter should be String type')
-    .val()
-
+  const permalink = ctx.validateBody('permalink').optional().val()
   const article = {}
 
   title && (article.title = title)
@@ -253,52 +220,41 @@ exports.create = async (ctx, next) => {
   if (state !== undefined) {
     article.state = state
   }
+  article.content = content
+  article.renderedContent = marked(content)
 
-  if (content) {
-    article.content = content
-    article.renderedContent = marked(content)
-  }
+  let data = await ArticleProxy.newAndSave(article)
 
-  let data = await new ArticleModel(article).save().catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
-
-  if (data) {
+  if (data && data.length) {
+    data = data[0]
     if (!data.permalink) {
       // 更新永久链接
-      data = await ArticleModel.findByIdAndUpdate(data._id, {
+      data = await ArticleProxy.updateById(data._id, {
         permalink: `${config.site}/article/${data._id}`
-      }, {
-        new : true
       }).exec().catch(err => {
-        ctx.log.error(err.message)
+        ctx.log.error('文章永久链接更新失败', err.message)
         return data
       })
     }
-    ctx.success(data)
+    ctx.success(data, '文章创建成功')
   } else {
-    ctx.fail()
+    ctx.fail('文章创建失败')
   }
 }
 
+// 文章更新
 exports.update = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
-  const title = ctx.validateBody('title').optional().isString('the "title" parameter should be String type').val()
-  const content = ctx.validateBody('content').optional().isString('the "content" parameter should be String type').val()
-  const keywords = ctx.validateBody('keywords').optional().isArray('the "keywords" parameter should be Array type').val()
-  const description = ctx.validateBody('description').optional().isString('the "description" parameter should be String type').val()
+  const id = ctx.validateParam('id').required('缺少文章ID').toString().isObjectId().val()
+  const title = ctx.validateBody('title').optional().val()
+  const content = ctx.validateBody('content').optional().val()
+  const keywords = ctx.validateBody('keywords').optional().toArray().val()
+  const description = ctx.validateBody('description').optional().val()
   const category = ctx.validateBody('category').optional().isObjectId().val()
   const tag = ctx.validateBody('tag').optional().isObjectIdArray().val()
-  const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'the "state" parameter is not the expected value').val()
-  const thumb = ctx.validateBody('thumb').optional().isString('the "thumb" parameter should be String type').val()
+  const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'state参数错误').val()
+  const thumb = ctx.validateBody('thumb').optional().val()
   const createdAt = ctx.validateBody('createdAt').optional().toString().val()
-
   const article = {}
-  const cache = await ArticleModel.findById(id).exec().catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
 
   title && (article.title = title)
   keywords && (article.keywords = keywords)
@@ -312,60 +268,46 @@ exports.update = async (ctx, next) => {
     article.state = state
   }
 
-  if (content) {
+  if (content !== undefined) {
     article.content = content
     article.renderedContent = marked(content)
   }
 
-  const data = await ArticleModel.findByIdAndUpdate(id, article, { new: true })
-    .populate('category tag')
-    .exec()
-    .catch(err => {
-      ctx.log.error(err.message)
-      return null
-    })
+  const data = await ArticleProxy.updateById(id, article).populate('category tag').exec()
 
-  if (data) {
-    ctx.success(data)
-  } else {
-    ctx.fail()
-  }
+  data
+    ? ctx.success(data, '文章更新成功')
+    : ctx.fail('文章更新失败')
 }
 
+// 删除文章
 exports.delete = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
-  const data = await ArticleModel.remove({ _id: id }).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
+  const id = ctx.validateParam('id').required('缺少文章ID').toString().isObjectId().val()
+  const data = await ArticleProxy.delById(id).exec()
 
   if (data && data.result && data.result.ok) {
-    ctx.success()
+    ctx.success(true, '文章删除成功')
   } else {
-    ctx.fail()
+    ctx.fail('文章删除失败')
   }
 }
 
+// 文章点赞
 exports.like = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
+  const id = ctx.validateParam('id').required('缺少文章ID').toString().isObjectId().val()
   const like = ctx.validateBody('like').defaultTo(true).toBoolean().val()
-
-  const data = await ArticleModel.findByIdAndUpdate(id, {
+  const data = await ArticleProxy.updateById(id, {
     $inc: {
       'meta.ups': like ? 1 : -1
     }
-  }).catch(err => {
-    ctx.log.error(err.message)
-    return null
   })
 
-  if (data) {
-    ctx.success()
-  } else {
-    ctx.fail(-1, 'the article not found')
-  }
+  data
+    ? ctx.success(true, '文章点赞成功')
+    : ctx.fail('文章点赞失败')
 }
 
+// 文章归档
 exports.archive = async (ctx, next) => {
   let data = await ArticleModel.aggregate([
     { $match: { state: 1 } },
@@ -419,7 +361,7 @@ exports.archive = async (ctx, next) => {
   ctx.success({
     count,
     list: data || []
-  })
+  }, '获取文章归档成功')
 }
 
 /**
@@ -430,11 +372,11 @@ exports.archive = async (ctx, next) => {
 async function getRelatedArticles (ctx, data) {
   data.related = []
   let { _id, tag = [] } = data
-  const articles = await ArticleModel.find({
+  const articles = await ArticleProxy.find({
     _id: { $nin: [ _id ] },
     state: 1,
-    tag: { $in: tag.map(t => t._id) }}
-  )
+    tag: { $in: tag.map(t => t._id) }
+  })
   .select('title thumb createdAt publishedAt meta category')
   .populate({
     path: 'category',
@@ -442,13 +384,13 @@ async function getRelatedArticles (ctx, data) {
   })
   .exec()
   .catch(err => {
-    ctx.log.error('related articles access failed, err: ', err.message)
+    ctx.log.error('关联文章查询失败，err：', err.message)
     return null
   })
 
   if (articles) {
-    // 取前10篇
-    data.related = articles.slice(0, 10)
+    // 最多取前10篇
+    data.related = articles.slice(0, config.limit.relatedArticleLimit)
   }
 }
 
@@ -464,7 +406,7 @@ async function getSiblingArticles (ctx, data) {
     if (!ctx._isAuthenticated) {
       query.state = 1
     }
-    let prev = await ArticleModel.findOne(query)
+    const prev = await ArticleProxy.findOne(query)
       .select('title createdAt publishedAt thumb category')
       .populate({
         path: 'category',
@@ -474,10 +416,10 @@ async function getSiblingArticles (ctx, data) {
       .lt('createdAt', data.createdAt)
       .exec()
       .catch(err => {
-        ctx.log.error('adjacent articles access failed, err: ', err.message)
+        ctx.log.error('前一篇文章获取失败，err：', err.message)
         return null
       })
-    let next = await ArticleModel.findOne(query)
+    const next = await ArticleProxy.findOne(query)
       .select('title createdAt publishedAt thumb category')
       .populate({
         path: 'category',
@@ -487,11 +429,12 @@ async function getSiblingArticles (ctx, data) {
       .gt('createdAt', data.createdAt)
       .exec()
       .catch(err => {
-        ctx.log.error('adjacent articles access failed, err: ', err.message)
+        ctx.log.error('后一篇文章获取失败，err：', err.message)
         return null
       })
-    prev = prev && prev.toObject()
-    next = next && next.toObject()
-    data.adjacent = { prev, next }
+    data.adjacent = {
+      prev: prev && prev.toObject() || null,
+      next: next && next.toObject() || null
+    }
   }
 }

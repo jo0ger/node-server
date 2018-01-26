@@ -9,6 +9,7 @@
 const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
 const validator = require('validator')
+const config = require('../config')
 
 exports.getDebug = require('./debug')
 
@@ -63,21 +64,7 @@ exports.randomString = (length = 8) => {
   return id
 }
 
-const monthMap = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December'
-]
-exports.getMonthFromNum = (num = 1) => monthMap[num - 1] || ''
+exports.getMonthFromNum = (num = 1) => config.constant.monthMap[num - 1] || ''
 
 Object.keys(validator).forEach(key => {
   exports[key] = function () {
@@ -89,3 +76,16 @@ exports.isSiteUrl = (site = '') => validator.isURL(site, {
   protocols: ['http', 'https'],
   require_protocol: true
 })
+
+// 获取分页请求的响应数据
+exports.getDocsPaginationData = (docs = {}) => {
+  return {
+    list: docs.docs,
+    pagination: {
+      total: docs.total,
+      current_page: docs.page > docs.pages ? docs.pages : docs.page,
+      total_page: docs.pages,
+      per_page: docs.limit
+    }
+  }
+}

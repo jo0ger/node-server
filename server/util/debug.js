@@ -40,7 +40,7 @@ module.exports = function getDebug (namespace = '') {
       deBug.enabled = true
       deBug.color = levelMap[key].level
       const args = slice.call(arguments)
-      args[0] = levelMap[key].emoji + '  ' + args[0]
+      // args[0] = levelMap[key].emoji + '  ' + args[0]
       deBug.apply(null, args)
     }
   })

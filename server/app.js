@@ -50,6 +50,9 @@ app.use(koaBunyanLogger({
   name: packageInfo.name,
   level: 'debug'
 }))
+app.use(koaBunyanLogger.requestIdContext({
+  header: 'Request-Id'
+}))
 app.use(bouncer.middleware())
 app.use(middlewares.response)
 app.use(middlewares.error)

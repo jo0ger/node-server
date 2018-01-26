@@ -14,7 +14,7 @@ const debug = getDebug('Comment')
 const isProd = process.env.NODE_ENV === 'development'
 
 exports.list = async (ctx, next) => {
-  const pageSize = ctx.validateQuery('per_page').defaultTo(config.commentLimit).toInt().gt(0, '每页评论数量必须大于0').val()
+  const pageSize = ctx.validateQuery('per_page').defaultTo(config.limit.commentLimit).toInt().gt(0, '每页评论数量必须大于0').val()
   const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, '页码参数必须大于0').val()
   const state = ctx.validateQuery('state').optional().toInt().isIn([0, 1], '评论状态参数无效').val()
   const type = ctx.validateQuery('type').optional().toInt().isIn([0, 1], '评论类型参数无效').val()
@@ -517,7 +517,7 @@ async function checkUserSpam (user) {
 
   const spamComments = userComments.filter(c => c.spam)
   // 如果用户以往评论中spam评论数量大于等于spam限制
-  if (spamComments.length >= config.commentSpamLimit) {
+  if (spamComments.length >= config.limit.commentSpamLimit) {
     if (!user.mute) {
       // 将用户禁言
       await UserModel.update({ _id: user._id }, {
@@ -637,7 +637,7 @@ async function checkAuthor (author) {
       // 创建
       user = await new UserModel({
         ...update,
-        role: config.roleMap.USER
+        role: config.constant.roleMap.USER
       })
       .save()
       .catch(err => {

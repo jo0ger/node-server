@@ -64,7 +64,7 @@ exports.update = async (ctx, next) => {
   const description = ctx.validateBody('description').optional().isString('the "description" parameter should be String type').val()
   const avatar = ctx.validateBody('avatar').optional().isString('the "avatar" parameter should be String type').val()
   const slogan = ctx.validateBody('slogan').optional().isString('the "slogan" parameter should be String type').val()
-  const role = ctx.validateBody('role').optional().toInt().isIn(Object.values(config.roleMap), 'the "role" parameter is not the expected value').val()
+  const role = ctx.validateBody('role').optional().toInt().isIn(Object.values(config.constant.roleMap), 'the "role" parameter is not the expected value').val()
   const password = ctx.validateBody('password').optional().isString('the "password" parameter should be String type').val()
   const mute = ctx.validateBody('mute').optional().toBoolean().val()
   const user = {}
@@ -162,7 +162,7 @@ exports.guests = async (ctx, next) => {
       _id: item._id,
       $nor: [
         {
-          role: config.roleMap.ADMIN
+          role: config.constant.roleMap.ADMIN
         }, {
           'github.login': config.author
         }
@@ -185,7 +185,7 @@ exports.updateGithubInfo = async () => {
       return []
     })
   const githubUsers = users.reduce((sum, user) => {
-    if (user.role === config.roleMap.GITHUB_USER || (user.role === config.roleMap.ADMIN && user.github.login)) {
+    if (user.role === config.constant.roleMap.GITHUB_USER || (user.role === config.constant.roleMap.ADMIN && user.github.login)) {
       sum.push(user)
     }
     return sum
@@ -193,7 +193,6 @@ exports.updateGithubInfo = async () => {
   const updates = await getGithubUsersInfo(githubUsers.map(user => user.github.login))
   Promise.all(
     updates.reduce((tasks, data, index) => {
-      console.log(data)
       const user = githubUsers[index]
       const u = {
         name: data.name,

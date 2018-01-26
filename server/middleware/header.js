@@ -10,7 +10,7 @@ const config = require('../config')
 
 module.exports = async (ctx, next) => {
   const { request, response } = ctx
-  const allowedOrigins = config.auth.allowedOrigins
+  const allowedOrigins = config.constant.allowedOrigins
   const origin = request.get('origin') || ''
   const allowed = request.query._DEV_
     || origin.includes('localhost')

@@ -1,5 +1,5 @@
 /**
- * @desc 
+ * @desc Netease service encrypt
  * @author Jooger <iamjooger@gmail.com>
  * @date 30 Sep 2017
  */
