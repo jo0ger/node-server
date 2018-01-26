@@ -9,7 +9,7 @@
 const config = require('../config')
 const { ArticleProxy } = require('../proxy')
 const { ArticleModel, CategoryModel, TagModel } = require('../model')
-const { marked, isObjectId, createObjectId, getDebug, getMonthFromNum, getDocsPagination } = require('../util')
+const { marked, isObjectId, createObjectId, getDebug, getMonthFromNum, getDocsPaginationData } = require('../util')
 const debug = getDebug('Article')
 
 // 文章列表

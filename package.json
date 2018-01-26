@@ -1,9 +1,9 @@
 {
-  "name": "jooger.me-server",
-  "version": "1.3.0",
+  "name": "node-server",
+  "version": "1.4.0",
   "private": true,
   "description": "🔥 My blog's api server build by koa2 and mongoose",
-  "homepage": "https://github.com/jo0ger/jooger.me-server",
+  "homepage": "https://github.com/jo0ger/node-server",
   "author": {
     "name": "jo0ger",
     "email": "iamjooger@gmail.com",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "https",
-    "url": "https://github.com/jo0ger/jooger.me-server.git"
+    "url": "https://github.com/jo0ger/node-server.git"
   },
   "keywords": [
     "jooger.me",
@@ -23,7 +23,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jo0ger/jooger.me-server/issues"
+    "url": "https://github.com/jo0ger/node-server/issues"
   },
   "bin": "./node_modules/.bin/",
   "scripts": {
