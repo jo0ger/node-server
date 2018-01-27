@@ -12,8 +12,8 @@ const config = require('../config')
 const { UserModel } = require('../model')
 const { bhash, bcompare, getDebug, signToken, proxy, randomString } = require('../util')
 const debug = getDebug('Auth')
-const debugGithub = getDebug('Github:Auth')
 const { getGithubToken, getGithubAuthUserInfo } = require('../service')
+const debugGithub = getDebug('Github:Auth')
 const isProd = process.env.NODE_ENV === 'production'
 
 exports.localLogin = async (ctx, next) => {

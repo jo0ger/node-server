@@ -110,6 +110,8 @@ node-server
 
 * TypeScript升级
 
+* ESlint
+
 * 邮件模板
 
 * 消息api

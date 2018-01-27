@@ -90,7 +90,10 @@ const baseConfig = {
       USER: 1,
       GITHUB_USER: 2
     },
-    monthMap: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    monthMap: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    redisCacheKey: {
+      music: 'music-data'
+    }
   }
 }
 

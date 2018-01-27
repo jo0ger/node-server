@@ -7,5 +7,11 @@
 'use strict'
 
 module.exports = {
-  ArticleProxy: require('./article')
+  articleProxy: require('./article'),
+  categoryProxy: require('./category'),
+  tagProxy: require('./tag'),
+  userProxy: require('./user'),
+  commentProxy: require('./comment'),
+  optionProxy: require('./option'),
+  momentProxy: require('./moment')
 }

@@ -6,11 +6,13 @@
 
 'use strict'
 
-const { CategoryModel, ArticleModel } = require('../model')
+const { articleProxy, categoryProxy } = require('../proxy')
 
+// 分类列表
 exports.list = async (ctx, next) => {
   const keyword = ctx.validateQuery('keyword').optional().toString().val()
-  const rank = ctx.validateQuery('rank').defaultTo(1).toInt().isIn([0, 1], 'the "rank" parameter is not the expected value').val()
+  // 是否按照list属性排序
+  const rank = ctx.validateQuery('rank').defaultTo(1).toInt().isIn([0, 1], 'rank参数错误').val()
 
   const query = {}
   // 搜索关键词
@@ -26,40 +28,35 @@ exports.list = async (ctx, next) => {
     sort = 'list ' + sort
   }
 
-  const data = await CategoryModel.find(query).sort(sort).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
+  const data = await categoryProxy.find(query).sort(sort)
 
   if (data) {
     for (let i = 0; i < data.length; i++) {
-      if (data[i].toObject) {
+      if (typeof data[i].toObject === 'function') {
         data[i] = data[i].toObject()
       }
-      const articles = await ArticleModel.find({ category: data[i]._id }).exec().catch(err => {
+      const articles = await articleProxy.find({ category: data[i]._id }).exec().catch(err => {
         ctx.log.error(err.message)
         return []
       })
       data[i].count = articles.length
     }
-    ctx.success(data)
+    ctx.success(data, '分类列表获取成功')
   } else {
-    ctx.fail()
+    ctx.fail('分类列表获取失败')
   }
 }
 
+// 分类详情
 exports.item = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
+  const id = ctx.validateParam('id').required('缺少分类ID').toString().isObjectId().val()
 
-  let data = await CategoryModel.findById(id).exec().catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
+  let data = await categoryProxy.getById(id).exec()
 
   if (data) {
     data = data.toObject()
-    const articles = await ArticleModel.find({ tag: id })
-      .select('-tag')
+    const articles = await articleProxy.find({ category: id })
+      .select('-category')
       .exec()
       .catch(err => {
         ctx.log.error(err.message)
@@ -67,119 +64,71 @@ exports.item = async (ctx, next) => {
       })
     data.articles = articles
     data.articles_count = articles.length
-    ctx.success(data)
+    ctx.success(data, '分类详情获取成功')
   } else {
-    ctx.fail()
+    ctx.fail('分类详情获取失败')
   }
 }
 
+// 分类创建
 exports.create = async (ctx, next) => {
-  const name = ctx.validateBody('name')
-    .required('the "name" parameter is required')
-    .notEmpty()
-    .isString('the "name" parameter should be String type')
-    .val()
-  const description = ctx.validateBody('description')
-    .optional()
-    .isString('the "description" parameter should be String type')
-    .val()
-  const list = ctx.validateBody('list')
-    .defaultTo(1)
-    .toInt()
-    .val()
-  const ext = ctx.validateBody('extends')
-    .optional()
-    .isArray('the "extends" parameter should be Array type')
-    .val()
+  const name = ctx.validateBody('name').required('缺少分类名称').notEmpty().val()
+  const description = ctx.validateBody('description').optional().val()
+  const list = ctx.validateBody('list').defaultTo(1).toInt().val()
+  const ext = ctx.validateBody('extends').optional().toArray().val()
 
-  const { length } = await CategoryModel.find({ name }).exec().catch(err => {
+  const { length } = await categoryProxy.find({ name }).exec().catch(err => {
     ctx.log.error(err.message)
     return []
   })
 
   if (!length) {
-    const data = await new CategoryModel({
+    const data = await categoryProxy.newAndSave({
       name,
       description,
       extends: ext,
       list
-    }).save().catch(err => {
-      ctx.log.error(err.message)
-      return null
     })
 
-    if (data) {
-      return ctx.success(data)
-    } else {
-      ctx.fail()
-    }
+    data && data.length
+      ? ctx.success(data, '分类创建成功')
+      : ctx.fail('分类创建失败')
   } else {
-    ctx.fail(-1, `the tag(${name}) is already exist`)
+    ctx.fail(`【${name}】分类已经存在`)
   }
 }
 
+// 分类更新
 exports.update = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
-  const name = ctx.validateBody('name')
-    .optional()
-    .isString('the "name" parameter should be String type')
-    .val()
-  const description = ctx.validateBody('description')
-    .optional()
-    .isString('the "description" parameter should be String type')
-    .val()
-  const list = ctx.validateBody('list')
-    .optional()
-    .toInt()
-    .val()
+  const id = ctx.validateParam('id').required('缺少分类ID').toString().isObjectId().val()
+  const name = ctx.validateBody('name').optional().val()
+  const description = ctx.validateBody('description').optional().val()
+  const list = ctx.validateBody('list').optional().toInt().val()
+  const category = {}
 
-  const tag = {}
+  name && (category.name = name)
+  description && (category.description = description)
+  list && (category.list = list)
 
-  name && (tag.name = name)
-  description && (tag.description = description)
-  list && (tag.list = list)
+  const data = await categoryProxy.updateById(id, category).exec()
 
-  const data = await CategoryModel.findByIdAndUpdate(id, tag, {
-    new: true
-  }).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
-
-  if (data) {
-    ctx.success(data)
-  } else {
-    ctx.fail()
-  }
+  data
+    ? ctx.success(data, '分类更新成功')
+    : ctx.fail('分类更新失败')
 }
 
+// 删除分类
 exports.delete = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
-  const data = await CategoryModel.remove({ _id: id }).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
+  const id = ctx.validateParam('id').required('缺少分类ID').toString().isObjectId().val()
+  const articles = await articleProxy.find({ category: id }).exec()
 
-  if (data && data.result && data.result.ok) {
-    // 删除所有文章关联关系
-    const articles = await ArticleModel.find({ tag: data._id })
-      .exec()
-      .catch(err => {
-        ctx.log.error(err.message)
-        return []
-      })
-    // TODO: 这里应该需要一个容错机制，保证如果有一篇文章没有删除成功的话，需要在规定次数内反复删除
-    await Promise.all(
-      articles.map(item => {
-        return ArticleModel.findByIdAndUpdate(item._id, {
-          tag: item.tag.filter(tag => tag.toString() !== data._id.toString())
-        }).exec()
-      })
-    ).catch(err => {
-      ctx.log.error(err.message)
-    })
-    ctx.success()
+  if (articles && articles.length) {
+    // 分类下面有文章，不能删除
+    ctx.fail('该分类下有文章，不能删除')
   } else {
-    ctx.fail()
+    const data = await categoryProxy.delById(id).exec()
+    data && data.result && data.result.ok
+      ? ctx.success(null, '分类删除成功')
+      : ctx.fail('分类删除失败')
   }
 }

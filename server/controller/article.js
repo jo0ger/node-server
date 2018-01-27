@@ -7,8 +7,7 @@
 'use strict'
 
 const config = require('../config')
-const { ArticleProxy } = require('../proxy')
-const { ArticleModel, CategoryModel, TagModel } = require('../model')
+const { articleProxy, categoryProxy, tagProxy } = require('../proxy')
 const { marked, isObjectId, createObjectId, getDebug, getMonthFromNum, getDocsPaginationData } = require('../util')
 const debug = getDebug('Article')
 
@@ -76,7 +75,7 @@ exports.list = async (ctx, next) => {
       query.category = category
     } else {
       // 普通字符串，需要先查到id
-      const c = await CategoryModel.findOne({ name: category }).exec()
+      const c = await categoryProxy.findOne({ name: category }).exec()
         .catch(err => {
           ctx.log.error(err.message)
           return null
@@ -92,7 +91,7 @@ exports.list = async (ctx, next) => {
       query.tag = tag
     } else {
       // 普通字符串，需要先查到id
-      const t = await TagModel.findOne({ name: tag }).exec()
+      const t = await tagProxy.findOne({ name: tag }).exec()
         .catch(err => {
           ctx.log.error(err.message)
           return null
@@ -131,7 +130,7 @@ exports.list = async (ctx, next) => {
     }
   }
 
-  const articles = await ArticleProxy.paginate(query, options)
+  const articles = await articleProxy.paginate(query, options)
 
   articles
     ? ctx.success(getDocsPaginationData(articles), '文章列表获取成功')
@@ -141,7 +140,7 @@ exports.list = async (ctx, next) => {
 // 热门文章
 exports.hot = async (ctx, next) => {
   const limit = ctx.validateQuery('limit').defaultTo(config.limit.hotLimit).toInt().gt(0, 'limit参数必须大于0').val()
-  const data = await ArticleProxy.find()
+  const data = await articleProxy.find()
     .sort('-meta.comments -meta.ups -meta.pvs')
     .select('-content -renderedContent -state')
     .populate([
@@ -167,9 +166,9 @@ exports.item = async (ctx, next) => {
   let query = null
   // 只有前台博客访问文章的时候pv才+1
   if (!ctx._isAuthenticated) {
-    query = ArticleProxy.updateOne({ _id: id, state: 1 }, { $inc: { 'meta.pvs': 1 } }).select('-content')
+    query = articleProxy.updateOne({ _id: id, state: 1 }, { $inc: { 'meta.pvs': 1 } }).select('-content')
   } else {
-    query = ArticleProxy.getById(id)
+    query = articleProxy.getById(id)
   }
 
   data = await query.populate([
@@ -223,13 +222,13 @@ exports.create = async (ctx, next) => {
   article.content = content
   article.renderedContent = marked(content)
 
-  let data = await ArticleProxy.newAndSave(article)
+  let data = await articleProxy.newAndSave(article)
 
   if (data && data.length) {
     data = data[0]
     if (!data.permalink) {
       // 更新永久链接
-      data = await ArticleProxy.updateById(data._id, {
+      data = await articleProxy.updateById(data._id, {
         permalink: `${config.site}/article/${data._id}`
       }).exec().catch(err => {
         ctx.log.error('文章永久链接更新失败', err.message)
@@ -273,7 +272,7 @@ exports.update = async (ctx, next) => {
     article.renderedContent = marked(content)
   }
 
-  const data = await ArticleProxy.updateById(id, article).populate('category tag').exec()
+  const data = await articleProxy.updateById(id, article).populate('category tag').exec()
 
   data
     ? ctx.success(data, '文章更新成功')
@@ -283,33 +282,31 @@ exports.update = async (ctx, next) => {
 // 删除文章
 exports.delete = async (ctx, next) => {
   const id = ctx.validateParam('id').required('缺少文章ID').toString().isObjectId().val()
-  const data = await ArticleProxy.delById(id).exec()
+  const data = await articleProxy.delById(id).exec()
 
-  if (data && data.result && data.result.ok) {
-    ctx.success(true, '文章删除成功')
-  } else {
-    ctx.fail('文章删除失败')
-  }
+  data && data.result && data.result.ok
+    ? ctx.success(null, '文章删除成功')
+    : ctx.fail('文章删除失败')
 }
 
 // 文章点赞
 exports.like = async (ctx, next) => {
   const id = ctx.validateParam('id').required('缺少文章ID').toString().isObjectId().val()
   const like = ctx.validateBody('like').defaultTo(true).toBoolean().val()
-  const data = await ArticleProxy.updateById(id, {
+  const data = await articleProxy.updateById(id, {
     $inc: {
       'meta.ups': like ? 1 : -1
     }
-  })
+  }).exec()
 
   data
-    ? ctx.success(true, '文章点赞成功')
+    ? ctx.success(null, '文章点赞成功')
     : ctx.fail('文章点赞失败')
 }
 
 // 文章归档
-exports.archive = async (ctx, next) => {
-  let data = await ArticleModel.aggregate([
+exports.archives = async (ctx, next) => {
+  let data = await articleProxy.aggregate([
     { $match: { state: 1 } },
     { $sort: { createdAt: 1 } },
     {
@@ -372,7 +369,7 @@ exports.archive = async (ctx, next) => {
 async function getRelatedArticles (ctx, data) {
   data.related = []
   let { _id, tag = [] } = data
-  const articles = await ArticleProxy.find({
+  const articles = await articleProxy.find({
     _id: { $nin: [ _id ] },
     state: 1,
     tag: { $in: tag.map(t => t._id) }
@@ -406,7 +403,7 @@ async function getSiblingArticles (ctx, data) {
     if (!ctx._isAuthenticated) {
       query.state = 1
     }
-    const prev = await ArticleProxy.findOne(query)
+    const prev = await articleProxy.findOne(query)
       .select('title createdAt publishedAt thumb category')
       .populate({
         path: 'category',
@@ -419,7 +416,7 @@ async function getSiblingArticles (ctx, data) {
         ctx.log.error('前一篇文章获取失败，err：', err.message)
         return null
       })
-    const next = await ArticleProxy.findOne(query)
+    const next = await articleProxy.findOne(query)
       .select('title createdAt publishedAt thumb category')
       .populate({
         path: 'category',

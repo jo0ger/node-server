@@ -22,7 +22,7 @@ const {
 // Article
 router.get('/articles', article.list)
 router.get('/articles/hot', article.hot)
-router.get('/articles/archives', article.archive)
+router.get('/articles/archives', article.archives)
 router.get('/articles/:id', article.item)
 router.post('/articles/:id/like', article.like)
 

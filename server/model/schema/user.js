@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   site: { type: String, validate: isSiteUrl },
   slogan: { type: String },
   description: { type: String, default: '' },
-  // 角色 0 管理员 | 1 普通用户 | 2 github用户
+  // 角色 0 管理员 | 1 普通用户 | 2 github用户，不能更改
   role: { type: Number, default: 1 },
   // role = 0的时候才有该项
   password: { type: String },
@@ -27,6 +27,7 @@ const userSchema = new mongoose.Schema({
   location: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  // github信息，不能手动更改
   github: {
     id: { type: String, default: '' },
     login: { type: String, default: '' }

@@ -10,7 +10,7 @@ const compose = require('koa-compose')
 const jwt = require('jsonwebtoken')
 const passport = require('koa-passport')
 const config = require('../config')
-const { UserModel } = require('../model')
+const { userProxy } = require('../proxy')
 const debug = require('../util').getDebug('Auth')
 const isProd = process.env.NODE_ENV === 'production'
 const redirectReg = /auth\/github\/login(.*?)/
@@ -75,8 +75,8 @@ exports.isAuthenticated = () => {
       }
 
       const userId = ctx.cookies.get(config.auth.userCookieKey, { signed: false })
-      const user = await UserModel.findById(userId).exec().catch(err => {
-        debug.error('用户查找失败, 错误：', err.message)
+      const user = await userProxy.getById(userId).exec().catch(err => {
+        debug.error('token验证时用户查找失败, 错误：', err.message)
         ctx.log.error(err.message)
         return null
       })

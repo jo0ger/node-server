@@ -1,5 +1,5 @@
 /**
- * @desc Server entry
+ * @desc Server entrance
  * @author Jooger <iamjooger@gmail.com>
  * @date 25 Sep 2017
  */
@@ -16,21 +16,14 @@ const passport = require('koa-passport')
 const compress = require('koa-compress')
 const bodyparser = require('koa-bodyparser')
 const koaBunyanLogger = require('koa-bunyan-logger')
-
 const packageInfo = require('../package.json')
 const middlewares = require('./middleware')
+const routes = require('./routes')
 const config = require('./config')
-const { mongo, redis, akismet, validation, mailer, gc } = require('./plugins')
-const { crontab } = require('./service')
-const isProd = process.env.NODE_ENV === 'production'
+const { mongo, redis, akismet, validation, mailer, gc, crontab } = require('./plugins')
 
 const app = new Koa()
-
-// connect mongodb
-mongo.connect()
-
-// connect redis
-redis.connect()
+app.keys = config.auth.secrets
 
 // load custom validations
 bouncer.Validator = validation
@@ -38,7 +31,6 @@ bouncer.Validator = validation
 // error handler
 onerror(app)
 
-app.keys = config.auth.secrets
 
 // middlewares
 app.use(bodyparser({
@@ -63,8 +55,13 @@ app.use(passport.initialize())
 app.use(compress())
 
 // routes
-require('./routes')(app)
+routes(app)
 
+// connect mongodb
+mongo.connect()
+
+// connect redis
+redis.connect()
 // akismet
 akismet.start()
 
@@ -74,11 +71,7 @@ mailer.start()
 // crontab
 crontab.start()
 
-if (isProd) {
-  // v8 gc
-  gc.start()
-}
-
-app.on('error', function () {})
+// v8 gc
+gc.start()
 
 module.exports = app
