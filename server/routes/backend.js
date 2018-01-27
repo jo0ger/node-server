@@ -58,9 +58,12 @@ router.patch('/options', isAuthenticated, option.update)
 
 // User
 router.get('/users', isAuthenticated, user.list)
+router.get('/users/blogger', isAuthenticated, user.blogger)
+router.get('/users/guests', isAuthenticated, user.guests)
 router.get('/users/:id', isAuthenticated, user.item)
-router.patch('/users/:id', isAuthenticated, user.update)
-router.delete('/users/:id', isAuthenticated, user.delete)
+router.patch('/users/me/password', isAuthenticated, user.password)
+router.patch('/users/me', isAuthenticated, user.updateMe)
+router.patch('/users/:id/mute', isAuthenticated, user.mute)
 
 // Music
 router.get('/music/songs', isAuthenticated, music.list)

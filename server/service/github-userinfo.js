@@ -33,13 +33,13 @@ exports.getGithubUsersInfo = (githubNames = '') => {
       }
     }).then(res => {
       if (res && res.status === 200) {
-        debug.success('抓取【 %s 】信息成功', name)
+        debug.success('【 %s 】信息抓取成功', name)
         return res.data
       }
       return null
     })
     .catch(err => {
-      debug.error('抓取【 %s 】信息失败，错误：%s', name, err.message)
+      debug.error('【 %s 】信息抓取失败，错误：%s', name, err.message)
       return null
     })
   })

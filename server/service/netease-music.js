@@ -7,7 +7,9 @@
 'use strict'
 
 const axios = require('axios')
+const NeteseMusic = require('simple-netease-cloud-music')
 const { encrypt, getDebug } = require('../util')
+const neteaseMusic = new NeteseMusic()
 const debug = getDebug('Netease')
 
 const neFetcher = axios.create({
@@ -93,4 +95,7 @@ const fetchNE = function (type = '', id = '') {
   })
 }
 
-module.exports = fetchNE
+module.exports = {
+  neteaseMusic,
+  fetchNE
+}

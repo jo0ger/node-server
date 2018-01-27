@@ -7,11 +7,13 @@
 'use strict'
 
 const config = require('../config')
+const { userProxy, commentProxy } = require('../proxy')
 const { UserModel, CommentModel } = require('../model')
 const { bhash, bcompare, getDebug, proxy } = require('../util')
 const { getGithubUsersInfo } = require('../service')
 const debug = getDebug('User')
 
+// 用户列表
 exports.list = async (ctx, next) => {
   let select = '-password'
 
@@ -19,133 +21,111 @@ exports.list = async (ctx, next) => {
     select += ' -createdAt -updatedAt -role'
   }
 
-  const data = await UserModel.find({})
+  const data = await userProxy.find()
     .sort('-createdAt')
     .select(select)
-    .catch(err => {
-      ctx.log.error(err.message)
-      return null
-    })
 
-  if (data) {
-    ctx.success(data)
-  } else {
-    ctx.fail()
-  }
+  data
+    ? ctx.success(data, '用户列表获取成功')
+    : ctx.fail('用户列表获取失败')
 }
 
+// 用户详情
 exports.item = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
+  const id = ctx.validateParam('id').required('缺少用户ID').toString().isObjectId().val()
   let select = '-password'
 
   if (!ctx._isAuthenticated) {
     select += ' -createdAt -updatedAt -github'
   }
-
-  const data = await UserModel.findById(id)
+  
+  const data = await userProxy.getById(id)
     .select(select)
     .exec()
-    .catch(err => {
-      ctx.log.error(err.message)
-      return null
-    })
 
-  if (data) {
-    ctx.success(data)
-  } else {
-    ctx.fail()
-  }
+  data
+    ? ctx.success(data, '用户详情获取成功')
+    : ctx.fail('用户详情获取失败')
 }
 
-exports.update = async (ctx, next) => {
-  const name = ctx.validateBody('name').optional().isString('the "name" parameter should be String type').val()
-  const email = ctx.validateBody('email').optional().isString('the "email" parameter should be String type').isEmail('Invalid email format').val()
-  const site = ctx.validateBody('site').optional().isString('the "site" parameter should be String type').val()
-  const description = ctx.validateBody('description').optional().isString('the "description" parameter should be String type').val()
-  const avatar = ctx.validateBody('avatar').optional().isString('the "avatar" parameter should be String type').val()
-  const slogan = ctx.validateBody('slogan').optional().isString('the "slogan" parameter should be String type').val()
-  const role = ctx.validateBody('role').optional().toInt().isIn(Object.values(config.constant.roleMap), 'the "role" parameter is not the expected value').val()
-  const password = ctx.validateBody('password').optional().isString('the "password" parameter should be String type').val()
-  const mute = ctx.validateBody('mute').optional().toBoolean().val()
+// 用户更新，只能更新自己
+exports.updateMe = async (ctx, next) => {
+  const name = ctx.validateBody('name').optional().val()
+  const email = ctx.validateBody('email').optional().isEmail('Email格式错误').val()
+  const site = ctx.validateBody('site').optional().val()
+  const description = ctx.validateBody('description').optional().val()
+  const avatar = ctx.validateBody('avatar').optional().val()
+  const slogan = ctx.validateBody('slogan').optional().val()
+  const company = ctx.validateBody('company').optional().val()
+  const location = ctx.validateBody('location').optional().val()
   const user = {}
 
   name && (user.name = name)
   slogan && (user.slogan = slogan)
+  company && (user.company = company)
+  location && (user.location = location)
   site && (user.site = site)
   description && (user.description = description)
   avatar && (user.avatar = avatar)
   email && (user.email = email)
 
-  if (role !== undefined) {
-    user.role = role
-  }
-
-  if (mute !== undefined) {
-    user.mute = mute
-  }
-
-  if (password !== undefined) {
-    const oldPassword = ctx.validateBody('old_password')
-      .required('the "old_password" parameter is required')
-      .notEmpty()
-      .isString('the "old_password" parameter should be String type')
-      .val()
-
-    const vertifyPassword = bcompare(oldPassword, ctx._user.password)
-    if (!vertifyPassword) {
-      return ctx.fail(-1, 'old password is not correct')
-    }
-    user.password = bhash(password)
-  }
-
-  const data = await UserModel.findByIdAndUpdate(ctx._user._id, user, {
-    new: true
-  }).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
-
-  if (data) {
-    ctx.success(data)
-  } else {
-    ctx.fail()
-  }
+  const data = await userProxy.updateById(ctx._user._id, user).exec()
+  data
+    ? ctx.success(data, '用户更新成功')
+    : ctx.fail('用户更新失败')
 }
 
-exports.delete = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
-  const data = await UserModel.remove({ _id: id }).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
-
-  if (data && data.result && data.result.ok) {
-    ctx.success()
-  } else {
-    ctx.fail()
+// 更新密码
+exports.password = async (ctx, next) => {
+  const password = ctx.validateBody('password').required('缺少新密码').notEmpty().val()
+  const oldPassword = ctx.validateBody('old_password').required('缺少原密码').notEmpty().val()
+  const vertifyPassword = bcompare(oldPassword, ctx._user.password)
+  if (!vertifyPassword) {
+    return ctx.fail('原密码错误')
   }
+
+  const data = await userProxy.updateById(ctx._user._id, {
+      password: bhash(password)
+    }).exec()
+  data
+    ? ctx.success(data, '密码更新成功')
+    : ctx.fail('密码更新失败')
 }
 
+// 用户禁言/解禁
+exports.mute = async (ctx, next) => {
+  const id = ctx.validateParam('id').required('缺少用户ID').toString().isObjectId().val()
+  const mute = ctx.validateBody('mute').defaultTo(true).toBoolean().val()
+  const data = await userProxy.updateById(id, { mute }).exec()
+  const msg = mute ? '用户禁言' : '用户解禁'
+  data
+    ? ctx.success(null, `${msg}成功`)
+    : ctx.fail(`${msg}失败`)
+}
+
+// 博主信息获取
 exports.blogger = async (ctx, next) => {
-  const data = await UserModel
+  const data = await userProxy
     .findOne({ 'github.login': config.author, role: 0 })
     .select('-password -role -createdAt -updatedAt -github -mute')
     .exec()
-    .catch(err => {
-      ctx.log.error(err.message)
-      return null
-    })
 
-  if (data) {
-    ctx.success(data)
-  } else {
-    ctx.fail()
-  }
+  data
+    ? ctx.success(data, '博主详情获取成功')
+    : ctx.fail('博主详情获取失败')
 }
 
+// 站内留言墙的用户，只限站内留言
 exports.guests = async (ctx, next) => {
-  // $lookup尝试失败，只能循环查询用户了
-  let data = await CommentModel.aggregate([
+  // OPTIMIZE: $lookup尝试失败，只能循环查询用户了
+  let data = await commentProxy.aggregate([
+    {
+      $match: {
+        spam: false, // 非垃圾留言
+        state: 1, // 审核通过
+        type: 1 // 站内留言
+      }
+    },
     {
       $sort: {
         createdAt: -1
@@ -156,9 +136,10 @@ exports.guests = async (ctx, next) => {
         _id: '$author'
       }
     }
-  ])
+  ]).exec()
+
   let list = await Promise.all((data || []).map((item) => {
-    return UserModel.findOne({
+    return userProxy.findOne({
       _id: item._id,
       $nor: [
         {
@@ -167,55 +148,11 @@ exports.guests = async (ctx, next) => {
           'github.login': config.author
         }
       ]
-    }).select('name site avatar')
+    }).select('name site avatar').exec()
   }))
   list = list.filter(item => !!item)
   ctx.success({
     list,
     total: list.length
-  })
-}
-
-// 更新用户的Github信息
-exports.updateGithubInfo = async () => {
-  const users = await UserModel.find({})
-    .exec()
-    .catch(err => {
-      debug.error('用户查找失败，错误：', err.message)
-      return []
-    })
-  const githubUsers = users.reduce((sum, user) => {
-    if (user.role === config.constant.roleMap.GITHUB_USER || (user.role === config.constant.roleMap.ADMIN && user.github.login)) {
-      sum.push(user)
-    }
-    return sum
-  }, [])
-  const updates = await getGithubUsersInfo(githubUsers.map(user => user.github.login))
-  Promise.all(
-    updates.reduce((tasks, data, index) => {
-      const user = githubUsers[index]
-      const u = {
-        name: data.name,
-        email: data.email,
-        avatar: proxy(data.avatar_url),
-        site: data.blog || data.url,
-        slogan: data.bio,
-        company: data.company,
-        location: data.location,
-        github: {
-          id: data.id,
-          login: data.login
-        }
-      }
-      tasks.push(
-        UserModel.findByIdAndUpdate(user._id, u).exec().catch(err => {
-          debug.error('Github用户信息更新失败，错误：', err.message)
-          return null
-        })
-      )
-      return tasks
-    }, [])
-  ).then(() => {
-    debug.success('所有Github用户信息更新成功')
-  })
+  }, '站内留言用户列表获取成功')
 }

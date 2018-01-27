@@ -12,5 +12,5 @@ const { getGithubUsersInfo, getGithubAuthUserInfo } = require('./github-userinfo
 exports.getGithubUsersInfo = getGithubUsersInfo
 exports.getGithubAuthUserInfo = getGithubAuthUserInfo
 exports.getGithubToken = require('./github-token')
-exports.fetchNE = require('./netease-music')
-exports.crontab = require('./crontab')
+exports.netease = require('./netease-music')
+exports.modelUpdate = require('./model-update')
