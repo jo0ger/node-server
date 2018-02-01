@@ -61,6 +61,7 @@ exports.updateGithubInfo = async () => {
 	const updates = await getGithubUsersInfo(githubUsers.map(user => user.github.login))
 	Promise.all(
 		updates.reduce((tasks, data, index) => {
+			if (!data) return tasks
 			const user = githubUsers[index]
 			const u = {
 				name: data.name,
@@ -84,7 +85,9 @@ exports.updateGithubInfo = async () => {
 			return tasks
 		}, [])
 	).then(() => {
-		debug.success('所有Github用户信息更新成功')
+		debug.success('Github用户信息全部更新成功')
+	}).catch(err => {
+		debug.error(err.message)
 	})
 }
 
