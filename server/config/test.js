@@ -5,3 +5,5 @@
  */
 
 'use strict'
+
+module.exports = {}

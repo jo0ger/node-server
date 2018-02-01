@@ -10,9 +10,9 @@ const BaseProxy = require('./base')
 const { MomentModel } = require('../model')
 
 class MomentProxy extends BaseProxy {
-  constructor () {
-    super(MomentModel)
-  }
+	constructor () {
+		super(MomentModel)
+	}
 }
 
 module.exports = new MomentProxy()

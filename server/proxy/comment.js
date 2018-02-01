@@ -10,9 +10,9 @@ const BaseProxy = require('./base')
 const { CommentModel } = require('../model')
 
 class CommentProxy extends BaseProxy {
-  constructor () {
-    super(CommentModel)
-  }
+	constructor () {
+		super(CommentModel)
+	}
 }
 
 module.exports = new CommentProxy()

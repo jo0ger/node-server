@@ -10,6 +10,6 @@ const jwt = require('jsonwebtoken')
 const config = require('../config')
 
 module.exports = (payload = {}, isLogin = true) => {
-  const { secrets, session } = config.auth
-  return jwt.sign(payload, secrets, { expiresIn: isLogin ? session.maxAge : 0 })
+	const { secrets, session } = config.auth
+	return jwt.sign(payload, secrets, { expiresIn: isLogin ? session.maxAge : 0 })
 }

@@ -33,7 +33,8 @@
     "pm2": "pm2 startOrReload ecosystem.config.js",
     "pm2:prod": "pm2 startOrReload ecosystem.config.js --env production",
     "deploy": "pm2 deploy ecosystem.config.js production",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "precommit": "npm run lint",
+    "lint": "eslint --ext .js,.ts --ignore-path .gitignore ."
   },
   "dependencies": {
     "akismet-api": "^3.0.0",
@@ -73,6 +74,20 @@
   },
   "devDependencies": {
     "cross-env": "^5.0.5",
+    "eslint": "^4.16.0",
+    "eslint-config-koa": "^2.0.2",
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1",
     "nodemon": "^1.8.1"
+  },
+  "config": {
+    "pre-git": {
+      "pre-commit": [
+        "npm run precommit"
+      ]
+    }
   }
 }

@@ -12,50 +12,50 @@ const modulus = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b72
 const nonce = '0CoJUm6Qyw8W8jud'
 const pubKey = '010001'
 
-const createSecretKey = (size) => {
-    const keys = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    let key = ""
-    for (let i = 0; i < size; i++) {
-        let pos = Math.random() * keys.length
-        pos = Math.floor(pos)
-        key = key + keys.charAt(pos)
-    }
-    return key
+const createSecretKey = size => {
+	const keys = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+	let key = ''
+	for (let i = 0; i < size; i++) {
+		let pos = Math.random() * keys.length
+		pos = Math.floor(pos)
+		key = key + keys.charAt(pos)
+	}
+	return key
 }
 
 const aesEncrypt = (text, secKey) => {
-    const _text = text
-    const lv = new Buffer('0102030405060708', "binary")
-    const _secKey = new Buffer(secKey, "binary")
-    const cipher = crypto.createCipheriv('AES-128-CBC', _secKey, lv)
-    let encrypted = cipher.update(_text, 'utf8', 'base64')
-    encrypted += cipher.final('base64')
-    return encrypted
+	const _text = text
+	const lv = Buffer.from('0102030405060708', 'binary')
+	const _secKey = Buffer.from(secKey, 'binary')
+	const cipher = crypto.createCipheriv('AES-128-CBC', _secKey, lv)
+	let encrypted = cipher.update(_text, 'utf8', 'base64')
+	encrypted += cipher.final('base64')
+	return encrypted
 }
 
 const zfill = (str, size) => {
-    while (str.length < size) str = "0" + str
-    return str
+	while (str.length < size) str = '0' + str
+	return str
 }
 
 const rsaEncrypt = (text, pubKey, modulus) => {
-    const _text = text.split('').reverse().join('')
-    const biText = bigInt(new Buffer(_text).toString('hex'), 16),
-        biEx = bigInt(pubKey, 16),
-        biMod = bigInt(modulus, 16),
-        biRet = biText.modPow(biEx, biMod)
-    return zfill(biRet.toString(16), 256)
+	const _text = text.split('').reverse().join('')
+	const biText = bigInt(Buffer.from(_text).toString('hex'), 16)
+	const biEx = bigInt(pubKey, 16)
+	const biMod = bigInt(modulus, 16)
+	const biRet = biText.modPow(biEx, biMod)
+	return zfill(biRet.toString(16), 256)
 }
 
-const encrypt = (params) => {
-    const text = JSON.stringify(params)
-    const secKey = createSecretKey(16)
-    const encText = aesEncrypt(aesEncrypt(text, nonce), secKey)
-    const encSecKey = rsaEncrypt(secKey, pubKey, modulus)
-    return {
-        params: encText,
-        encSecKey: encSecKey
-    }
+const encrypt = params => {
+	const text = JSON.stringify(params)
+	const secKey = createSecretKey(16)
+	const encText = aesEncrypt(aesEncrypt(text, nonce), secKey)
+	const encSecKey = rsaEncrypt(secKey, pubKey, modulus)
+	return {
+		params: encText,
+		encSecKey: encSecKey
+	}
 }
 
 module.exports = encrypt

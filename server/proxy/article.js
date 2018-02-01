@@ -10,9 +10,9 @@ const BaseProxy = require('./base')
 const { ArticleModel } = require('../model')
 
 class ArticleProxy extends BaseProxy {
-  constructor () {
-    super(ArticleModel)
-  }
+	constructor () {
+		super(ArticleModel)
+	}
 }
 
 module.exports = new ArticleProxy()

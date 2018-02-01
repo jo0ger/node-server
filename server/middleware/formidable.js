@@ -9,31 +9,31 @@
 const formidable = require('formidable')
 
 const middleware = (opts = {}) => async (ctx, next) => {
-  const res = await middleware.parse(opts, ctx).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
-  if (res) {
-    ctx.request.body = res.fields
-    ctx.request.files = res.files
-  }
-  await next()
+	const res = await middleware.parse(opts, ctx).catch(err => {
+		ctx.log.error(err.message)
+		return null
+	})
+	if (res) {
+		ctx.request.body = res.fields
+		ctx.request.files = res.files
+	}
+	await next()
 }
 
 middleware.parse = (opts = {}, ctx) => {
-  return new Promise((resolve, reject) => {
-    const form = new formidable.IncomingForm()
-    for(const key in opts){
-      form[key] = opts[key]
-    }
-    form.parse(ctx.request, (err, fields, files) => {
-      if (err) return reject(err)
-      resolve({
-        fields,
-        files
-      })
-    })
-  })
+	return new Promise((resolve, reject) => {
+		const form = new formidable.IncomingForm()
+		for (const key in opts) {
+			form[key] = opts[key]
+		}
+		form.parse(ctx.request, (err, fields, files) => {
+			if (err) return reject(err)
+			resolve({
+				fields,
+				files
+			})
+		})
+	})
 }
 
 module.exports = middleware

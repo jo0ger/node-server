@@ -10,9 +10,9 @@ const BaseProxy = require('./base')
 const { OptionModel } = require('../model')
 
 class OptionProxy extends BaseProxy {
-  constructor () {
-    super(OptionModel)
-  }
+	constructor () {
+		super(OptionModel)
+	}
 }
 
 module.exports = new OptionProxy()
