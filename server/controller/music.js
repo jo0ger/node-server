@@ -91,7 +91,7 @@ exports.lyric = async (ctx, next) => {
   .isString('the "song_id" parameter should be String type')
   .val()
 
-  const data = await neteaseMusic.lyric(songId)
+  const data = await netease.neteaseMusic.lyric(songId)
 
   ctx.success(data)
 }
@@ -103,7 +103,7 @@ exports.cover = async (ctx, next) => {
   .isString('the "cover_id" parameter should be String type')
   .val()
 
-  const data = await neteaseMusic.picture(coverId)
+  const data = await netease.neteaseMusic.picture(coverId)
 
   ctx.success(data)
 }
