@@ -7,71 +7,71 @@
 'use strict'
 
 module.exports = class BaseProxy {
-  constructor (Model) {
-    this.Model = Model
-  }
+	constructor (Model) {
+		this.Model = Model
+	}
 
-  newAndSave (docs) {
-    if (!Array.isArray(docs)) {
-      docs = [docs]
-    }
-    return this.Model.insertMany(docs)
-  }
+	newAndSave (docs) {
+		if (!Array.isArray(docs)) {
+			docs = [docs]
+		}
+		return this.Model.insertMany(docs)
+	}
 
-  paginate (query, opt = {}) {
-    return this.Model.paginate(query, opt)
-  }
+	paginate (query, opt = {}) {
+		return this.Model.paginate(query, opt)
+	}
 
-  getById (id) {
-    return this.Model.findById(id)
-  }
+	getById (id) {
+		return this.Model.findById(id)
+	}
 
-  find (query = {}, opt = {}) {
-    return this.Model.find(query, null, opt)
-  }
+	find (query = {}, opt = {}) {
+		return this.Model.find(query, null, opt)
+	}
 
-  findOne (query = {}, opt = {}) {
-    return this.Model.findOne(query, null, opt)
-  }
+	findOne (query = {}, opt = {}) {
+		return this.Model.findOne(query, null, opt)
+	}
 
-  updateById (id, doc, opt = {}) {
-    return this.Model.findByIdAndUpdate(id, doc, {
-      new: true,
-      ...opt
-    })
-  }
+	updateById (id, doc, opt = {}) {
+		return this.Model.findByIdAndUpdate(id, doc, {
+			new: true,
+			...opt
+		})
+	}
 
-  updateOne (query = {}, doc = {}, opt = {}) {
-    return this.Model.findOneAndUpdate(query, doc, {
-      new: true,
-      ...opt
-    })
-  }
+	updateOne (query = {}, doc = {}, opt = {}) {
+		return this.Model.findOneAndUpdate(query, doc, {
+			new: true,
+			...opt
+		})
+	}
 
-  updateMany (query = {}, doc = {}, opt = {}) {
-    return this.Model.update(query, doc, {
-      multi: true,
-      ...opt
-    })
-  }
+	updateMany (query = {}, doc = {}, opt = {}) {
+		return this.Model.update(query, doc, {
+			multi: true,
+			...opt
+		})
+	}
 
-  del (query) {
-    return this.Model.remove(query)
-  }
+	del (query) {
+		return this.Model.remove(query)
+	}
 
-  delById (id) {
-    return this.del({ _id: id })
-  }
+	delById (id) {
+		return this.del({ _id: id })
+	}
 
-  delByIds (ids) {
-    return this.del({
-      _id: {
-        $in: ids
-      }
-    })
-  }
+	delByIds (ids) {
+		return this.del({
+			_id: {
+				$in: ids
+			}
+		})
+	}
 
-  aggregate (opt = {}) {
-    return this.Model.aggregate(opt)
-  }
+	aggregate (opt = {}) {
+		return this.Model.aggregate(opt)
+	}
 }

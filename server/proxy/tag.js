@@ -10,9 +10,9 @@ const BaseProxy = require('./base')
 const { TagModel } = require('../model')
 
 class TagProxy extends BaseProxy {
-  constructor () {
-    super(TagModel)
-  }
+	constructor () {
+		super(TagModel)
+	}
 }
 
 module.exports = new TagProxy()

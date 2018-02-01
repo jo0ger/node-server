@@ -8,16 +8,16 @@
 
 const router = require('koa-router')()
 const {
-  article,
-  category,
-  tag,
-  comment,
-  option,
-  user,
-  auth,
-  music,
-  statistics,
-  moment
+	article,
+	category,
+	tag,
+	comment,
+	option,
+	user,
+	auth,
+	music,
+	statistics,
+	moment
 } = require('../controller')
 const { authenticate } = require('../middleware')
 const isAuthenticated = authenticate.isAuthenticated()
@@ -25,7 +25,7 @@ const isAuthenticated = authenticate.isAuthenticated()
 // Article
 router.get('/articles', isAuthenticated, article.list)
 router.get('/articles/:id', isAuthenticated, article.item)
-router.post('/articles',isAuthenticated,  article.create)
+router.post('/articles', isAuthenticated, article.create)
 router.patch('/articles/:id', isAuthenticated, article.update)
 router.delete('/articles/:id', isAuthenticated, article.delete)
 router.post('/articles/:id/like', isAuthenticated, article.like)
