@@ -27,7 +27,7 @@
   },
   "bin": "./node_modules/.bin/",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon bin/www",
+    "start": "cross-env NODE_ENV=development nodemon bin/www",
     "debug": "cross-env NODE_ENV=development nodemon --inspect bin/www",
     "prod": "cross-env NODE_ENV=production nodemon bin/www",
     "pm2": "pm2 startOrReload ecosystem.config.js",

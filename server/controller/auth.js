@@ -8,6 +8,7 @@
 
 // const passport = require('koa-passport')
 const config = require('../config')
+const { userProxy } = require('../proxy')
 const { UserModel } = require('../model')
 const { bcompare, getDebug, signToken, proxy, randomString } = require('../util')
 const debug = getDebug('Auth')
@@ -16,21 +17,10 @@ const { getGithubToken, getGithubAuthUserInfo } = require('../service')
 // const isProd = process.env.NODE_ENV === 'production'
 
 exports.localLogin = async (ctx, next) => {
-	const name = ctx.validateBody('name')
-		.required('the "name" parameter is required')
-		.notEmpty()
-		.isString('the "name" parameter should be String type')
-		.val()
-	const password = ctx.validateBody('password')
-		.required('the "password" parameter is required')
-		.notEmpty()
-		.isString('the "password" parameter should be String type')
-		.val()
+	const name = ctx.validateBody('name').required('缺少登录名').notEmpty().val()
+	const password = ctx.validateBody('password').required('缺少密码').notEmpty().val()
 
-	const user = await UserModel.findOne({ name }).catch(err => {
-		ctx.log.error(err.message)
-		return null
-	})
+	const user = await userProxy.findOne({ name }).exec()
 
 	if (user) {
 		const vertifyPassword = bcompare(password, user.password)
@@ -46,12 +36,12 @@ exports.localLogin = async (ctx, next) => {
 			ctx.success({
 				id: user._id,
 				token
-			}, 'login success')
+			}, '登录成功')
 		} else {
-			ctx.fail(-1, 'incorrect password')
+			ctx.fail('密码错误')
 		}
 	} else {
-		ctx.fail(-1, 'user doesn\'t exist')
+		ctx.fail('用户不存在')
 	}
 }
 
@@ -64,7 +54,7 @@ exports.logout = async (ctx, next) => {
 	ctx.cookies.set(session.key, token, { signed: false, domain: session.domain, maxAge: 0, httpOnly: false })
 	ctx.cookies.set(config.auth.userCookieKey, ctx._user._id, { signed: false, domain: session.domain, maxAge: 0, httpOnly: false })
 	debug.success('登出成功, 用户ID：%s，用户名：%s', ctx.user._id, ctx.user.name)
-	ctx.success(null, 'logout success')
+	ctx.success(null, '登出成功')
 }
 
 exports.info = async (ctx, next) => {
