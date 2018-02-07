@@ -55,15 +55,15 @@ module.exports = class BaseProxy {
 		})
 	}
 
-	del (query) {
+	del (query = {}) {
 		return this.Model.remove(query)
 	}
 
-	delById (id) {
+	delById (id = '') {
 		return this.del({ _id: id })
 	}
 
-	delByIds (ids) {
+	delByIds (ids = []) {
 		return this.del({
 			_id: {
 				$in: ids
@@ -73,5 +73,9 @@ module.exports = class BaseProxy {
 
 	aggregate (opt = {}) {
 		return this.Model.aggregate(opt)
+	}
+
+	count (query = {}) {
+		return this.Model.count(query)
 	}
 }
