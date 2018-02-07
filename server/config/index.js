@@ -21,7 +21,7 @@ const baseConfig = {
 	port: process.env.PORT || 3001,
 	// 限制参数
 	limit: {
-		articleLimit: 3,
+		articleLimit: 15,
 		// 相关文章限制个数
 		relatedArticleLimit: 10,
 		hotLimit: 7,
