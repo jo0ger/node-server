@@ -83,7 +83,7 @@ exports.getDocsPaginationData = (docs = {}) => {
 		list: docs.docs,
 		pagination: {
 			total: docs.total,
-			current_page: docs.page > docs.pages ? docs.pages : docs.page,
+			cur_page: docs.page > docs.pages ? docs.pages : docs.page,
 			total_page: docs.pages,
 			per_page: docs.limit
 		}
