@@ -6,9 +6,14 @@
 
 'use strict'
 
+const isDocker = process.env.RUN_ENV === 'docker'
+
 module.exports = {
 	mongo: {
-		uri: 'mongodb://127.0.0.1/jooger-me'
+		uri: `mongodb://${isDocker ? 'mongo' : '127.0.0.1'}/jooger-me`
+	},
+	redis: {
+		host: isDocker ? 'redis' : '127.0.0.1'
 	},
 	auth: {
 		session: {

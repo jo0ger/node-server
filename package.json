@@ -1,6 +1,6 @@
 {
   "name": "node-server",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "description": "🔥 My blog's api server build by koa2 and mongoose",
   "homepage": "https://github.com/jo0ger/node-server",
@@ -31,7 +31,7 @@
     "debug": "cross-env NODE_ENV=development nodemon --inspect bin/www",
     "prod": "cross-env NODE_ENV=production nodemon bin/www",
     "pm2": "pm2 startOrReload ecosystem.config.js",
-    "pm2:prod": "pm2 startOrReload ecosystem.config.js --env production",
+    "prod:pm2": "pm2 startOrReload ecosystem.config.js --env production",
     "deploy": "pm2 deploy ecosystem.config.js production",
     "precommit": "npm run lint",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore ."
@@ -44,11 +44,9 @@
     "crypto": "^1.0.1",
     "debug": "^2.6.9",
     "formidable": "^1.1.1",
-    "gc-stats": "^1.0.2",
     "geoip-lite": "^1.2.1",
     "gravatar": "^1.6.0",
     "highlight.js": "^9.12.0",
-    "idle-gc": "^1.0.1",
     "jsonwebtoken": "^8.1.0",
     "koa": "^2.4.1",
     "koa-bodyparser": "^3.2.0",
@@ -93,10 +91,7 @@
       "pre-commit": [
         "npm run precommit"
       ],
-      "post-commit": "git status",
-      "pre-push": [],
-      "post-checkout": "",
-      "post-merge": ""
+      "post-commit": "git status"
     }
   }
 }
