@@ -20,7 +20,7 @@ const packageInfo = require('../package.json')
 const middlewares = require('./middleware')
 const routes = require('./routes')
 const config = require('./config')
-const { mongo, redis, akismet, validation, mailer, gc, crontab } = require('./plugins')
+const { mongo, redis, akismet, validation, mailer, crontab } = require('./plugins')
 
 const app = new Koa()
 app.keys = config.auth.secrets
@@ -69,8 +69,5 @@ mailer.start()
 
 // crontab
 crontab.start()
-
-// v8 gc
-gc.start()
 
 module.exports = app

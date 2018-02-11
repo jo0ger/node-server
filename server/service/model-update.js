@@ -27,6 +27,7 @@ exports.updateOption = async (option = null) => {
 			debug.error('数据查找失败，错误：', err.message)
 			return {}
 		})
+		if (!option) return
 	}
 
 	// 更新友链

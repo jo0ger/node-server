@@ -110,7 +110,9 @@ node-server
 
 * TypeScript升级
 
-* ESlint
+* ~~ESlint~~ (2018.02.01)
+
+* ~~Docker支持~~
 
 * 邮件模板
 
@@ -123,3 +125,5 @@ node-server
 * 完善API文档
 
 * 测试case
+
+* GraphQL
