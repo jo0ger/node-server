@@ -69,6 +69,14 @@ const baseConfig = {
 	akismet: {
 		apiKey: process.env.akismetApikey || 'akismet api key'
 	},
+	aliyun: {
+		oss: {
+			accessKeyId: process.env.aliyunOssAccessKeyId || 'alayu accesskey Id',
+			accessKeySecret: process.env.aliyunOssAccessKeySecret || 'aliyun oss accesskey secret',
+			bucket: 'jooger-static',
+			region: 'oss-cn-beijing'
+		}
+	},
 	constant: {
 		// 允许请求的域名
 		allowedOrigins: [
