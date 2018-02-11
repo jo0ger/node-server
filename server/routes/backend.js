@@ -17,7 +17,8 @@ const {
 	auth,
 	music,
 	statistics,
-	moment
+	moment,
+	aliyun
 } = require('../controller')
 const { authenticate } = require('../middleware')
 const isAuthenticated = authenticate.isAuthenticated()
@@ -83,7 +84,9 @@ router.patch('/moments/:id', isAuthenticated, moment.update)
 router.delete('/moments/:id', isAuthenticated, moment.delete)
 
 // Statistics
-// TODO:
+// OPTIMIZE:
 router.get('/statistics', isAuthenticated, statistics.data)
+
+router.get('/aliyun/oss', isAuthenticated, aliyun.oss)
 
 module.exports = router
