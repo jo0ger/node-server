@@ -8,11 +8,9 @@
 
 const compose = require('koa-compose')
 const jwt = require('jsonwebtoken')
-// const passport = require('koa-passport')
 const config = require('../config')
 const { userProxy } = require('../proxy')
 const debug = require('../util').getDebug('Auth')
-// const isProd = process.env.NODE_ENV === 'production'
 const redirectReg = /auth\/github\/login(.*?)/
 
 // 验证本地登录token
@@ -89,62 +87,3 @@ exports.isAuthenticated = () => {
 		}
 	])
 }
-
-// 第三方登录验证
-// exports.isSnsAuthenticated = () => {
-// 	return compose(
-// 		Object.keys(config.sns).map(name => {
-// 			return vertifySnsToken(name)
-// 		}).concat([
-// 			async (ctx, next) => {
-// 				if (!ctx.session._snsVerify) {
-// 					return ctx.fail(401)
-// 				}
-
-// 				const userId = ctx.cookies.get(config.auth.userCookieKey, { signed: false })
-// 				const user = await UserModel.findById(userId).exec().catch(err => {
-// 					debug.error('用户查找失败, 错误：', err.message)
-// 					ctx.log.error(err.message)
-// 					return null
-// 				})
-// 				if (!user) {
-// 					return ctx.fail(401, '用户不存在')
-// 				}
-// 				ctx._user = user.toObject()
-// 				ctx._isSnsAuthenticated = true
-// 				await next()
-// 			}
-// 		]))
-// }
-
-// 单个第三方登录验证
-// exports.snsAuth = (name = '') => {
-//   return compose([
-//     vertifySnsToken(name),
-//     async (ctx, next) => {
-//       // 如果已经登录
-//       const redirectUrl = ctx.query.redirectUrl || config.site
-//       if (ctx.session._snsVerify) {
-//         debug.info('您已经登录, 重定向中...')
-//         return ctx.redirect(redirectUrl)
-//       }
-//       ctx.session.passport = { redirectUrl }
-//       await next()
-//     },
-//     passport.authenticate(name, {
-//       failureRedirect: '/',
-//       session: false
-//     })
-//   ])
-// }
-
-// 单个第三方登录退出
-// exports.snsLogout = (name = '') => compose([
-//   vertifySnsToken(name),
-//   async (ctx, next) => {
-//     if (!ctx.session._snsVerify) {
-//       return ctx.fail(-1, '请您先登录')
-//     }
-//     await next()
-//   }
-// ])

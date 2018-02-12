@@ -13,5 +13,6 @@ module.exports = {
 	userProxy: require('./user'),
 	commentProxy: require('./comment'),
 	optionProxy: require('./option'),
-	momentProxy: require('./moment')
+	momentProxy: require('./moment'),
+	notificationProxy: require('./notification')
 }

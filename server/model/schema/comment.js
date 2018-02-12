@@ -18,7 +18,7 @@ const commentSchema = new mongoose.Schema({
 	state: { type: Number, default: 1 }, // 状态 -2 垃圾评论 | -1 已删除 | 0 待审核 | 1 通过
 	spam: { type: Boolean, default: false }, // Akismet判定是否是垃圾评论，方便后台check
 	author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-	ups: { type: Number, default: 0 }, // 点赞数
+	ups: { type: Number, default: 0, validate: /^\d*$/ }, // 点赞数
 	sticky: { type: Number, default: 0 }, // 是否置顶 0 否 | 1 是
 	type: { type: Number, default: 0 }, // 类型 0 文章评论 | 1 站内留言 | 2 其他（保留）
 	meta: {

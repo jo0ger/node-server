@@ -8,28 +8,29 @@
 
 const config = require('../config')
 const { akismet, mailer } = require('../plugins')
-const { CommentModel, UserModel, ArticleModel } = require('../model')
-const { isType, marked, isObjectId, createObjectId, getDebug, getLocation, gravatar } = require('../util')
+const { commentProxy, userProxy, articleProxy } = require('../proxy')
+const { isType, marked, isObjectId, createObjectId, getDebug, getLocation, gravatar, getDocsPaginationData } = require('../util')
 const debug = getDebug('Comment')
 const isProd = process.env.NODE_ENV === 'development'
 
+// 评论列表
 exports.list = async (ctx, next) => {
-	const pageSize = ctx.validateQuery('per_page').defaultTo(config.limit.commentLimit).toInt().gt(0, '每页评论数量必须大于0').val()
-	const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, '页码参数必须大于0').val()
-	const state = ctx.validateQuery('state').optional().toInt().isIn([0, 1], '评论状态参数无效').val()
-	const type = ctx.validateQuery('type').optional().toInt().isIn([0, 1], '评论类型参数无效').val()
-	const author = ctx.validateQuery('author').optional().toString().isObjectId('用户ID参数无效').val()
-	const article = ctx.validateQuery('article').optional().toString().isObjectId('文章ID参数无效').val()
+	const pageSize = ctx.validateQuery('per_page').defaultTo(config.limit.commentLimit).toInt().gt(0, 'per_page参数必须大于0').val()
+	const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, 'page参数必须大于0').val()
+	const state = ctx.validateQuery('state').optional().toInt().isIn([0, 1], 'state参数错误').val()
+	const type = ctx.validateQuery('type').optional().toInt().isIn([0, 1], 'type参数错误').val()
+	const author = ctx.validateQuery('author').optional().toString().isObjectId().val()
+	const article = ctx.validateQuery('article').optional().toString().isObjectId().val()
 	const keyword = ctx.validateQuery('keyword').optional().toString().val()
-	const parent = ctx.validateQuery('parent').optional().toString().isObjectId('父评论ID参数无效').val()
+	const parent = ctx.validateQuery('parent').optional().toString().isObjectId().val()
 	// 时间区间查询仅后台可用，且依赖于createdAt
 	const startDate = ctx.validateQuery('start_date').optional().toString().val()
 	const endDate = ctx.validateQuery('end_date').optional().toString().val()
 	// 排序仅后台能用，且order和sortBy需同时传入才起作用
 	// -1 desc | 1 asc
-	const order = ctx.validateQuery('order').optional().toInt().isIn([-1, 1], '排序方式参数无效').val()
+	const order = ctx.validateQuery('order').optional().toInt().isIn([-1, 1], 'order参数错误').val()
 	// createdAt | updatedAt | ups
-	const sortBy = ctx.validateQuery('sort_by').optional().toString().isIn(['createdAt', 'updatedAt', 'ups'], '排序项参数无效').val()
+	const sortBy = ctx.validateQuery('sort_by').optional().toString().isIn(['createdAt', 'updatedAt', 'ups'], 'sort_by参数错误').val()
 
 	// 过滤条件
 	const options = {
@@ -89,7 +90,7 @@ exports.list = async (ctx, next) => {
 			query.author = author
 		} else {
 			// 普通字符串，需要先查到id
-			const u = await UserModel.findOne({ name: author }).exec()
+			const u = await userProxy.findOne({ name: author }).exec()
 				.catch(err => {
 					ctx.log.error(err.message)
 					return null
@@ -105,7 +106,7 @@ exports.list = async (ctx, next) => {
 			query.article = article
 		} else {
 			// 普通字符串，需要先查到id
-			const a = await ArticleModel.findOne({ name: article }).exec()
+			const a = await articleProxy.findOne({ name: article }).exec()
 				.catch(err => {
 					ctx.log.error(err.message)
 					return null
@@ -153,10 +154,7 @@ exports.list = async (ctx, next) => {
 		}
 	}
 
-	const comments = await CommentModel.paginate(query, options).catch(err => {
-		ctx.log.error(err.message)
-		return null
-	})
+	const comments = await commentProxy.paginate(query, options)
 
 	if (comments) {
 		const data = []
@@ -165,7 +163,7 @@ exports.list = async (ctx, next) => {
 			doc = doc.toObject()
 			doc.subCount = 0
 			data.push(doc)
-			return CommentModel.count({ parent: doc._id }).exec()
+			return commentProxy.count({ parent: doc._id }).exec()
 				.then(count => {
 					doc.subCount = count
 				})
@@ -174,27 +172,21 @@ exports.list = async (ctx, next) => {
 					doc.subCount = 0
 				})
 		}))
-		ctx.success({
-			list: data,
-			pagination: {
-				total: comments.total,
-				current_page: comments.page > comments.pages ? comments.pages : comments.page,
-				total_page: comments.pages,
-				per_page: comments.limit
-			}
-		})
+		comments.docs = data
+		ctx.success(getDocsPaginationData(comments), '评论列表获取成功')
 	} else {
-		ctx.fail(-1)
+		ctx.fail('评论列表获取失败')
 	}
 }
 
+// 评论详情
 exports.item = async (ctx, next) => {
-	const id = ctx.validateParam('id').required('评论ID参数无效').toString().isObjectId('评论ID参数无效').val()
+	const id = ctx.validateParam('id').required('缺少评论ID').toString().isObjectId().val()
 
 	let data = null
 	let queryPs = null
 	if (!ctx._isAuthenticated) {
-		queryPs = CommentModel.findById(id, { state: 1, spam: false })
+		queryPs = commentProxy.getById(id, { state: 1, spam: false })
 			.select('-content -state -updatedAt -type -spam')
 			.populate({
 				path: 'author',
@@ -209,44 +201,50 @@ exports.item = async (ctx, next) => {
 				select: 'author meta sticky ups'
 			})
 	} else {
-		queryPs = CommentModel.findById(id)
+		queryPs = commentProxy.getById(id)
 	}
 
-	data = await queryPs.exec().catch(err => {
-		ctx.log.error(err.message)
-		return null
-	})
+	data = await queryPs.populate([
+		{
+			path: 'author',
+			select: 'github'
+		}, {
+			path: 'parent',
+			select: 'author meta sticky ups'
+		}, {
+			path: 'forward',
+			select: 'author meta sticky ups'
+		}
+	]).exec()
 
-	if (data) {
-		data = data.toObject()
-		ctx.success(data)
-	} else {
-		ctx.fail('评论不存在')
-	}
+	data
+		? ctx.success(data.toObject(), '评论详情获取成功')
+		: ctx.fail('评论详情获取失败')
 }
 
+// 发表评论
 exports.create = async (ctx, next) => {
-	const content = ctx.validateBody('content').required('内容参数必填').notEmpty().val()
-	const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], '评论状态参数无效').val()
-	const sticky = ctx.validateBody('sticky').optional().toInt().isIn([0, 1], '置顶参数无效').val()
-	const type = ctx.validateBody('type').defaultTo(0).toInt().isIn([0, 1], '评论类型参数无效').val()
-	const article = ctx.validateBody('article').optional().toString().isObjectId('文章ID参数无效').val()
-	const parent = ctx.validateBody('parent').optional().toString().isObjectId('父评论ID参数无效').val()
-	const forward = ctx.validateBody('forward').optional().toString().isObjectId('前置评论ID参数无效').val()
+	const content = ctx.validateBody('content').required('缺少评论内容').notEmpty().val()
+	const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'state参数错误').val()
+	const sticky = ctx.validateBody('sticky').optional().toInt().isIn([0, 1], 'sticky参数错误').val()
+	const type = ctx.validateBody('type').defaultTo(0).toInt().isIn([0, 1], 'type参数错误').val()
+	const article = ctx.validateBody('article').optional().toString().isObjectId('article参数错误').val()
+	const parent = ctx.validateBody('parent').optional().toString().isObjectId('parent参数错误').val()
+	const forward = ctx.validateBody('forward').optional().toString().isObjectId('forward参数错误').val()
 	// ObjectId | { id, name, email, site }
-	const author = ctx.validateBody('author').required('作者参数无效').val()
+	const author = ctx.validateBody('author').required('author参数错误').val()
 	const req = ctx.req
 	const comment = { content }
 
 	if (type === undefined || type === 0) {
 		if (!article) {
-			return ctx.fail('缺少文章ID参数')
+			return ctx.fail('缺少article参数')
 		}
 		comment.article = article
 	}
 
 	if ((parent && !forward) || (!parent && forward)) {
-		return ctx.fail('父评论ID和前置评论ID必须同时存在')
+		return ctx.fail('缺少parent和forward参数')
 	}
 
 	const user = await checkAuthor.call(ctx, author)
@@ -254,13 +252,14 @@ exports.create = async (ctx, next) => {
 		return ctx.fail('作者不存在')
 	} else if (user.mute) {
 		// 如果被禁言
-		return ctx.fail('您已经被禁言')
+		return ctx.fail('你已经被禁言')
 	}
 	comment.author = user._id
 
 	if (!checkUserSpam(user)) {
-		return ctx.fail('您的垃圾评论数量已达到最大限制，已被禁言')
+		return ctx.fail('你的垃圾评论数量已达到最大限制，已被禁言')
 	}
+	const isAdmin = !user.role
 
 	if (state !== undefined) {
 		comment.state = state
@@ -310,13 +309,10 @@ exports.create = async (ctx, next) => {
 	forward && (comment.forward = forward)
 	comment.renderedContent = marked(content)
 
-	let data = await new CommentModel(comment).save().catch(err => {
-		ctx.log.error(err.message)
-		return null
-	})
+	let data = await commentProxy[isAdmin ? 'newAndSave' : 'createAndNotify'](comment)
 
 	if (data) {
-		let p = CommentModel.findById(data._id)
+		let p = commentProxy.getById(data._id)
 		if (!ctx._isAuthenticated) {
 			p = p.select('-content -state -updatedAt')
 				.populate({
@@ -338,7 +334,7 @@ exports.create = async (ctx, next) => {
 				ctx.log.error(err.message)
 				return null
 			})
-		ctx.success(data, '评论成功')
+		ctx.success(data, '评论创建成功')
 		// 如果是文章评论，则更新文章评论数量
 		if (type === 0) {
 			updateArticleCommentCount([comment.article])
@@ -346,17 +342,19 @@ exports.create = async (ctx, next) => {
 		// 发送邮件通知站主和被评论者
 		sendEmailToAdminAndUser(data, permalink)
 	} else {
-		ctx.fail('评论失败')
+		ctx.fail('评论创建失败')
 	}
 }
 
+// 评论更新
 exports.update = async (ctx, next) => {
-	const id = ctx.validateParam('id').required('评论ID参数无效').toString().isObjectId('评论ID参数无效').val()
-	const content = ctx.validateBody('content').optional().isString('内容参数必须是字符串类型').val()
-	const state = ctx.validateBody('state').optional().toInt().isIn([-2, 0, 1, 2], '评论状态参数无效').val()
-	const sticky = ctx.validateBody('sticky').optional().toInt().isIn([0, 1], '置顶参数无效').val()
+	const id = ctx.validateParam('id').required('评论ID参数错误').toString().isObjectId().val()
+	const content = ctx.validateBody('content').optional().val()
+	const state = ctx.validateBody('state').optional().toInt().isIn([-2, 0, 1, 2], 'state参数错误').val()
+	const sticky = ctx.validateBody('sticky').optional().toInt().isIn([0, 1], 'sticky参数错误').val()
 	const comment = {}
-	let cache = await CommentModel.findById(id)
+
+	let cache = await commentProxy.getById(id)
 		.populate('author')
 		.exec()
 	if (!cache) {
@@ -411,7 +409,7 @@ exports.update = async (ctx, next) => {
 		}
 	}
 
-	let p = CommentModel.findByIdAndUpdate(id, comment, { new: true })
+	let p = commentProxy.updateById(id, comment)
 	if (!ctx._isAuthenticated) {
 		p = p.select('-content -state -updatedAt')
 			.populate({
@@ -427,49 +425,49 @@ exports.update = async (ctx, next) => {
 				select: 'author meta sticky ups'
 			})
 	}
-	const data = await p.exec().catch(err => {
-		ctx.log.error(err.message)
-		return null
-	})
-	if (data) {
-		ctx.success(data)
-	} else {
-		ctx.fail()
-	}
+	const data = await p.exec()
+	data
+		? ctx.success(data, '评论更新成功')
+		: ctx.fail('评论更新失败')
 }
 
+// 删除评论
 exports.delete = async (ctx, next) => {
-	const id = ctx.validateParam('id').required('评论ID参数无效').toString().isObjectId('评论ID参数无效').val()
-	const data = await CommentModel.remove({ _id: id }).catch(err => {
-		ctx.log.error(err.message)
-		return null
-	})
+	const id = ctx.validateParam('id').required('缺少评论ID').toString().isObjectId().val()
+	const data = await commentProxy.delById(id).exec()
 
-	if (data && data.result && data.result.ok) {
-		ctx.success()
-	} else {
-		ctx.fail('评论不存在')
-	}
+	data && data.result && data.result.ok
+		? ctx.success(null, '评论删除成功')
+		: ctx.fail('评论删除失败')
 }
 
+// 评论点赞
 exports.like = async (ctx, next) => {
-	const id = ctx.validateParam('id').required('评论ID参数无效').toString().isObjectId('评论ID参数无效').val()
+	const id = ctx.validateParam('id').required('评论ID参数错误').toString().isObjectId('评论ID参数错误').val()
 	const like = ctx.validateBody('like').defaultTo(true).toBoolean().val()
-
-	const data = await CommentModel.findByIdAndUpdate(id, {
-		$inc: {
-			ups: like ? 1 : -1
-		}
-	}).catch(err => {
-		ctx.log.error(err.message)
-		return null
-	})
-
-	if (data) {
-		ctx.success()
-	} else {
-		ctx.fail('评论不存在')
+	const user = ctx.validateBody('user').optional().isObjectId().val()
+	let userCache = null
+	if (user) {
+		userCache = await userProxy.getById(user).exec().catch(err => {
+			ctx.log.error(err.message)
+			return null
+		})
 	}
+
+	let data = null
+	if (!userCache || !!userCache.role) {
+		data = await commentProxy.likeAndNotify(id, like, userCache)
+	} else {
+		data = await commentProxy.updateById(id, {
+			$inc: {
+				ups: like ? 1 : -1
+			}
+		}).exec()
+	}
+
+	data
+		? ctx.success(null, '评论点赞成功')
+		: ctx.fail('评论点赞失败')
 }
 
 // 获取永久链接
@@ -499,9 +497,7 @@ function getCommentType (type) {
 
 // 检测用户以往spam评论
 async function checkUserSpam (user) {
-	const userComments = await CommentModel.find({
-		author: user._id
-	})
+	const userComments = await commentProxy.find({ author: user._id })
 		.exec()
 		.catch(err => {
 			debug.error('用户历史评论获取失败，错误：', err.message)
@@ -513,16 +509,9 @@ async function checkUserSpam (user) {
 	if (spamComments.length >= config.limit.commentSpamLimit) {
 		if (!user.mute) {
 			// 将用户禁言
-			await UserModel.update({ _id: user._id }, {
-				mute: true
-			})
-				.exec()
-				.then(() => {
-					debug.success('用户禁言成功，用户：', user.name)
-				})
-				.catch(err => {
-					debug.error('用户禁言失败，请手动禁言，错误：', err.message)
-				})
+			await userProxy.muteByIdAndNotify(user._id)
+				.then(() => debug.success('用户禁言成功，用户：', user.name))
+				.catch(err => debug.error('用户禁言失败，请手动禁言，错误：', err.message))
 		}
 		return false
 	}
@@ -536,7 +525,7 @@ async function updateArticleCommentCount (articleIds = []) {
 	}
 	// TIP: 这里必须$in的是一个ObjectId对象数组，而不能只是id字符串数组
 	articleIds = [...new Set(articleIds)].filter(id => isObjectId(id)).map(id => createObjectId(id))
-	const counts = await CommentModel.aggregate([
+	const counts = await commentProxy.aggregate([
 		{ $match: { state: 1, article: { $in: articleIds } } },
 		{ $group: { _id: '$article', total_count: { $sum: 1 } } }
 	])
@@ -545,14 +534,11 @@ async function updateArticleCommentCount (articleIds = []) {
 			debug.error('更新文章评论数量前聚合评论数据操作失败，错误：', err.message)
 			return []
 		})
-	Promise.all(counts.map(count => ArticleModel.update(
-		{ _id: count._id },
-		{ $set: { 'meta.comments': count.total_count } }
-	).exec().catch(err => {
-		debug.error('文章评论数量更新失败，错误：', err.message)
-	}))).then(() => {
-		debug.success('文章评论数量更新成功')
-	})
+	Promise.all(
+		counts.map(count => articleProxy.updateById(count._id, { $set: { 'meta.comments': count.total_count } }).exec())
+	)
+		.then(() => debug.success('文章评论数量更新成功'))
+		.catch(err => debug.error('文章评论数量更新失败，错误：', err.message))
 }
 
 // 发送邮件
@@ -562,7 +548,7 @@ async function sendEmailToAdminAndUser (comment, permalink) {
 	let adminType = '评论'
 	if (type === 0) {
 		// 文章评论
-		const at = await ArticleModel.findById(article).exec()
+		const at = await articleProxy.getById(article).exec().catch(() => null)
 		if (at && at._id) {
 			adminTitle = `博客文章 [${at.title}] 有了新的评论`
 		}
@@ -582,7 +568,7 @@ async function sendEmailToAdminAndUser (comment, permalink) {
 
 	// 发送给被评论者
 	if (comment.forward) {
-		const forwardAuthor = await UserModel.findById(comment.forward.author).exec().catch(() => null)
+		const forwardAuthor = await userProxy.getById(comment.forward.author).exec().catch(() => null)
 		if (forwardAuthor) {
 			mailer.send({
 				to: forwardAuthor.github.email,
@@ -615,29 +601,26 @@ async function checkAuthor (author) {
 		if (author.id) {
 			// 更新
 			if (isObjectId(author.id)) {
-				user = await UserModel.findByIdAndUpdate(author.id, update, {
-					new: true
-				}).exec().catch(err => {
-					debug.error('用户更新失败，错误：', err.message)
-					this.log.error(err.message)
-					return null
-				})
+				user = await userProxy.updateByIdAndNotify(author.id, update)
+					.catch(err => {
+						debug.error('用户更新失败，错误：', err.message)
+						this.log.error(err.message)
+						return null
+					})
 				if (user) {
 					debug.success(`用户【${user.name}】更新成功`)
 				}
 			}
 		} else {
 			// 创建
-			user = await new UserModel({
+			user = await userProxy.createAndNotify({
 				...update,
 				role: config.constant.roleMap.USER
+			}).catch(err => {
+				debug.error('用户创建失败，错误：', err.message)
+				this.log.error(err.message)
+				return null
 			})
-				.save()
-				.catch(err => {
-					debug.error('用户创建失败，错误：', err.message)
-					this.log.error(err.message)
-					return null
-				})
 			if (user) {
 				debug.success(`用户【${user.name}】创建成功`)
 			}
@@ -647,7 +630,7 @@ async function checkAuthor (author) {
 }
 
 async function findUser (query = {}, update) {
-	const user = await UserModel.findOne(query).select('-password').exec().catch(err => {
+	const user = await userProxy.findOne(query).select('-password').exec().catch(err => {
 		debug.error('用户查找失败，错误：', err.message)
 		return null
 	})

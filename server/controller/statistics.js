@@ -6,7 +6,7 @@
 
 const { articleProxy, categoryProxy, tagProxy, userProxy, commentProxy } = require('../proxy')
 
-// TODO: 站内统计
+// OPTIMIZE: 站内统计
 exports.data = async (ctx, next) => {
 	const data = await Promise.all([
 		articleProxy.count({ state: 1 }).exec(),

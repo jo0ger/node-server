@@ -6,15 +6,11 @@
 
 'use strict'
 
-// const passport = require('koa-passport')
 const config = require('../config')
 const { userProxy } = require('../proxy')
-const { UserModel } = require('../model')
 const { bcompare, getDebug, signToken, proxy, randomString } = require('../util')
-const debug = getDebug('Auth')
 const { getGithubToken, getGithubAuthUserInfo } = require('../service')
-// const debugGithub = getDebug('Github:Auth')
-// const isProd = process.env.NODE_ENV === 'production'
+const debug = getDebug('Auth')
 
 exports.localLogin = async (ctx, next) => {
 	const name = ctx.validateBody('name').required('缺少登录名').notEmpty().val()
@@ -66,7 +62,7 @@ exports.info = async (ctx, next) => {
 	if (ctx._isSnsAuthenticated) {
 		// TODO: 第三方信息获取
 	} else if (ctx._isAuthenticated) {
-		data = await UserModel.findById(adminId)
+		data = await userProxy.getById(adminId)
 			.select('-password')
 			.exec()
 			.catch(err => {
@@ -84,25 +80,6 @@ exports.info = async (ctx, next) => {
 		ctx.fail(401)
 	}
 }
-
-// github login
-// exports.githubLogin = async (ctx, next) => {
-//   await passport.authenticate('github', {
-//     session: false
-//   }, (err, user) => {
-//     debugGithub('Github权限验证回调处理开始')
-//     const redirectUrl = ctx.session.passport.redirectUrl
-
-//     const { session } = config.auth
-//     const opt = { signed: false, maxAge: session.maxAge, httpOnly: false }
-//     opt.domain = session.domain || null
-//     ctx.cookies.set(config.sns.github.key, user.token, opt)
-//     ctx.cookies.set(config.auth.userCookieKey, user._id, opt)
-
-//     debugGithub.success('Github权限验证回调处理成功, 用户ID：%s，用户名：%s', user._id, user.name)
-//     return ctx.redirect(redirectUrl)
-//   })(ctx)
-// }
 
 exports.fetchGithubToken = async (ctx, next) => {
 	const code = ctx.validateQuery('code').required('缺少code参数').toString().val()
@@ -129,7 +106,7 @@ exports.fetchGithubUser = async (ctx, next) => {
 }
 
 async function createLocalUserFromGithub (githubUser) {
-	const user = await UserModel.findOne({
+	const user = await userProxy.findOne({
 		'github.id': githubUser.id
 	}).catch(err => {
 		debug.error('本地用户查找失败, 错误：', err.message)
@@ -143,7 +120,7 @@ async function createLocalUserFromGithub (githubUser) {
 			github: githubUser,
 			role: user.role
 		}
-		const updatedUser = await UserModel.findByIdAndUpdate(user._id, userData)
+		const updatedUser = await userProxy.updateById(user._id, userData)
 			.select('-password -role -createdAt -updatedAt')
 			.exec().catch(err => {
 				debug.error('本地用户更新失败, 错误：', err.message)
@@ -159,7 +136,7 @@ async function createLocalUserFromGithub (githubUser) {
 			role: 1
 		}
 
-		const checkUser = await UserModel.findOne({ name: newUser.name }).exec().catch(err => {
+		const checkUser = await userProxy.findOne({ name: newUser.name }).exec().catch(err => {
 			debug.error('本地用户查找失败, 错误：', err.message)
 			return true
 		})
@@ -168,7 +145,11 @@ async function createLocalUserFromGithub (githubUser) {
 			newUser.name += '-' + randomString()
 		}
 
-		const data = await new UserModel(newUser).save().catch(err => debug.error('本地用户创建失败, 错误：', err.message))
-		return data ? data.toObject() : null
+		const data = await userProxy.createAndNotify(newUser).catch(err => {
+			debug.error('本地用户创建失败, 错误：', err.message)
+			return null
+		})
+
+		return data && data.length ? data[0].toObject() : null
 	}
 }

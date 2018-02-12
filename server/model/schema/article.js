@@ -38,9 +38,9 @@ const articleSchema = new mongoose.Schema({
 	publishedAt: { type: Date, default: Date.now },
 	// 文章元数据 （浏览量， 喜欢数， 评论数）
 	meta: {
-		pvs: { type: Number, default: 0 },
-		ups: { type: Number, default: 0 },
-		comments: { type: Number, default: 0 }
+		pvs: { type: Number, default: 0, validate: /^\d*$/ },
+		ups: { type: Number, default: 0, validate: /^\d*$/ },
+		comments: { type: Number, default: 0, validate: /^\d*$/ }
 	}
 })
 

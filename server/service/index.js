@@ -8,7 +8,6 @@
 
 const { getGithubUsersInfo, getGithubAuthUserInfo } = require('./github-userinfo')
 
-// exports.githubPassport = require('./github-passport')
 exports.getGithubUsersInfo = getGithubUsersInfo
 exports.getGithubAuthUserInfo = getGithubAuthUserInfo
 exports.getGithubToken = require('./github-token')

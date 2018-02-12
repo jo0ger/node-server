@@ -100,25 +100,23 @@ node-server
 
 * ~~评论发送邮件 [nodemailer](https://github.com/nodemailer/nodemailer)~~ (2017.10.29)
 
-* ~~GC优化~~ (2017.10.30，linux下需要预先安装g++)
+* ~~GC优化~~ (2017.10.30，linux下需要预先安装g++, **已废弃**)
 
 * ~~个人动态api~~ (2017.10.30)
 
 * ~~文章归档api~~（2018.01.04）
 
-* model代理
-
-* TypeScript升级
+* ~~Model代理~~ (2018.01.28)
 
 * ~~ESlint~~ (2018.02.01)
 
-* ~~Docker支持~~
+* ~~Docker支持~~ (2018.02.09)
+
+* ~~站内通知api~~ (2018.02.12)
 
 * 邮件模板
 
-* 消息api
-
-* 日志api
+* TypeScript升级
 
 * 统计api
 

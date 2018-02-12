@@ -7,7 +7,7 @@
 'use strict'
 
 const config = require('../config')
-const { articleProxy, categoryProxy, tagProxy } = require('../proxy')
+const { articleProxy, categoryProxy, tagProxy, userProxy } = require('../proxy')
 const { marked, isObjectId, createObjectId, getMonthFromNum, getDocsPaginationData } = require('../util')
 
 // 文章列表
@@ -292,11 +292,25 @@ exports.delete = async (ctx, next) => {
 exports.like = async (ctx, next) => {
 	const id = ctx.validateParam('id').required('缺少文章ID').toString().isObjectId().val()
 	const like = ctx.validateBody('like').defaultTo(true).toBoolean().val()
-	const data = await articleProxy.updateById(id, {
-		$inc: {
-			'meta.ups': like ? 1 : -1
-		}
-	}).exec()
+	const user = ctx.validateBody('user').optional().isObjectId().val()
+	let userCache = null
+	if (user) {
+		userCache = await userProxy.getById(user).exec().catch(err => {
+			ctx.log.error(err.message)
+			return null
+		})
+	}
+
+	let data = null
+	if (!userCache || !!userCache.role) {
+		data = await articleProxy.likeAndNotify(id, like, userCache)
+	} else {
+		data = await articleProxy.updateById(id, {
+			$inc: {
+				'meta.ups': like ? 1 : -1
+			}
+		}).exec()
+	}
 
 	data
 		? ctx.success(null, '文章点赞成功')

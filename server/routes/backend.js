@@ -18,7 +18,8 @@ const {
 	music,
 	statistics,
 	moment,
-	aliyun
+	aliyun,
+	notification
 } = require('../controller')
 const { authenticate } = require('../middleware')
 const isAuthenticated = authenticate.isAuthenticated()
@@ -84,9 +85,14 @@ router.patch('/moments/:id', isAuthenticated, moment.update)
 router.delete('/moments/:id', isAuthenticated, moment.delete)
 
 // Statistics
-// OPTIMIZE:
 router.get('/statistics', isAuthenticated, statistics.data)
 
+// Aliyun OSS
 router.get('/aliyun/oss', isAuthenticated, aliyun.oss)
+
+// Notifications
+router.get('/notifications', isAuthenticated, notification.list)
+router.post('/notifications/:id/view', isAuthenticated, notification.view)
+router.delete('/notifications/:id', isAuthenticated, notification.delete)
 
 module.exports = router

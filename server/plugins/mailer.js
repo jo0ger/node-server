@@ -49,7 +49,7 @@ exports.start = async () => {
  */
 exports.send = (opt = {}, toMe = false) => {
 	if (!isVerify) {
-		return debug.error('客户端未验证，拒绝发送邮件')
+		return debug.warn('客户端未验证，拒绝发送邮件')
 	}
 	opt.from = `${config.author} <${config.email}>`
 	if (toMe) {
