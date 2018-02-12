@@ -93,6 +93,10 @@ exports.password = async (ctx, next) => {
 exports.mute = async (ctx, next) => {
 	const id = ctx.validateParam('id').required('缺少用户ID').toString().isObjectId().val()
 	const mute = ctx.validateBody('mute').defaultTo(true).toBoolean().val()
+	const user = userProxy.getById(id).exec()
+	if (user && !user.role) {
+		return ctx.fail('管理员不能禁言')
+	}
 	const data = await userProxy.updateById(id, { mute }).exec()
 	const msg = mute ? '用户禁言' : '用户解禁'
 	data

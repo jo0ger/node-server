@@ -12,7 +12,6 @@ const logger = require('koa-logger')
 const onerror = require('koa-onerror')
 const bouncer = require('koa-bouncer')
 const session = require('koa-session')
-const passport = require('koa-passport')
 const compress = require('koa-compress')
 const bodyparser = require('koa-bodyparser')
 const koaBunyanLogger = require('koa-bunyan-logger')
@@ -21,6 +20,7 @@ const middlewares = require('./middleware')
 const routes = require('./routes')
 const config = require('./config')
 const { mongo, redis, akismet, validation, mailer, crontab } = require('./plugins')
+const isProd = process.env.NODE_ENV === 'production'
 
 const app = new Koa()
 app.keys = config.auth.secrets
@@ -50,7 +50,6 @@ app.use(middlewares.error)
 // form parse
 // app.use(middlewares.formidable())
 app.use(session(config.auth.session, app))
-app.use(passport.initialize())
 app.use(compress())
 
 // routes
@@ -61,11 +60,14 @@ mongo.connect()
 
 // connect redis
 redis.connect()
-// akismet
-akismet.start()
 
-// mailer
-mailer.start()
+if (isProd) {
+	// akismet
+	akismet.start()
+
+	// mailer
+	mailer.start()
+}
 
 // crontab
 crontab.start()

@@ -7,9 +7,10 @@
 'use strict'
 
 const config = require('../config')
-const { MomentModel } = require('../model')
-const { getLocation } = require('../util')
+const { momentProxy } = require('../proxy')
+const { getLocation, getDocsPaginationData } = require('../util')
 
+// 动态列表
 exports.list = async (ctx, next) => {
 	const pageSize = ctx.validateQuery('per_page').defaultTo(config.limit.momentLimit).toInt().gt(0, '每页数量必须大于0').val()
 	const page = ctx.validateQuery('page').defaultTo(1).toInt().gt(0, '页码参数必须大于0').val()
@@ -38,29 +39,17 @@ exports.list = async (ctx, next) => {
 		}
 	}
 
-	const moments = await MomentModel.paginate(query, options).catch(err => {
-		ctx.log.error(err.message)
-		return null
-	})
+	const moments = await momentProxy.paginate(query, options)
 
-	if (moments) {
-		ctx.success({
-			list: moments.docs,
-			pagination: {
-				total: moments.total,
-				current_page: moments.page > moments.pages ? moments.pages : moments.page,
-				total_page: moments.pages,
-				per_page: moments.limit
-			}
-		})
-	} else {
-		ctx.fail(-1)
-	}
+	moments
+		? ctx.success(getDocsPaginationData(moments), '动态列表获取成功')
+		: ctx.fail('动态列表获取失败')
 }
 
+// 创建动态
 exports.create = async (ctx, next) => {
 	const content = ctx.validateBody('content').required('缺少内容').notEmpty().val()
-	const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], '个人动态状态参数无效').val()
+	const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'state参数无效').val()
 	const req = ctx.req
 	const moment = {}
 	const { ip, location } = getLocation(req)
@@ -71,53 +60,37 @@ exports.create = async (ctx, next) => {
 	moment.location = { ip, ...location }
 	moment.content = content
 
-	const data = await new MomentModel(moment).save().catch(err => {
-		ctx.log.error(err.message)
-		return null
-	})
+	const data = await momentProxy.newAndSave(moment)
 
-	if (data) {
-		ctx.success(data)
-	} else {
-		ctx.fail()
-	}
+	data && data.length
+		? ctx.success(data, '动态创建成功')
+		: ctx.fail('动态创建失败')
 }
 
+// 动态更新
 exports.update = async (ctx, next) => {
-	const id = ctx.validateParam('id').required('个人动态ID参数无效').toString().isObjectId('个人动态ID参数无效').val()
-	const content = ctx.validateBody('content').optional().isString('内容参数必须是字符串类型').val()
-	const state = ctx.validateBody('state').optional().toInt().isIn([-2, 0, 1, 2], '个人动态状态参数无效').val()
+	const id = ctx.validateParam('id').required('缺少动态ID').toString().isObjectId().val()
+	const content = ctx.validateBody('content').optional().toString().val()
+	const state = ctx.validateBody('state').optional().toInt().isIn([0, 1], 'state参数无效').val()
 	const moment = {}
 
 	if (state !== undefined) {
 		moment.state = state
 	}
 	content && (moment.content = content)
+	const data = await momentProxy.updateById(id, moment).exec()
 
-	const data = await MomentModel.findByIdAndUpdate(id, moment, {
-		new: true
-	}).catch(err => {
-		ctx.log.error(err.message)
-		return null
-	})
-
-	if (data) {
-		ctx.success(data)
-	} else {
-		ctx.fail()
-	}
+	data
+		? ctx.success(data, '动态更新成功')
+		: ctx.fail('动态更新失败')
 }
 
+// 删除动态
 exports.delete = async (ctx, next) => {
-	const id = ctx.validateParam('id').required('个人动态ID参数无效').toString().isObjectId('个人动态ID参数无效').val()
-	const data = await MomentModel.remove({ _id: id }).catch(err => {
-		ctx.log.error(err.message)
-		return null
-	})
+	const id = ctx.validateParam('id').required('缺少动态ID').toString().isObjectId().val()
+	const data = await momentProxy.delById(id).exec()
 
-	if (data && data.result && data.result.ok) {
-		ctx.success()
-	} else {
-		ctx.fail()
-	}
+	data && data.result && data.result.ok
+		? ctx.success(null, '动态删除成功')
+		: ctx.fail('动态删除失败')
 }
