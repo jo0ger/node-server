@@ -66,7 +66,7 @@
     "nodemailer": "^4.4.1",
     "passport-github": "^1.1.0",
     "redis": "^2.8.0",
-    "simple-netease-cloud-music": "^0.3.0",
+    "simple-netease-cloud-music": "^0.3.4",
     "validator": "^9.2.0"
   },
   "devDependencies": {
