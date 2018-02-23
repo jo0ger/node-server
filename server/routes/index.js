@@ -16,7 +16,6 @@ module.exports = app => {
 	router.use('*', header)
 
 	router.get('/', async (ctx, next) => {
-		ctx.log.info('Got a root request from %s for %s', ctx.request.ip, ctx.path)
 		ctx.body = {
 			name: config.name,
 			version: config.version,
@@ -32,7 +31,6 @@ module.exports = app => {
 
 	router.all('*', (ctx, next) => {
 		ctx.fail(404, `${ctx.path} 不支持 ${ctx.method} 请求类型`)
-		ctx.status = 404
 	})
 
 	app.use(router.routes(), router.allowedMethods())

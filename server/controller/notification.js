@@ -50,7 +50,7 @@ exports.list = async (ctx, next) => {
 	}
 
 	if (viewed !== undefined) {
-		query.viewed = viewed
+		query.viewed = viewed === 'true'
 	}
 
 	const ns = await notificationProxy.paginate(query, options)
@@ -58,6 +58,15 @@ exports.list = async (ctx, next) => {
 	ns
 		? ctx.success(getDocsPaginationData(ns), '通知列表获取成功')
 		: ctx.fail('通知列表获取失败')
+}
+
+// 未读通知数量
+exports.count = async (ctx, next) => {
+	const data = await notificationProxy.count({ viewed: false }).exec()
+
+	data
+		? ctx.success(data, '未读通知数量获取成功')
+		: ctx.fail('未读通知数量获取失败')
 }
 
 // 通知已读
@@ -70,6 +79,14 @@ exports.view = async (ctx, next) => {
 	data
 		? ctx.success(null, '通知标记已读成功')
 		: ctx.fail('通知标记已读失败')
+}
+
+// 通知已读
+exports.viewAll = async (ctx, next) => {
+	const data = await notificationProxy.updateMany({ viewed: false }, { viewed: true }).exec()
+	data && data.ok
+		? ctx.success(null, '通知全部标记已读成功')
+		: ctx.fail('通知全部标记已读失败')
 }
 
 // 删除通知

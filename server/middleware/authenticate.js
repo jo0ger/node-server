@@ -42,27 +42,6 @@ function verifyToken () {
 	}
 }
 
-// 验证第三方登录token
-// function vertifySnsToken (name = '') {
-// 	return async (ctx, next) => {
-// 		if (ctx.session._snsVerify) {
-// 			await next()
-// 		}
-// 		ctx.session._snsVerify = false
-// 		if (config.sns[name]) {
-// 			const token = ctx.cookies.get(config.sns[name].key, { signed: false })
-
-// 			if (token) {
-// 				ctx.session._snsVerify = true
-// 				ctx.session._snsToken = token
-// 				ctx.session._snsName = name
-// 				debug.success('【%s】第三方登录Token校验成功', name)
-// 			}
-// 		}
-// 		await next()
-// 	}
-// }
-
 // 本地登录验证
 exports.isAuthenticated = () => {
 	return compose([
