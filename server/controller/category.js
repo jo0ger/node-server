@@ -91,7 +91,7 @@ exports.create = async (ctx, next) => {
 		})
 
 		data && data.length
-			? ctx.success(data, '分类创建成功')
+			? ctx.success(data[0], '分类创建成功')
 			: ctx.fail('分类创建失败')
 	} else {
 		ctx.fail(`【${name}】分类已经存在`)

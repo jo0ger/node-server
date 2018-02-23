@@ -28,7 +28,7 @@ exports.list = async (ctx, next) => {
 			if (typeof data[i].toObject === 'function') {
 				data[i] = data[i].toObject()
 			}
-			const articles = await articleProxy.find({ tag: data[i]._id }).exec().catch(err => {
+			const articles = await articleProxy.find({ tag: data[i]._id, state: 1 }).exec().catch(err => {
 				ctx.log.error(err.message)
 				return []
 			})
@@ -82,7 +82,7 @@ exports.create = async (ctx, next) => {
 		})
 
 		data && data.length
-			? ctx.success(data, '标签创建成功')
+			? ctx.success(data[0], '标签创建成功')
 			: ctx.fail('标签创建失败')
 	} else {
 		ctx.fail(`【${name}】标签已经存在`)
