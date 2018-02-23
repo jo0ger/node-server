@@ -92,7 +92,9 @@ router.get('/aliyun/oss', isAuthenticated, aliyun.oss)
 
 // Notifications
 router.get('/notifications', isAuthenticated, notification.list)
+router.get('/notifications/count', isAuthenticated, notification.count)
 router.post('/notifications/:id/view', isAuthenticated, notification.view)
+router.post('/notifications/viewall', isAuthenticated, notification.viewAll)
 router.delete('/notifications/:id', isAuthenticated, notification.delete)
 
 module.exports = router
