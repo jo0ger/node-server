@@ -1,6 +1,6 @@
 /**
  * @desc backend api map
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 25 Sep 2017
  */
 
@@ -8,16 +8,18 @@
 
 const router = require('koa-router')()
 const {
-  article,
-  category,
-  tag,
-  comment,
-  option,
-  user,
-  auth,
-  music,
-  statistics,
-  moment
+	article,
+	category,
+	tag,
+	comment,
+	option,
+	user,
+	auth,
+	music,
+	statistics,
+	moment,
+	aliyun,
+	notification
 } = require('../controller')
 const { authenticate } = require('../middleware')
 const isAuthenticated = authenticate.isAuthenticated()
@@ -25,7 +27,7 @@ const isAuthenticated = authenticate.isAuthenticated()
 // Article
 router.get('/articles', isAuthenticated, article.list)
 router.get('/articles/:id', isAuthenticated, article.item)
-router.post('/articles',isAuthenticated,  article.create)
+router.post('/articles', isAuthenticated, article.create)
 router.patch('/articles/:id', isAuthenticated, article.update)
 router.delete('/articles/:id', isAuthenticated, article.delete)
 router.post('/articles/:id/like', isAuthenticated, article.like)
@@ -58,9 +60,12 @@ router.patch('/options', isAuthenticated, option.update)
 
 // User
 router.get('/users', isAuthenticated, user.list)
+router.get('/users/blogger', isAuthenticated, user.blogger)
+router.get('/users/guests', isAuthenticated, user.guests)
 router.get('/users/:id', isAuthenticated, user.item)
-router.patch('/users/:id', isAuthenticated, user.update)
-router.delete('/users/:id', isAuthenticated, user.delete)
+router.patch('/users/me/password', isAuthenticated, user.password)
+router.patch('/users/me', isAuthenticated, user.updateMe)
+router.patch('/users/:id/mute', isAuthenticated, user.mute)
 
 // Music
 router.get('/music/songs', isAuthenticated, music.list)
@@ -80,7 +85,16 @@ router.patch('/moments/:id', isAuthenticated, moment.update)
 router.delete('/moments/:id', isAuthenticated, moment.delete)
 
 // Statistics
-// TODO:
 router.get('/statistics', isAuthenticated, statistics.data)
+
+// Aliyun OSS
+router.get('/aliyun/oss', isAuthenticated, aliyun.oss)
+
+// Notifications
+router.get('/notifications', isAuthenticated, notification.list)
+router.get('/notifications/count', isAuthenticated, notification.count)
+router.post('/notifications/:id/view', isAuthenticated, notification.view)
+router.post('/notifications/viewall', isAuthenticated, notification.viewAll)
+router.delete('/notifications/:id', isAuthenticated, notification.delete)
 
 module.exports = router

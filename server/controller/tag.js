@@ -1,164 +1,123 @@
 /**
  * @desc Tag controller
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 26 Sep 2017
  */
 
 'use strict'
 
-const { TagModel, ArticleModel } = require('../model')
+const { tagProxy, articleProxy } = require('../proxy')
 
+// 标签列表
 exports.list = async (ctx, next) => {
-  const keyword = ctx.validateQuery('keyword').optional().toString().val()
+	const keyword = ctx.validateQuery('keyword').optional().toString().val()
 
-  const query = {}
-  // 搜索关键词
-   if (keyword) {
-    const keywordReg = new RegExp(keyword)
-    query.$or = [
-      { name:  keywordReg }
-    ]
-  }
+	const query = {}
+	// 搜索关键词
+	if (keyword) {
+		const keywordReg = new RegExp(keyword)
+		query.$or = [
+			{ name: keywordReg }
+		]
+	}
 
-  const data = await TagModel.find(query).sort('-createdAt').catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
+	const data = await tagProxy.find(query).sort('-createdAt')
 
-  if (data) {
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].toObject) {
-        data[i] = data[i].toObject()
-      }
-      const articles = await ArticleModel.find({ tag: data[i]._id }).exec().catch(err => {
-        ctx.log.error(err.message)
-        return []
-      })
-      data[i].count = articles.length
-    }
-    ctx.success(data)
-  } else {
-    ctx.fail()
-  }
+	if (data) {
+		for (let i = 0; i < data.length; i++) {
+			if (typeof data[i].toObject === 'function') {
+				data[i] = data[i].toObject()
+			}
+			const articles = await articleProxy.find({ tag: data[i]._id, state: 1 }).exec().catch(err => {
+				ctx.log.error(err.message)
+				return []
+			})
+			data[i].count = articles.length
+		}
+		ctx.success(data, '标签列表获取成功')
+	} else {
+		ctx.fail('标签列表获取失败')
+	}
 }
 
+// 标签详情
 exports.item = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
+	const id = ctx.validateParam('id').required('缺少标签ID').toString().isObjectId().val()
 
-  let data = await TagModel.findById(id).exec().catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
+	let data = await tagProxy.getById(id).exec()
 
-  if (data) {
-    data = data.toObject()
-    const articles = await ArticleModel.find({ tag: id })
-      .select('-tag')
-      .exec()
-      .catch(err => {
-        ctx.log.error(err.message)
-        return []
-      })
-    data.articles = articles
-    data.articles_count = articles.length
-    ctx.success(data)
-  } else {
-    ctx.fail()
-  }
+	if (data) {
+		data = data.toObject()
+		const articles = await articleProxy.find({ tag: id })
+			.select('-tag')
+			.exec()
+			.catch(err => {
+				ctx.log.error(err.message)
+				return []
+			})
+		data.articles = articles
+		data.articles_count = articles.length
+		ctx.success(data, '标签详情获取成功')
+	} else {
+		ctx.fail('标签详情获取失败')
+	}
 }
 
+// 标签创建
 exports.create = async (ctx, next) => {
-  const name = ctx.validateBody('name')
-    .required('the "name" parameter is required')
-    .notEmpty()
-    .isString('the "name" parameter should be String type')
-    .val()
-  const description = ctx.validateBody('description')
-    .optional()
-    .isString('the "description" parameter should be String type')
-    .val()
+	const name = ctx.validateBody('name').required('缺少标签名称').notEmpty().val()
+	const description = ctx.validateBody('description').optional().val()
+	const ext = ctx.validateBody('extends').optional().toArray().val()
 
-  const { length } = await TagModel.find({ name }).exec().catch(err => {
-    ctx.log.error(err.message)
-    return []
-  })
+	const { length } = await tagProxy.find({ name }).exec().catch(err => {
+		ctx.log.error(err.message)
+		return []
+	})
 
-  if (!length) {
-    const data = await new TagModel({
-      name,
-      description
-    }).save().catch(err => {
-      ctx.log.error(err.message)
-      return null
-    })
+	if (!length) {
+		const data = await tagProxy.newAndSave({
+			name,
+			description,
+			extends: ext
+		})
 
-    if (data) {
-      return ctx.success(data)
-    } else {
-      ctx.fail()
-    }
-  } else {
-    ctx.fail(-1, `the tag(${name}) is already exist`)
-  }
+		data && data.length
+			? ctx.success(data[0], '标签创建成功')
+			: ctx.fail('标签创建失败')
+	} else {
+		ctx.fail(`【${name}】标签已经存在`)
+	}
 }
 
+// 标签更新
 exports.update = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
-  const name = ctx.validateBody('name')
-    .optional()
-    .isString('the "name" parameter should be String type')
-    .val()
-  const description = ctx.validateBody('description')
-    .optional()
-    .isString('the "description" parameter should be String type')
-    .val()
+	const id = ctx.validateParam('id').required('缺少标签ID').toString().isObjectId().val()
+	const name = ctx.validateBody('name').optional().val()
+	const description = ctx.validateBody('description').optional().val()
+	const tag = {}
 
-  const tag = {}
+	name && (tag.name = name)
+	description && (tag.description = description)
 
-  name && (tag.name = name)
-  description && (tag.description = description)
+	const data = await tagProxy.updateById(id, tag).exec()
 
-  const data = await TagModel.findByIdAndUpdate(id, tag, {
-    new: true
-  }).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
-
-  if (data) {
-    ctx.success(data)
-  } else {
-    ctx.fail()
-  }
+	data
+		? ctx.success(data, '标签更新成功')
+		: ctx.fail('标签更新失败')
 }
 
+// 标签删除
 exports.delete = async (ctx, next) => {
-  const id = ctx.validateParam('id').required('the "id" parameter is required').toString().isObjectId().val()
-  const data = await TagModel.remove({ _id: id }).catch(err => {
-    ctx.log.error(err.message)
-    return null
-  })
+	const id = ctx.validateParam('id').required('缺少标签ID').toString().isObjectId().val()
+	const articles = await tagProxy.find({ tag: id }).exec()
 
-  if (data && data.result && data.result.ok) {
-    // 删除所有文章关联关系
-    const articles = await ArticleModel.find({ tag: data._id })
-      .exec()
-      .catch(err => {
-        ctx.log.error(err.message)
-        return []
-      })
-    // TODO: 这里应该需要一个容错机制，保证如果有一篇文章没有删除成功的话，需要在规定次数内反复删除
-    await Promise.all(
-      articles.map(item => {
-        return ArticleModel.findByIdAndUpdate(item._id, {
-          tag: item.tag.filter(tag => tag.toString() !== data._id.toString())
-        }).exec()
-      })
-    ).catch(err => {
-      ctx.log.error(err.message)
-    })
-    ctx.success()
-  } else {
-    ctx.fail()
-  }
+	if (articles && articles.length) {
+		// 标签下面有文章，不能删除
+		ctx.fail('该标签下有文章，不能删除')
+	} else {
+		const data = await tagProxy.delById(id).exec()
+		data && data.result && data.result.ok
+			? ctx.success(null, '标签删除成功')
+			: ctx.fail('标签删除失败')
+	}
 }
