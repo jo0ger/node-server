@@ -1,9 +1,9 @@
-[![GitHub forks](https://img.shields.io/github/forks/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/network)
-[![GitHub stars](https://img.shields.io/github/stars/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/issues)
-[![GitHub last commit](https://img.shields.io/github/last-commit/jo0ger/jooger.me-server.svg?style=flat-square)](https://github.com/jo0ger/jooger.me-server/commits/master)
+[![GitHub forks](https://img.shields.io/github/forks/jo0ger/node-server.svg?style=flat-square)](https://github.com/jo0ger/node-server/network)
+[![GitHub stars](https://img.shields.io/github/stars/jo0ger/node-server.svg?style=flat-square)](https://github.com/jo0ger/node-server/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/jo0ger/node-server.svg?style=flat-square)](https://github.com/jo0ger/node-server/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/jo0ger/node-server.svg?style=flat-square)](https://github.com/jo0ger/node-server/commits/master)
 
-## jooger.me-server
+## node-server
 
 ⚡️ My blog's api server build with koa2 and mongoose，a RESTful application.
 
@@ -11,7 +11,7 @@
 
 * jooger.me: [https://jooger.me](https://jooger.me)
 
-* jooger.me-server: [https://api.jooger.me](https://api.jooger.me)
+* node-server: [https://api.jooger.me](https://api.jooger.me)
 
 * jooger.me-admin: [https://admin.jooger.me](https://admin.jooger.me)
 
@@ -43,7 +43,7 @@ $ npm run test
 ## Directory tree
 
 ```
-jooger.me-server
+node-server
 |____api.md                             // api文档（待完善）
 |____bin                                // 启动目录
 |____ecosystem.config.js                // pm2启动文件，需要自己手动创建
@@ -64,6 +64,7 @@ jooger.me-server
 | | |____mongo.js                       // MongoDB驱动（mongoose）
 | | |____redis.js                       // Redis
 | | |____validation.js                  // 额外的校验规则
+| | |____gc.js                          // GC
 | |____routes                           // 路由目录
 | | |____backend.js                     // 后台路由
 | | |____frontend.js                    // 前台路由
@@ -71,7 +72,9 @@ jooger.me-server
 | | |____crontab.js                     // 定时更新任务
 | | |____github-passport.js             // Github验证
 | | |____github-userinfo.js             // 获取Github用户信息
+| | |____github-token.js                // 获取Github登录token
 | | |____netease-music.js               // 网易云音乐api
+| |____proxy                            // model操作代理
 | |____util                             // 常用工具
 |____test                               // 测试目录
 
@@ -97,16 +100,28 @@ jooger.me-server
 
 * ~~评论发送邮件 [nodemailer](https://github.com/nodemailer/nodemailer)~~ (2017.10.29)
 
-* ~~GC优化~~ (2017.10.30，linux下需要预先安装g++)
+* ~~GC优化~~ (2017.10.30，linux下需要预先安装g++, **已废弃**)
 
 * ~~个人动态api~~ (2017.10.30)
 
+* ~~文章归档api~~（2018.01.04）
+
+* ~~Model代理~~ (2018.01.28)
+
+* ~~ESlint~~ (2018.02.01)
+
+* ~~Docker支持~~ (2018.02.09)
+
+* ~~站内通知api~~ (2018.02.12)
+
 * 邮件模板
 
-* 消息api
-
-* 日志api
+* TypeScript升级
 
 * 统计api
 
 * 完善API文档
+
+* 测试case
+
+* GraphQL

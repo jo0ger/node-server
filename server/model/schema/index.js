@@ -1,6 +1,6 @@
 /**
  * @desc Schemas entry
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 25 Sep 2017
  */
 
@@ -13,4 +13,4 @@ exports.tag = require('./tag')
 exports.user = require('./user')
 exports.option = require('./option')
 exports.moment = require('./moment')
-exports.log = require('./log')
+exports.notification = require('./notification')

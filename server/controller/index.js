@@ -1,6 +1,6 @@
 /**
  * @desc Controllers entry
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 26 Sep 2017
  */
 
@@ -16,3 +16,5 @@ exports.user = require('./user')
 exports.auth = require('./auth')
 exports.moment = require('./moment')
 exports.statistics = require('./statistics')
+exports.aliyun = require('./aliyun')
+exports.notification = require('./notification')

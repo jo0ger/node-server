@@ -1,6 +1,6 @@
 /**
  * @desc front api map
- * @author Jooger <zzy1198258955@163.com>
+ * @author Jooger <iamjooger@gmail.com>
  * @date 25 Sep 2017
  */
 
@@ -21,6 +21,8 @@ const {
 
 // Article
 router.get('/articles', article.list)
+router.get('/articles/hot', article.hot)
+router.get('/articles/archives', article.archives)
 router.get('/articles/:id', article.item)
 router.post('/articles/:id/like', article.like)
 
@@ -48,7 +50,9 @@ router.get('/music/songs/:song_id/lyric', music.lyric)
 router.get('/options', option.data)
 
 // User
-router.get('/users/me', user.me)
+router.get('/users/blogger', user.blogger)
+router.get('/users/guests', user.guests)
+router.get('/users/:id', user.item)
 
 // Auth
 router.get('/auth/github/token', auth.fetchGithubToken)
