@@ -94,10 +94,12 @@ exports.update = async (ctx, next) => {
 	const id = ctx.validateParam('id').required('缺少标签ID').toString().isObjectId().val()
 	const name = ctx.validateBody('name').optional().val()
 	const description = ctx.validateBody('description').optional().val()
+	const ext = ctx.validateBody('extends').optional().toArray().val()
 	const tag = {}
 
 	name && (tag.name = name)
 	description && (tag.description = description)
+	ext && (tag.extends = ext)
 
 	const data = await tagProxy.updateById(id, tag).exec()
 

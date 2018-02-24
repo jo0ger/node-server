@@ -104,11 +104,13 @@ exports.update = async (ctx, next) => {
 	const name = ctx.validateBody('name').optional().val()
 	const description = ctx.validateBody('description').optional().val()
 	const list = ctx.validateBody('list').optional().toInt().val()
+	const ext = ctx.validateBody('extends').optional().toArray().val()
 	const category = {}
 
 	name && (category.name = name)
 	description && (category.description = description)
 	list && (category.list = list)
+	ext && (category.extends = ext)
 
 	const data = await categoryProxy.updateById(id, category).exec()
 
