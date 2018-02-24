@@ -17,7 +17,7 @@ const transporter = isProd ? nodemailer.createTransport({
 	service: '163',
 	secure: true,
 	auth: {
-		user: config.email,
+		user: config.email_163,
 		pass: process.env['163Pass'] || '163邮箱密码'
 	}
 }) : null

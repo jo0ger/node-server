@@ -16,6 +16,7 @@ const baseConfig = {
 	author: packageInfo.author.name,
 	site: packageInfo.author.url,
 	email: packageInfo.author.email,
+	email_163: 'zzy1198258955@163.com',
 	env: process.env.NODE_ENV,
 	root: path.resolve(__dirname, '../../'),
 	port: process.env.PORT || 3001,
