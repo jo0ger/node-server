@@ -9,7 +9,7 @@
 const config = require('../config')
 const mongoose = require('mongoose')
 const { bhash, getDebug, proxy } = require('../util')
-const { UserModel, OptionModel } = require('../model')
+const { userProxy, optionProxy } = require('../proxy')
 const { getGithubUsersInfo } = require('../service')
 const debug = getDebug('MongoDB')
 let isConnected = false
@@ -38,16 +38,16 @@ function seed () {
 
 // 参数初始化
 async function seedOption () {
-	const option = await OptionModel.findOne().exec().catch(err => debug.error(err.message))
+	const option = await optionProxy.findOne().exec().catch(err => debug.error(err.message))
 
 	if (!option) {
-		await new OptionModel().save().catch(err => debug.error(err.message))
+		await optionProxy.newAndSave().catch(err => debug.error(err.message))
 	}
 }
 
 // 管理员初始化
 async function seedAdmin () {
-	const admin = await UserModel.findOne({
+	const admin = await userProxy.findOne({
 		role: config.constant.roleMap.ADMIN,
 		'github.login': config.author
 	}).exec()
@@ -63,7 +63,7 @@ async function createAdmin () {
 		return fail('未找到Github用户数据')
 	}
 	data = data[0]
-	const result = await new UserModel({
+	const result = await userProxy.newAndSave({
 		role: config.constant.roleMap.ADMIN,
 		name: data.name,
 		email: data.email,
@@ -77,11 +77,9 @@ async function createAdmin () {
 			id: data.id,
 			login: data.login
 		}
-	})
-		.save()
-		.catch(err => fail(err.message))
+	}).catch(err => fail(err.message))
 
-	if (!result || !result._id) {
+	if (!result || !result.length) {
 		fail('本地入库失败')
 	} else {
 		debug.success('初始化管理员成功')
