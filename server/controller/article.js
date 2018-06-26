@@ -36,6 +36,7 @@ exports.list = async (ctx, next) => {
 	// 过滤条件
 	const options = {
 		sort: {
+			updatedAt: -1,
 			createdAt: -1
 		},
 		page,
