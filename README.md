@@ -40,6 +40,36 @@ $ npm run deploy
 $ npm run test
 ```
 
+## Docker
+
+先装Docker，过程参见官网
+
+依赖镜像：[redis](!https://hub.docker.com/_/redis/)，[mongo](!https://hub.docker.com/_/mongo/)
+
+1. 先pull一下依赖镜像
+
+``` bash
+$ docker pull redis
+$ docker pull mongo
+```
+
+2. 然后启动依赖镜像的容器
+
+``` bash
+$ docker run --name mongo -d mongo
+$ docker run --name redis -d redis
+```
+
+3. 生成项目镜像并运行
+
+``` bash
+# 生成镜像
+$ docker build -t node-server:0.0.1 .
+
+# 启动容器
+$ docker run -it -p 3001:3001 --name node-server --link mongo:mongo --link redis:redis node-server:0.0.1
+```
+
 ## Directory tree
 
 ```
@@ -110,7 +140,7 @@ node-server
 
 * ~~ESlint~~ (2018.02.01)
 
-* ~~Docker支持~~ (2018.02.09)
+* ~~Docker支持~~ (更新2018.08.16)
 
 * ~~站内通知api~~ (2018.02.12)
 
