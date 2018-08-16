@@ -4,8 +4,15 @@
 import { Application } from 'egg'
 
 export default (app: Application) => {
-    const { STRING } = app.Sequelize
-    return app.model.define('tag', app.schemaWrapper({
+    const { STRING, INTEGER, DATE } = app.Sequelize
+    return app.model.define('tag', {
+        id: {
+            type: INTEGER,
+            autoIncrement: true,
+            primaryKey: true
+        },
+        created_at: { type: DATE },
+        updated_at: { type: DATE },
         name: {
             type: STRING(255),
             allowNull: false
@@ -18,5 +25,5 @@ export default (app: Application) => {
             type: STRING,
             defaultValue: ''
         }
-    }))
+    })
 }

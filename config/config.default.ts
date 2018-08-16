@@ -25,13 +25,13 @@ export default (appInfo: EggAppInfo) => {
     // add your config here
     config.middleware = ['graphql'];
 
-    config.graphql = {
-        router: '/graphql',
-        // 是否加载到 app 上，默认开启
-        app: true,
-        // 是否加载到 agent 上，默认关闭
-        agent: false,
-    }
+    // config.graphql = {
+    //     router: '/graphql',
+    //     // 是否加载到 app 上，默认开启
+    //     app: true,
+    //     // 是否加载到 agent 上，默认关闭
+    //     agent: false,
+    // }
 
     config.sequelize = {
         dialect: 'mysql',

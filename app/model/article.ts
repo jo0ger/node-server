@@ -4,8 +4,15 @@
 import { Application } from 'egg'
 
 export default (app: Application) => {
-    const { INTEGER, STRING, ARRAY, ENUM, Deferrable } = app.Sequelize
-    return app.model.define('article', app.schemaWrapper({
+    const { INTEGER, STRING, ENUM, DATE, Deferrable } = app.Sequelize
+    return app.model.define('article', {
+        id: {
+            type: INTEGER,
+            autoIncrement: true,
+            primaryKey: true
+        },
+        created_at: { type: DATE },
+        updated_at: { type: DATE },
         title: {
             type: STRING(255),
             allowNull: false
@@ -14,7 +21,7 @@ export default (app: Application) => {
             type: STRING,
             defaultValue: ''
         },
-        keywords: ARRAY(STRING),
+        keywords: STRING,
         content: {
             type: STRING,
             allowNull: false
@@ -57,10 +64,10 @@ export default (app: Application) => {
         category_id: {
             type: INTEGER,
             references: {
-                model: 'category',
+                model: 'categories',
                 key: 'id',
                 deferrable: Deferrable.INITIALLY_IMMEDIATE
             }
         }
-    }))
+    })
 }
