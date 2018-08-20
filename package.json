@@ -1,96 +1,45 @@
 {
   "name": "node-server",
-  "version": "1.5.0",
+  "version": "1.0.0",
+  "description": "",
   "private": true,
-  "description": "🔥 My blog's api server build by koa2 and mongoose",
-  "homepage": "https://github.com/jo0ger/node-server",
-  "author": {
-    "name": "jo0ger",
-    "email": "iamjooger@gmail.com",
-    "url": "https://jooger.me"
-  },
-  "repository": {
-    "type": "https",
-    "url": "https://github.com/jo0ger/node-server.git"
-  },
-  "keywords": [
-    "jooger.me",
-    "server",
-    "api",
-    "Nodejs",
-    "Koa2",
-    "MongoDB"
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/jo0ger/node-server/issues"
-  },
-  "bin": "./node_modules/.bin/",
-  "scripts": {
-    "start": "cross-env NODE_ENV=development nodemon bin/www",
-    "debug": "cross-env NODE_ENV=development nodemon --inspect bin/www",
-    "prod": "cross-env NODE_ENV=production nodemon bin/www",
-    "pm2": "pm2 startOrReload ecosystem.config.js",
-    "prod:pm2": "pm2 startOrReload ecosystem.config.js --env production",
-    "deploy": "pm2 deploy ecosystem.config.js production",
-    "precommit": "npm run lint",
-    "lint": "eslint --ext .js,.ts --ignore-path .gitignore ."
-  },
   "dependencies": {
-    "akismet-api": "^3.0.0",
-    "axios": "^0.16.2",
-    "bcryptjs": "^2.4.3",
-    "big-integer": "^1.6.25",
-    "crypto": "^1.0.1",
-    "debug": "^2.6.9",
-    "formidable": "^1.1.1",
-    "geoip-lite": "^1.2.1",
-    "gravatar": "^1.6.0",
-    "highlight.js": "^9.12.0",
-    "jsonwebtoken": "^8.1.0",
-    "koa": "^2.4.1",
-    "koa-bodyparser": "^3.2.0",
-    "koa-bouncer": "^6.0.0",
-    "koa-bunyan-logger": "^2.0.0",
-    "koa-compose": "^4.0.0",
-    "koa-compress": "^2.0.0",
-    "koa-json": "^2.0.2",
-    "koa-logger": "^2.0.1",
-    "koa-onerror": "^1.2.1",
-    "koa-router": "^7.1.1",
-    "koa-session": "^5.5.0",
-    "lodash": "^4.17.4",
-    "marked": "^0.3.12",
-    "mongoose": "^4.13.9",
-    "mongoose-paginate": "^5.0.3",
-    "nodemailer": "^4.4.1",
-    "passport-github": "^1.1.0",
-    "redis": "^2.8.0",
-    "simple-netease-cloud-music": "^0.3.4",
-    "validator": "^9.2.0"
+    "egg": "^2.2.1",
+    "egg-mongoose": "^3.1.0",
+    "egg-scripts": "^2.5.0"
   },
   "devDependencies": {
-    "cross-env": "^5.0.5",
-    "eslint": "^4.16.0",
-    "eslint-config-koa": "^2.0.2",
-    "eslint-config-standard": "^11.0.0-beta.0",
-    "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-node": "^5.2.1",
-    "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-standard": "^3.0.1",
-    "nodemon": "^1.8.1",
-    "pre-git": "^3.17.0"
+    "autod": "^3.0.1",
+    "autod-egg": "^1.0.0",
+    "egg-bin": "^4.3.5",
+    "egg-ci": "^1.8.0",
+    "egg-mock": "^3.14.0",
+    "eslint": "^4.11.0",
+    "eslint-config-egg": "^6.0.0",
+    "webstorm-disable-index": "^1.2.0"
   },
-  "release": {
-    "analyzeCommits": "simple-commit-message"
+  "engines": {
+    "node": ">=8.9.0"
   },
-  "config": {
-    "pre-git": {
-      "enabled": true,
-      "pre-commit": [
-        "npm run precommit"
-      ],
-      "post-commit": "git status"
-    }
-  }
+  "scripts": {
+    "start": "egg-scripts start --daemon --title=egg-server-node-server",
+    "stop": "egg-scripts stop --title=egg-server-node-server",
+    "dev": "egg-bin dev",
+    "debug": "egg-bin debug",
+    "test": "npm run lint -- --fix && npm run test-local",
+    "test-local": "egg-bin test",
+    "cov": "egg-bin cov",
+    "lint": "eslint .",
+    "ci": "npm run lint && npm run cov",
+    "autod": "autod"
+  },
+  "ci": {
+    "version": "8"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "",
+  "license": "MIT"
 }
