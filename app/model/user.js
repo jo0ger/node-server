@@ -8,9 +8,9 @@ module.exports = app => {
 
     const UserSchema = new Schema({
         name: { type: String, required: true },
-        email: { type: String, required: true, validate: app.utils.isEmail },
+        email: { type: String, required: true, validate: app.utils.validate.isEmail },
         avatar: { type: String, required: true },
-        site: { type: String, validate: app.utils.isSiteUrl },
+        site: { type: String, validate: app.utils.validate.isSiteUrl },
         slogan: { type: String },
         description: { type: String, default: '' },
         // 角色 0 管理员 | 1 普通用户 | 2 github用户，不能更改

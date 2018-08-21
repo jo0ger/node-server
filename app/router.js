@@ -7,6 +7,8 @@ module.exports = app => {
     const { router, controller } = app
     router.post('/home', controller.home.index)
 
+    router.get('/tags', controller.tag.list)
+
     router.all('*', (ctx, next) => {
         const code = 404
         ctx.fail(code, app.config.codeMap[code])
