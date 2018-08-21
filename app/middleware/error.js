@@ -3,10 +3,14 @@ module.exports = (opt, app) => {
         try {
             await next()
         } catch (err) {
+            // 所有的异常都在 app 上触发一个 error 事件，框架会记录一条错误日志
+            ctx.app.emit('error', err, ctx)
             let code = err.status || 500
-            const message = app.config.codeMap[code] || err.message
-            if (err.code === 'invalid_param') {
-                code = 422
+            let message = ''
+            if (app.config.isProd) {
+                message = app.config.codeMap[code]
+            } else {
+                message = err.message
             }
             ctx.fail(code, message, err.errors)
         }

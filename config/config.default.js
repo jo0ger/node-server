@@ -10,7 +10,7 @@ module.exports = appInfo => {
 
     config.isLocal = appInfo.env === 'local'
 
-    config.isProd = process.env.EGG_SERVER_ENV === 'prod'
+    config.isProd = appInfo.env === 'prod'
 
     // add your config here
     config.middleware = [
@@ -35,7 +35,7 @@ module.exports = appInfo => {
 
     // mongoose配置
     config.mongoose = {
-		url: 'mongodb://127.0.0.1/jooger-me',
+		url: 'mongodb://127.0.0.1/node-server',
 		options: {
             useNewUrlParser: true,
 			poolSize: 20,

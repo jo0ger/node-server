@@ -19,7 +19,7 @@ module.exports = (opt, app) => {
         }
     
         ctx.fail = (code = -1, message = '', error = null) => {
-            if (app.utils.isType(code, 'String')) {
+            if (app.utils.validate.isType(code, 'String')) {
                 error = message || null
                 message = code
                 code = -1
