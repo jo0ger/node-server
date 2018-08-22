@@ -60,10 +60,16 @@ module.exports = appInfo => {
         '500': '服务器错误'
     }
 
-    config.onerror = {
-        json: (err, ctx) => {
-            ctx.body = { message: 'error' };
-            ctx.status = 500
+    config.modelValidate = {
+        article: {
+            // 文章状态 （ 0 草稿(默认) | 1 已发布 ）
+            state: {
+                default: 0,
+                optional: {
+                    'DRAFT': 0,
+                    'PUBLISH': 1
+                }
+            }
         }
     }
 

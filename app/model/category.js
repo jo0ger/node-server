@@ -24,5 +24,5 @@ module.exports = app => {
         }]
     })
 
-    return mongoose.model('Category', CategorySchema)
+    return mongoose.model('Category', app.processSchema(CategorySchema))
 }

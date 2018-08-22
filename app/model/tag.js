@@ -22,5 +22,5 @@ module.exports = app => {
         }]
     })
 
-    return mongoose.model('Tag', TagSchema)
+    return mongoose.model('Tag', app.processSchema(TagSchema))
 }

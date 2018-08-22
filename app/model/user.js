@@ -30,6 +30,6 @@ module.exports = app => {
         }
     })
 
-    return mongoose.model('User', UserSchema)
+    return mongoose.model('User', app.processSchema(UserSchema))
 }
 

@@ -9,6 +9,10 @@ module.exports = (opt, app) => {
 
     return async (ctx, next) => {
         ctx.success = (data = null, message = successMsg) => {
+            if (app.utils.validate.isString(data)) {
+                message = data
+                data = null
+            }
             ctx.status = 200
             ctx.body = {
                 code: 200,
@@ -19,7 +23,7 @@ module.exports = (opt, app) => {
         }
     
         ctx.fail = (code = -1, message = '', error = null) => {
-            if (app.utils.validate.isType(code, 'String')) {
+            if (app.utils.validate.isString(code)) {
                 error = message || null
                 message = code
                 code = -1

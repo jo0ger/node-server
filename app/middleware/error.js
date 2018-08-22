@@ -6,6 +6,7 @@ module.exports = (opt, app) => {
             // 所有的异常都在 app 上触发一个 error 事件，框架会记录一条错误日志
             ctx.app.emit('error', err, ctx)
             let code = err.status || 500
+            if (code === 200) code = -1
             let message = ''
             if (app.config.isProd) {
                 message = app.config.codeMap[code]
