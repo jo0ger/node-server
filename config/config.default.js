@@ -20,6 +20,16 @@ module.exports = appInfo => {
         'headers'
     ]
 
+    config.session = {
+        key: appInfo.name + '-token',
+        maxAge: 60000 * 60 * 24 * 7,
+        signed: false
+    }
+
+    config.userCookieKey = appInfo.name + '_userid'
+
+    config.secrets = appInfo.name + '_secrets'
+
     config.bodyParser = {
         jsonLimit: '10mb'
     }
