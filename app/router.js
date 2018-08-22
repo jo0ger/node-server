@@ -36,23 +36,23 @@ function frontend (app) {
 }
 
 function backend (app) {
-    const { router, controller } = app
+    const { router, controller, middlewares } = app
 
     // Category
-    router.get('/backend/categories', controller.category.list)
-    router.get('/backend/categories/:id', controller.category.item)
-    router.post('/backend/categories', controller.category.create)
-    router.put('/backend/categories/:id', controller.category.update)
-    router.patch('/backend/categories/:id', controller.category.update)
-    router.delete('/backend/categories/:id', controller.category.delete)
+    router.get('/backend/categories', middlewares.auth(app), controller.category.list)
+    router.get('/backend/categories/:id', middlewares.auth(app), controller.category.item)
+    router.post('/backend/categories', middlewares.auth(app), controller.category.create)
+    router.put('/backend/categories/:id', middlewares.auth(app), controller.category.update)
+    router.patch('/backend/categories/:id', middlewares.auth(app), controller.category.update)
+    router.delete('/backend/categories/:id', middlewares.auth(app), controller.category.delete)
 
     // Tag
-    router.get('/backend/tags', controller.tag.list)
-    router.get('/backend/tags/:id', controller.tag.item)
-    router.post('/backend/tags', controller.tag.create)
-    router.put('/backend/tags/:id', controller.tag.update)
-    router.patch('/backend/tags/:id', controller.tag.update)
-    router.delete('/backend/tags/:id', controller.tag.delete)
+    router.get('/backend/tags', middlewares.auth(app), controller.tag.list)
+    router.get('/backend/tags/:id', middlewares.auth(app), controller.tag.item)
+    router.post('/backend/tags', middlewares.auth(app), controller.tag.create)
+    router.put('/backend/tags/:id', middlewares.auth(app), controller.tag.update)
+    router.patch('/backend/tags/:id', middlewares.auth(app), controller.tag.update)
+    router.delete('/backend/tags/:id', middlewares.auth(app), controller.tag.delete)
 
     return router
 }
