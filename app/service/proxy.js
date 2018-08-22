@@ -1,5 +1,5 @@
 /**
- * @desc 公共的model proxy
+ * @desc 公共的model proxy service
  */
 
 const { Service } = require('egg')
@@ -49,16 +49,16 @@ module.exports = class ProxyService extends Service {
 		})
 	}
 
-	delete (query = {}) {
+	remove (query = {}) {
 		return this.model.remove(query)
 	}
 
 	deleteById (id = '') {
-		return this.del({ _id: id })
+		return this.model.deleteOne({ _id: id })
 	}
 
 	deleteByIds (ids = []) {
-		return this.del({
+		return this.model.deleteMany({
 			_id: {
 				$in: ids
 			}

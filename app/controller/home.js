@@ -14,8 +14,10 @@ const createRule = {
 
 class HomeController extends Controller {
     async index() {
-        this.ctx.validate(createRule)
-        this.ctx.body = this.ctx.request.body
+        // this.ctx.validate(createRule)
+        // this.ctx.body = this.ctx.request.body
+        this.ctx.throw(200, '标签已经存在' )
+        this.ctx.fail(404)
     }
 }
 

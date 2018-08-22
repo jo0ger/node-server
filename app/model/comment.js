@@ -43,5 +43,5 @@ module.exports = app => {
         forward: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment' } // 前一条评论ID，可以是parent的id， 比如 B评论 是 A评论的回复，则B.forward._id = A._id，主要是为了查看评论对话时的评论树构建
     })
 
-    return mongoose.model('Comment', CommentSchema)
+    return mongoose.model('Comment', app.processSchema(CommentSchema))
 }

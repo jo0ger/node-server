@@ -1,16 +1,12 @@
+const lodash = require('lodash')
+const mongoose = require('mongoose')
 const validator = require('validator')
 
-exports.isType = (obj = {}, type = 'Object') => {
-	if (!Array.isArray(type)) {
-		type = [type]
+Object.keys(lodash).forEach(key => {
+	if (key.startsWith('is')) {
+		exports[key] = lodash[key]
 	}
-	return type.some(t => {
-		if (typeof t !== 'string') {
-			return false
-		}
-		return Object.prototype.toString.call(obj) === `[object ${t}]`
-	})
-}
+})
 
 exports.isObjectId = (str = '') => mongoose.Types.ObjectId.isValid(str)
 

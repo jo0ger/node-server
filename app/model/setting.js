@@ -45,5 +45,5 @@ module.exports = app => {
         }
     })
 
-    return mongoose.model('Setting', SettingSchema)
+    return mongoose.model('Setting', app.processSchema(SettingSchema))
 }

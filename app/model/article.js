@@ -3,8 +3,9 @@
  */
 
 module.exports = app => {
-    const { mongoose } = app
+    const { mongoose, config } = app
     const { Schema } = mongoose
+    const articleValidateConfig = config.modelValidate.article
 
     const ArticleSchema = new Schema({
         // 文章标题
@@ -18,13 +19,19 @@ module.exports = app => {
         // markdown渲染后的htmln内容
         renderedContent: { type: String, required: true, validate: /\S+/ },
         // 分类
-        category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+        category: { type: Schema.Types.ObjectId, ref: 'Category' },
         // 标签
-        tag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
+        tag: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
         // 缩略图 （图片uid, 图片名称，图片URL， 图片大小）
         thumb: { type: String, validate: /.+?\.(jpg|jpeg|gif|bmp|png)/ },
         // 文章状态 （ 0 草稿 | 1 已发布 ）
-        state: { type: Number, default: 0 },
+        state: {
+            type: Number,
+            default: articleValidateConfig.state.default,
+            validate: (val) => {
+                return Object.values(articleValidateConfig.state.optional).includes(val)
+            }
+        },
         // 永久链接
         permalink: { type: String, validate: /\S+/ },
         // 创建日期
@@ -41,5 +48,5 @@ module.exports = app => {
         }
     })
 
-    return mongoose.model('Article', ArticleSchema)
+    return mongoose.model('Article', app.processSchema(ArticleSchema))
 }
