@@ -17,3 +17,8 @@ exports.console = {
     enable: true,
     package: 'egg-console'
 }
+
+exports.redis = {
+    enable: true,
+    package: 'egg-redis'
+}

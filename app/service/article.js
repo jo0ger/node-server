@@ -14,4 +14,24 @@ module.exports = class ArticleService extends ProxyService {
             // todo
         }
     }
+
+    async list () {}
+
+    async item () {}
+
+    async create () {}
+
+    async update () {}
+
+    async delete () {
+        const { ctx } = this
+        const { params } = ctx
+        ctx.validateObjectId(params)
+        const data = await this.deleteById(params.id).exec()
+        return data && data.ok && data.n
+    }
+
+    async like () {}
+
+    async archives () {}
 }

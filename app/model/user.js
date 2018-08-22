@@ -3,8 +3,9 @@
  */
 
 module.exports = app => {
-    const { mongoose } = app
+    const { mongoose, config } = app
     const { Schema } = mongoose
+    const userValidateConfig = config.modelValidate.user
 
     const UserSchema = new Schema({
         name: { type: String, required: true },
@@ -14,7 +15,13 @@ module.exports = app => {
         slogan: { type: String },
         description: { type: String, default: '' },
         // 角色 0 管理员 | 1 普通用户 | 2 github用户，不能更改
-        role: { type: Number, default: 1 },
+        role: {
+            type: Number,
+            default: userValidateConfig.role.default,
+            validate: (val) => {
+                return Object.values(userValidateConfig.role.optional).includes(val)
+            }
+        },
         // role = 0的时候才有该项
         password: { type: String },
         // 是否被禁言

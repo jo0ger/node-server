@@ -56,6 +56,23 @@ module.exports = appInfo => {
 		}
     }
 
+    config.redis = {
+        clients: {
+            token: {
+                host: '127.0.0.1',
+                port: 6379,
+                db: 0,
+                password: appInfo.name
+            },
+            util: {
+                host: '127.0.0.1',
+                port: 6379,
+                db: 1,
+                password: appInfo.name
+            }
+        }
+    }
+
     // allowed origins
     config.allowedOrigins = ['jooger.me', 'www.jooger.me', 'admin.jooger.me']
 
@@ -76,8 +93,19 @@ module.exports = appInfo => {
             state: {
                 default: 0,
                 optional: {
-                    'DRAFT': 0,
-                    'PUBLISH': 1
+                    DRAFT: 0,
+                    PUBLISH: 1
+                }
+            }
+        },
+        user: {
+            // 角色 0 管理员 | 1 普通用户 | 2 gayhub用户，不能更改
+            role: {
+                default: 1,
+                optional: {
+                    ADMIN: 0,
+                    NORMAL: 1,
+                    GAYHUB: 2
                 }
             }
         }
