@@ -1,3 +1,7 @@
+/**
+ * @desc 统一错误处理
+ */
+
 module.exports = (opt, app) => {
     return async (ctx, next) => {
         try {
