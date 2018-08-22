@@ -8,21 +8,17 @@ module.exports = class CategoryController extends Controller {
     async list () {
         const { ctx } = this
         const data = await this.service.category.list()
-        if (data) {
-            ctx.success(data, '分类列表获取成功')
-        } else {
-            ctx.fail('分类列表获取失败')
-        }
+        data
+            ? ctx.success(data, '分类列表获取成功')
+            : ctx.fail('分类列表获取失败')
     }
 
     async item () {
         const { ctx } = this
         const data = await this.service.category.item()
-        if (data) {
-            ctx.success(data, '分类详情获取成功')
-        } else {
-            ctx.fail('分类详情获取失败')
-        }
+        data
+            ? ctx.success(data, '分类详情获取成功')
+            : ctx.fail('分类详情获取失败')
     }
 
     async create () {

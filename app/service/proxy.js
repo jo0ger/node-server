@@ -42,7 +42,7 @@ module.exports = class ProxyService extends Service {
 		})
 	}
 
-	update (query = {}, doc = {}, opt = {}) {
+	updateMany (query = {}, doc = {}, opt = {}) {
 		return this.model.update(query, doc, {
 			multi: true,
 			...opt
