@@ -18,7 +18,7 @@ module.exports = app => {
         role: {
             type: Number,
             default: userValidateConfig.role.default,
-            validate: (val) => {
+            validate: val => {
                 return Object.values(userValidateConfig.role.optional).includes(val)
             }
         },

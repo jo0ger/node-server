@@ -21,7 +21,6 @@ module.exports = (opt, app) => {
                 data
             }
         }
-    
         ctx.fail = (code = -1, message = '', error = null) => {
             if (app.utils.validate.isString(code)) {
                 error = message || null

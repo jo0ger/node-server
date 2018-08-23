@@ -3,7 +3,7 @@
  */
 
 const { Controller } = require('egg')
- 
+
 module.exports = class UserController extends Controller {
     async list () {
         const { ctx } = this
@@ -20,4 +20,8 @@ module.exports = class UserController extends Controller {
             ? ctx.success(data, '用户详情获取成功')
             : ctx.fail('用户详情获取失败')
     }
+
+    async update () {}
+
+    async password () {}
 }
