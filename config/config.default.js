@@ -1,5 +1,3 @@
-'use strict'
-
 module.exports = appInfo => {
     const config = exports = {}
 
@@ -7,6 +5,8 @@ module.exports = appInfo => {
     config.keys = appInfo.name + '_1534765762288_2697'
 
     config.version = appInfo.pkg.version
+
+    config.site = appInfo.pkg.author.site
 
     config.isLocal = appInfo.env === 'local'
 
@@ -23,7 +23,7 @@ module.exports = appInfo => {
     config.session = {
         key: appInfo.name + '-token',
         maxAge: 60000 * 60 * 24 * 7,
-        signed: false
+        signed: true
     }
 
     config.userCookieKey = appInfo.name + '_userid'
@@ -45,15 +45,15 @@ module.exports = appInfo => {
 
     // mongoose配置
     config.mongoose = {
-		url: 'mongodb://127.0.0.1/node-server',
-		options: {
+        url: 'mongodb://127.0.0.1/node-server',
+        options: {
             useNewUrlParser: true,
-			poolSize: 20,
-			keepAlive: true,
-			autoReconnect: true,
-			reconnectInterval: 1000,
-			reconnectTries: Number.MAX_VALUE
-		}
+            poolSize: 20,
+            keepAlive: true,
+            autoReconnect: true,
+            reconnectInterval: 1000,
+            reconnectTries: Number.MAX_VALUE
+        }
     }
 
     config.redis = {
@@ -79,12 +79,12 @@ module.exports = appInfo => {
     // 请求响应code
     config.codeMap = {
         '-1': '请求失败',
-        '200': '请求成功',
-        '401': '权限校验失败',
-        '403': 'Forbidden',
-        '404': '资源未找到',
-        '422': '参数校验失败',
-        '500': '服务器错误'
+        200: '请求成功',
+        401: '权限校验失败',
+        403: 'Forbidden',
+        404: 'URL资源未找到',
+        422: '参数校验失败',
+        500: '服务器错误'
     }
 
     config.modelValidate = {
@@ -109,6 +109,12 @@ module.exports = appInfo => {
                 }
             }
         }
+    }
+
+    // 初始化管理员，默认的名称和密码，名称需要是github名称
+    config.defaultAdmin = {
+        name: appInfo.pkg.author.name,
+        password: 'admin123456'
     }
 
     return config

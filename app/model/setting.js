@@ -41,6 +41,11 @@ module.exports = app => {
             // 163邮箱
             mail163: {
                 password: { type: String, default: '' }
+            },
+            // gayhub
+            github: {
+                clientID: { type: String, default: '' },
+                clientSecret: { type: String, default: '' }
             }
         }
     })

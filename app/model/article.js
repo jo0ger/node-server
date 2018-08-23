@@ -28,7 +28,7 @@ module.exports = app => {
         state: {
             type: Number,
             default: articleValidateConfig.state.default,
-            validate: (val) => {
+            validate: val => {
                 return Object.values(articleValidateConfig.state.optional).includes(val)
             }
         },
@@ -48,5 +48,5 @@ module.exports = app => {
         }
     })
 
-    return mongoose.model('Article', app.processSchema(ArticleSchema))
+    return mongoose.model('Article', app.processSchema(ArticleSchema, true))
 }

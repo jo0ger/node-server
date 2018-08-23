@@ -1,21 +1,21 @@
 module.exports = app => {
     const { router, config } = app
 
-    router.get('/', async (ctx, next) => {
-		ctx.body = {
-			name: config.name,
-			version: config.version,
-			author: config.pkg.author,
-			github: 'https://github.com/jo0ger',
-			site: config.site,
-			poweredBy: ['Egg', 'Koa2', 'MongoDB', 'Nginx', 'Redis']
-		}
-	})
+    router.get('/', async ctx => {
+        ctx.body = {
+            name: config.name,
+            version: config.version,
+            author: config.pkg.author,
+            github: 'https://github.com/jo0ger',
+            site: config.site,
+            poweredBy: ['Egg', 'Koa2', 'MongoDB', 'Nginx', 'Redis']
+        }
+    })
 
     frontend(app)
     backend(app)
 
-    router.all('*', (ctx, next) => {
+    router.all('*', ctx => {
         const code = 404
         ctx.fail(code, app.config.codeMap[code])
     })
@@ -23,6 +23,9 @@ module.exports = app => {
 
 function frontend (app) {
     const { router, controller } = app
+
+    // Article
+    router.get('/articles', controller.article.list)
 
     // Category
     router.get('/categories', controller.category.list)
@@ -34,6 +37,9 @@ function frontend (app) {
 
     // User
     router.get('/users/:id', controller.user.item)
+
+    // Setting
+    router.get('/setting', controller.setting.index)
 
     return router
 }
@@ -61,6 +67,16 @@ function backend (app) {
     // User
     router.get('/backend/users', auth, controller.user.list)
     router.get('/backend/users/:id', auth, controller.user.item)
+
+    // Setting
+    router.get('/backend/setting', auth, controller.setting.index)
+    router.put('/backend/setting', auth, controller.setting.update)
+    router.patch('/backend/setting', auth, controller.setting.update)
+
+    // Auth
+    router.post('/backend/auth/login', controller.auth.login)
+    router.get('/backend/auth/logout', auth, controller.auth.logout)
+    router.get('/backend/auth/info', auth, controller.auth.info)
 
     return router
 }

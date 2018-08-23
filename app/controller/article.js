@@ -3,7 +3,7 @@
  */
 
 const { Controller } = require('egg')
- 
+
 module.exports = class ArticleController extends Controller {
     async list () {
         const { ctx } = this
@@ -20,4 +20,14 @@ module.exports = class ArticleController extends Controller {
             ? ctx.success(data, '文章详情获取成功')
             : ctx.fail('文章详情获取失败')
     }
+
+    async create () {}
+
+    async update () {}
+
+    async delete () {}
+
+    async like () {}
+
+    async archives () {}
 }

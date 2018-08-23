@@ -1,4 +1,4 @@
-module.exports = appInfo => {
+module.exports = () => {
     const config = exports = {}
 
     config.console = {

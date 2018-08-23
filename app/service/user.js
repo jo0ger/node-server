@@ -3,7 +3,7 @@
  */
 
 const ProxyService = require('./proxy')
- 
+
 module.exports = class UserService extends ProxyService {
     get model () {
         return this.app.model.User
@@ -11,7 +11,10 @@ module.exports = class UserService extends ProxyService {
 
     get rules () {
         return {
-            // todo
+            password: {
+                password: { type: 'string', required: true },
+                oldPassword: { type: 'string', required: true }
+            }
         }
     }
 
@@ -21,7 +24,10 @@ module.exports = class UserService extends ProxyService {
         if (!ctx._isAuthenticated) {
             select += ' -createdAt -updatedAt -role'
         }
-        return await this.find().sort('-createdAt').select(select).exec()
+        return await this.find()
+            .sort('-createdAt')
+            .select(select)
+            .exec()
     }
 
     async item () {
@@ -35,5 +41,16 @@ module.exports = class UserService extends ProxyService {
         return await this.findById(params.id).select(select).exec()
     }
 
-    async update () {}
+    async password () {
+        const { ctx } = this
+        const { body } = ctx.request
+        ctx.validate(this.rules.password, body)
+        const verify = this.app.utils.encode.bcompare(body.oldPassword, ctx._user.password)
+        if (!verify) {
+            ctx.throw(200, '原密码错误')
+        }
+        return await this.updateById(ctx._user._id, {
+            password: this.app.utils.encode.bhash(body.password)
+        }).exec()
+    }
 }

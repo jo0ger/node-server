@@ -4,6 +4,8 @@
   "description": "",
   "private": true,
   "dependencies": {
+    "axios": "^0.18.0",
+    "bcryptjs": "^2.4.3",
     "egg": "^2.2.1",
     "egg-console": "^2.0.1",
     "egg-mongoose": "^3.1.0",
@@ -14,6 +16,7 @@
     "koa-compose": "^4.1.0",
     "koa-is-json": "^1.0.0",
     "lodash": "^4.17.10",
+    "mongoose-paginate-v2": "^1.0.12",
     "validator": "^10.6.0",
     "zlib": "^1.0.5"
   },
@@ -49,6 +52,10 @@
     "type": "git",
     "url": "git@github.com:jo0ger/node-server.git"
   },
-  "author": "",
+  "author": {
+    "name": "jo0ger",
+    "email": "iamjooger@gmail.com",
+    "url": "https://jooger.me"
+  },
   "license": "MIT"
 }

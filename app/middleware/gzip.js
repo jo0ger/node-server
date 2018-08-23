@@ -6,7 +6,7 @@ const isJSON = require('koa-is-json')
 const zlib = require('zlib')
 
 module.exports = options => {
-    return async function gzip(ctx, next) {
+    return async function gzip (ctx, next) {
         await next()
 
         // 后续中间件执行完成后将响应体转换成 gzip

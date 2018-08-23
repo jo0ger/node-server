@@ -1,15 +1,35 @@
+'use strict'
+
 const path = require('path')
 
 module.exports = app => {
     app.loader.loadToApp(path.join(app.config.baseDir, 'app/utils'), 'utils')
+    addValidateRule(app)
+    setSessionstore(app)
+    app.beforeStart(async () => {
+        const ctx = app.createAnonymousContext()
+        await ctx.service.auth.seed()
+    })
+}
+
+function addValidateRule (app) {
     app.validator.addRule('objectId', (rule, val) => {
         const valid = app.utils.validate.isObjectId(val)
         if (!valid) {
             return 'must be objectId'
         }
     })
+    app.validator.addRule('email', (rule, val) => {
+        return app.utils.validate.isEmail(val)
+    })
+    app.validator.addRule('url', (rule, val) => {
+        return app.utils.validate.isSiteUrl(val)
+    })
+}
+
+function setSessionstore (app) {
     app.sessionStore = class Store {
-        constructor(app) {
+        constructor (app) {
             this.app = app
             this.client = app.redis.get('token')
         }
