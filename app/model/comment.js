@@ -1,6 +1,7 @@
 module.exports = app => {
-    const { mongoose } = app
+    const { mongoose, config } = app
     const { Schema } = mongoose
+    const commentValidateConfig = config.modelValidate.comment
 
     const CommentSchema = new Schema({
         // ******* 评论通用项 ************
@@ -13,7 +14,11 @@ module.exports = app => {
         // marked渲染后的内容
         renderedContent: { type: String, required: true, validate: /\S+/ },
         // 状态 -2 垃圾评论 | -1 已删除 | 0 待审核 | 1 通过
-        state: { type: Number, default: 1 },
+        state: {
+            type: Number,
+            default: commentValidateConfig.state.default,
+            validate: val => Object.values(commentValidateConfig.state.optional).includes(val)
+        },
         // Akismet判定是否是垃圾评论，方便后台check
         spam: { type: Boolean, default: false },
         // 评论发布者
@@ -21,9 +26,17 @@ module.exports = app => {
         // 点赞数
         ups: { type: Number, default: 0, validate: /^\d*$/ },
         // 是否置顶 0 否 | 1 是
-        sticky: { type: Number, default: 0 },
+        sticky: {
+            type: Number,
+            default: commentValidateConfig.sticky.default,
+            validate: val => Object.values(commentValidateConfig.sticky.optional).includes(val)
+        },
         // 类型 0 文章评论 | 1 站内留言 | 2 其他（保留）
-        type: { type: Number, default: 0 },
+        type: {
+            type: Number,
+            default: commentValidateConfig.type.default,
+            validate: val => Object.values(commentValidateConfig.type.optional).includes(val)
+        },
         // type为0时此项存在
         article: { type: mongoose.Schema.Types.ObjectId, ref: 'Article' },
         meta: {

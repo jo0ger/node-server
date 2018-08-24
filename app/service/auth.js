@@ -116,7 +116,7 @@ module.exports = class AuthService extends Service {
     async create (name) {
         const ADMIN = this.config.modelValidate.user.role.optional.ADMIN
         const defaultAdmin = this.config.defaultAdmin
-        const admin = await this.service.util.getGithubUserInfo(name || defaultAdmin.name)
+        const admin = await this.service.common.getGithubUserInfo(name || defaultAdmin.name)
         if (!admin) {
             return this.logger.warn('管理员创建失败')
         }
@@ -127,7 +127,7 @@ module.exports = class AuthService extends Service {
             password: this.app.utils.encode.bhash(defaultAdmin.password),
             slogan: admin.bio,
             site: admin.blog || admin.url,
-            avatar: this.service.util.proxyUrl(admin.avatar_url),
+            avatar: this.service.common.proxyUrl(admin.avatar_url),
             company: admin.company,
             location: admin.location,
             github: {

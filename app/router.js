@@ -58,8 +58,8 @@ function backend (app) {
     router.post('/backend/articles', auth, controller.article.create)
     router.put('/backend/articles/:id', auth, controller.article.update)
     router.patch('/backend/articles/:id', auth, controller.article.update)
-    router.delete('/backend/articles/:id', auth, controller.article.delete)
     router.patch('/backend/articles/:id/like', auth, controller.article.like)
+    router.delete('/backend/articles/:id', auth, controller.article.delete)
 
     // Category
     router.get('/backend/categories', auth, controller.category.list)

@@ -30,7 +30,7 @@ module.exports = class UserService extends ProxyService {
     async item () {
         const { ctx } = this
         const { params } = ctx
-        ctx.validateObjectId(params)
+        ctx.validateParamsObjectId()
         let select = '-password'
         if (!ctx._isAuthenticated) {
             select += ' -createdAt -updatedAt -github'

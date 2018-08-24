@@ -18,9 +18,7 @@ module.exports = app => {
         role: {
             type: Number,
             default: userValidateConfig.role.default,
-            validate: val => {
-                return Object.values(userValidateConfig.role.optional).includes(val)
-            }
+            validate: val => Object.values(userValidateConfig.role.optional).includes(val)
         },
         // role = 0的时候才有该项
         password: { type: String },

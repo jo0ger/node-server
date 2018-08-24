@@ -152,7 +152,7 @@ module.exports = class ArticleService extends ProxyService {
     async item () {
         const { ctx } = this
         const { params } = ctx
-        ctx.validateObjectId(params)
+        ctx.validateParamsObjectId()
         ctx.validate(this.rules.item, ctx.query)
         let query = null
         // 只有前台博客访问文章的时候pv才+1
@@ -198,7 +198,7 @@ module.exports = class ArticleService extends ProxyService {
     async update () {
         const { ctx } = this
         const { params } = ctx
-        ctx.validateObjectId(params)
+        ctx.validateParamsObjectId()
         const body = ctx.validateBody(this.rules.update)
         if (body.createdAt) {
             body.createdAt = new Date(body.createdAt)
@@ -209,7 +209,7 @@ module.exports = class ArticleService extends ProxyService {
     async delete () {
         const { ctx } = this
         const { params } = ctx
-        ctx.validateObjectId(params)
+        ctx.validateParamsObjectId()
         const data = await this.deleteById(params.id).exec()
         return data && data.ok && data.n
     }
@@ -217,7 +217,7 @@ module.exports = class ArticleService extends ProxyService {
     async like () {
         const { ctx } = this
         const { params } = ctx
-        ctx.validateObjectId(params)
+        ctx.validateParamsObjectId()
         return await this.updateById(params.id, {
             $inc: {
                 'meta.ups': 1
