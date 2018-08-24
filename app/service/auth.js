@@ -20,14 +20,17 @@ module.exports = class AuthService extends Service {
                 slogan: { type: 'string', required: false },
                 company: { type: 'string', required: false },
                 location: { type: 'string', required: false }
+            },
+            password: {
+                password: { type: 'string', required: true },
+                oldPassword: { type: 'string', required: true }
             }
         }
     }
 
     async login () {
         const { ctx } = this
-        const { body } = ctx.request
-        ctx.validate(this.rules.login, body)
+        const body = this.ctx.validateBody(this.rules.login)
         const user = await this.service.user.findOne({ name: body.username }).exec()
         if (!user) {
             return ctx.fail('用户不存在')
@@ -86,9 +89,20 @@ module.exports = class AuthService extends Service {
 
     async update () {
         const { ctx } = this
-        const { body } = ctx.request
-        ctx.validate(this.rules.update, body)
+        const body = this.ctx.validateBody(this.rules.update)
         return await this.service.user.updateById(ctx._user_id, body)
+    }
+
+    async password () {
+        const { ctx } = this
+        const body = this.ctx.validateBody(this.rules.password)
+        const verify = this.app.utils.encode.bcompare(body.oldPassword, ctx._user.password)
+        if (!verify) {
+            ctx.throw(200, '原密码错误')
+        }
+        return await this.updateById(ctx._user._id, {
+            password: this.app.utils.encode.bhash(body.password)
+        }).exec()
     }
 
     async seed () {

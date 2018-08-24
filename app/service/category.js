@@ -98,8 +98,7 @@ module.exports = class CategoryService extends ProxyService {
 
     async create () {
         const { ctx } = this
-        const { body } = ctx.request
-        ctx.validate(this.rules.create, body)
+        const body = this.ctx.validateBody(this.rules.create)
         const exists = await this.find({ name: body.name }).exec()
         if (exists && exists.length) {
             ctx.throw(200, '分类已经存在')
@@ -110,9 +109,8 @@ module.exports = class CategoryService extends ProxyService {
     async update () {
         const { ctx } = this
         const { params } = ctx
-        const { body } = ctx.request
         ctx.validateObjectId(params)
-        ctx.validate(this.rules.update, body)
+        const body = this.ctx.validateBody(this.rules.update)
         return await this.updateById(params.id, body).exec()
     }
 

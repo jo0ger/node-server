@@ -108,9 +108,8 @@ module.exports = class TagService extends ProxyService {
     async update () {
         const { ctx } = this
         const { params } = ctx
-        const { body } = ctx.request
         ctx.validateObjectId(params)
-        ctx.validate(this.rules.update, body)
+        const body = this.ctx.validateBody(this.rules.create)
         return await this.updateById(params.id, body).exec()
     }
 

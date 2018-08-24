@@ -9,7 +9,7 @@ module.exports = class ProxyService extends Service {
         if (!Array.isArray(docs)) {
             docs = [docs]
         }
-        return this.model.insertMany(docs)
+        return this.model.create(docs)
     }
 
     paginate (query, opt = {}) {
