@@ -83,7 +83,7 @@ module.exports = class CategoryService extends ProxyService {
     async item () {
         const { ctx } = this
         const { params } = ctx
-        ctx.validateObjectId(params)
+        ctx.validateParamsObjectId()
         let data = await this.findById(params.id).exec()
         if (data) {
             data = data.toObject()
@@ -109,7 +109,7 @@ module.exports = class CategoryService extends ProxyService {
     async update () {
         const { ctx } = this
         const { params } = ctx
-        ctx.validateObjectId(params)
+        ctx.validateParamsObjectId()
         const body = this.ctx.validateBody(this.rules.update)
         return await this.updateById(params.id, body).exec()
     }
@@ -117,7 +117,7 @@ module.exports = class CategoryService extends ProxyService {
     async delete () {
         const { ctx } = this
         const { params } = ctx
-        ctx.validateObjectId(params)
+        ctx.validateParamsObjectId()
         const articles = await this.service.article.find({ category: params.id }).exec()
         if (articles && articles.length) {
             ctx.throw(200, '该分类下有文章，不能删除')

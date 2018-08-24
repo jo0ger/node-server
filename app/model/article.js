@@ -28,9 +28,7 @@ module.exports = app => {
         state: {
             type: Number,
             default: articleValidateConfig.state.default,
-            validate: val => {
-                return Object.values(articleValidateConfig.state.optional).includes(val)
-            }
+            validate: val => Object.values(articleValidateConfig.state.optional).includes(val)
         },
         // 创建日期
         createdAt: { type: Date, default: Date.now },

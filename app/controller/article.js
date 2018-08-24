@@ -37,7 +37,13 @@ module.exports = class ArticleController extends Controller {
             : ctx.fail('文章更新失败')
     }
 
-    async delete () {}
+    async delete () {
+        const { ctx } = this
+        const data = await this.service.article.delete()
+        data
+            ? ctx.success('文章删除成功')
+            : ctx.fail('文章删除失败')
+    }
 
     async like () {
         const { ctx } = this

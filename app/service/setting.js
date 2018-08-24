@@ -72,7 +72,7 @@ module.exports = class SettingService extends ProxyService {
             if (!payload) return
         }
         // 更新友链
-        payload.site.links = await this.service.util.generateLinks(payload.site.links)
+        payload.site.links = await this.service.common.generateLinks(payload.site.links)
         const data = await this.updateOne({}, payload).exec()
         if (data) {
             this.logger.info('Setting更新成功')

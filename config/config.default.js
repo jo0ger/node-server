@@ -108,6 +108,35 @@ module.exports = appInfo => {
                     GAYHUB: '2'
                 }
             }
+        },
+        comment: {
+            // 状态 -2 垃圾评论 | -1 已删除 | 0 待审核 | 1 通过
+            state: {
+                default: '1',
+                optional: {
+                    SPAM: '-2',
+                    DELETED: '-1',
+                    AUDITING: '0',
+                    PASS: '1'
+                }
+            },
+            // 类型 0 文章评论 | 1 站内留言 | 2 其他（保留）
+            type: {
+                default: '0',
+                optional: {
+                    COMMENT: '0',
+                    MESSAGE: '1',
+                    OTHER: '2'
+                }
+            },
+            // 是否置顶 0 否 | 1 是
+            sticky: {
+                default: '0',
+                optional: {
+                    NORMAL: '0',
+                    STICKY: '1'
+                }
+            }
         }
     }
 
