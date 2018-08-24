@@ -91,21 +91,21 @@ module.exports = appInfo => {
         article: {
             // 文章状态 （ 0 草稿(默认) | 1 已发布 ）
             state: {
-                default: 0,
+                default: '0',
                 optional: {
-                    DRAFT: 0,
-                    PUBLISH: 1
+                    DRAFT: '0',
+                    PUBLISH: '1'
                 }
             }
         },
         user: {
             // 角色 0 管理员 | 1 普通用户 | 2 gayhub用户，不能更改
             role: {
-                default: 1,
+                default: '1',
                 optional: {
-                    ADMIN: 0,
-                    NORMAL: 1,
-                    GAYHUB: 2
+                    ADMIN: '0',
+                    NORMAL: '1',
+                    GAYHUB: '2'
                 }
             }
         }

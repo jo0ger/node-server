@@ -22,3 +22,7 @@ exports.getDocsPaginationData = docs => {
         }
     }
 }
+
+exports.getMonthFromNum = (num = 1) => {
+    return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][num - 1] || ''
+}

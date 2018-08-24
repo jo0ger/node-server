@@ -57,8 +57,7 @@ module.exports = class SettingService extends ProxyService {
 
     async create (payload) {
         const { ctx } = this
-        const body = payload || ctx.request.body
-        ctx.validate(this.rules.create, body)
+        const body = this.ctx.validateBody(this.rules.create, payload)
         const exist = await this.findOne().exec()
         if (exist) {
             ctx.throw(200, '分类已经存在')

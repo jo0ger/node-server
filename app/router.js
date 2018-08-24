@@ -26,6 +26,9 @@ function frontend (app) {
 
     // Article
     router.get('/articles', controller.article.list)
+    router.get('/articles/archives', controller.article.archives)
+    router.get('/articles/:id', controller.article.item)
+    router.patch('/articles/:id', controller.article.like)
 
     // Category
     router.get('/categories', controller.category.list)
@@ -47,6 +50,16 @@ function frontend (app) {
 function backend (app) {
     const { router, controller, middlewares } = app
     const auth = middlewares.auth(app)
+
+    // Article
+    router.get('/backend/articles', auth, controller.article.list)
+    router.get('/backend/articles/archives', auth, controller.article.archives)
+    router.get('/backend/articles/:id', auth, controller.article.item)
+    router.post('/backend/articles', auth, controller.article.create)
+    router.put('/backend/articles/:id', auth, controller.article.update)
+    router.patch('/backend/articles/:id', auth, controller.article.update)
+    router.delete('/backend/articles/:id', auth, controller.article.delete)
+    router.patch('/backend/articles/:id/like', auth, controller.article.like)
 
     // Category
     router.get('/backend/categories', auth, controller.category.list)

@@ -27,6 +27,28 @@ module.exports = class ArticleService extends ProxyService {
             item: {
                 // 后台用，只获取当前文章内容，不获取相关文章和上下篇文章
                 single: { type: 'boolean', required: false }
+            },
+            create: {
+                title: { type: 'string', required: true },
+                content: { type: 'string', required: true },
+                description: { type: 'string', required: false },
+                keywords: { type: 'array', required: false },
+                category: { type: 'objectId', required: false },
+                tag: { type: 'array', required: false, itemType: 'objectId' },
+                state: { type: 'enum', values: Object.values(this.config.modelValidate.article.state.optional), required: false },
+                thumb: { type: 'url', required: false },
+                createdAt: { type: 'dateTime', required: false }
+            },
+            update: {
+                title: { type: 'string', required: false },
+                content: { type: 'string', required: false },
+                description: { type: 'string', required: false },
+                keywords: { type: 'array', required: false },
+                category: { type: 'objectId', required: false },
+                tag: { type: 'array', required: false, itemType: 'objectId' },
+                state: { type: 'enum', values: Object.values(this.config.modelValidate.article.state.optional), required: false },
+                thumb: { type: 'url', required: false },
+                createdAt: { type: 'dateTime', required: false }
             }
         }
     }
@@ -135,11 +157,11 @@ module.exports = class ArticleService extends ProxyService {
         let query = null
         // 只有前台博客访问文章的时候pv才+1
         if (!ctx._isAuthenticated) {
-            query = this.updateOne({ _id: params.id, state: this.config.modelValidate.article.optional.PUBLISH }, { $inc: { 'meta.pvs': 1 } }).select('-content')
+            query = this.updateOne({ _id: params.id, state: this.config.modelValidate.article.state.optional.PUBLISH }, { $inc: { 'meta.pvs': 1 } }).select('-content')
         } else {
             query = this.findById(params.id)
         }
-        let data = await query.populate([
+        const data = await query.populate([
             {
                 path: 'category',
                 select: 'name description extends'
@@ -148,9 +170,9 @@ module.exports = class ArticleService extends ProxyService {
                 select: 'name description extends'
             }
         ]).exec()
-        if (!ctx.query.single) {
+
+        if (data && !ctx.query.single) {
             // 获取相关文章和上下篇文章
-            data = data.toObject()
             const [related, adjacent] = await Promise.all([
                 this.getRelatedArticles(data),
                 this.getAdjacentArticles(data)
@@ -161,9 +183,28 @@ module.exports = class ArticleService extends ProxyService {
         return data
     }
 
-    async create () {}
+    async create () {
+        const body = this.ctx.validateBody(this.rules.create)
+        if (body.createdAt) {
+            body.createdAt = new Date(body.createdAt)
+        }
+        let data = await this.newAndSave(body)
+        if (data && data.length) {
+            data = data[0].toObject()
+        }
+        return data
+    }
 
-    async update () {}
+    async update () {
+        const { ctx } = this
+        const { params } = ctx
+        ctx.validateObjectId(params)
+        const body = ctx.validateBody(this.rules.update)
+        if (body.createdAt) {
+            body.createdAt = new Date(body.createdAt)
+        }
+        return await this.updateById(params.id, body).populate('category tag').exec()
+    }
 
     async delete () {
         const { ctx } = this
@@ -173,9 +214,77 @@ module.exports = class ArticleService extends ProxyService {
         return data && data.ok && data.n
     }
 
-    async like () {}
+    async like () {
+        const { ctx } = this
+        const { params } = ctx
+        ctx.validateObjectId(params)
+        return await this.updateById(params.id, {
+            $inc: {
+                'meta.ups': 1
+            }
+        })
+    }
 
-    async archives () {}
+    async archives () {
+        const $match = {}
+        const $project = {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+            title: 1,
+            createdAt: 1
+        }
+        if (!this.ctx._isAuthenticated) {
+            $match.state = 1
+        } else {
+            $project.state = 1
+        }
+        let data = await this.aggregate([
+            { $match },
+            { $sort: { createdAt: 1 } },
+            { $project },
+            {
+                $group: {
+                    _id: {
+                        year: '$year',
+                        month: '$month'
+                    },
+                    articles: {
+                        $push: {
+                            title: '$title',
+                            _id: '$_id',
+                            createdAt: '$createdAt',
+                            state: '$state'
+                        }
+                    }
+                }
+            }
+        ])
+        let count = 0
+        if (data && data.length) {
+            data = [...new Set(data.map(item => item._id.year))].map(year => {
+                const months = []
+                data.forEach(item => {
+                    const { _id, articles } = item
+                    if (year === _id.year) {
+                        count += articles.length
+                        months.push({
+                            month: _id.month,
+                            monthStr: this.app.utils.share.getMonthFromNum(_id.month),
+                            articles
+                        })
+                    }
+                })
+                return {
+                    year,
+                    months
+                }
+            })
+        }
+        return {
+            count,
+            list: data || []
+        }
+    }
 
     // 根据标签获取相关文章
     async getRelatedArticles (data) {
@@ -205,7 +314,7 @@ module.exports = class ArticleService extends ProxyService {
         const query = {}
         // 如果未通过权限校验，将文章状态重置为1
         if (!ctx._isAuthenticated) {
-            query.state = this.config.modelValidate.article.optional.PUBLISH
+            query.state = this.config.modelValidate.article.state.optional.PUBLISH
         }
         const prev = await this.service.article.findOne(query)
             .select('title createdAt publishedAt thumb category')
