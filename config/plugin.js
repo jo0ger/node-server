@@ -29,3 +29,8 @@ exports.akismet = {
     enable: true,
     path: path.join(__dirname, '../app/lib/plugin/egg-akismet')
 }
+
+exports.mailer = {
+    enable: true,
+    path: path.join(__dirname, '../app/lib/plugin/egg-mailer')
+}

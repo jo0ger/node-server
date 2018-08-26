@@ -116,7 +116,7 @@ module.exports = class ArticleService extends ProxyService {
         }
 
         // 未通过权限校验（前台获取文章列表）
-        if (!ctx._isAuthenticated) {
+        if (!ctx._isAuthed) {
             // 将文章状态重置为1
             query.state = 1
             // 文章列表不需要content和state
@@ -156,7 +156,7 @@ module.exports = class ArticleService extends ProxyService {
         ctx.validate(this.rules.item, ctx.query)
         let query = null
         // 只有前台博客访问文章的时候pv才+1
-        if (!ctx._isAuthenticated) {
+        if (!ctx._isAuthed) {
             query = this.updateOne({ _id: params.id, state: this.config.modelValidate.article.state.optional.PUBLISH }, { $inc: { 'meta.pvs': 1 } }).select('-content')
         } else {
             query = this.findById(params.id)
@@ -233,7 +233,7 @@ module.exports = class ArticleService extends ProxyService {
             title: 1,
             createdAt: 1
         }
-        if (!this.ctx._isAuthenticated) {
+        if (!this.ctx._isAuthed) {
             $match.state = 1
         } else {
             $project.state = 1
@@ -313,7 +313,7 @@ module.exports = class ArticleService extends ProxyService {
         if (!data || !data._id) return null
         const query = {}
         // 如果未通过权限校验，将文章状态重置为1
-        if (!ctx._isAuthenticated) {
+        if (!ctx._isAuthed) {
             query.state = this.config.modelValidate.article.state.optional.PUBLISH
         }
         const prev = await this.service.article.findOne(query)
@@ -346,5 +346,29 @@ module.exports = class ArticleService extends ProxyService {
             prev: prev ? prev.toObject() : null,
             next: next ? next.toObject() : null
         }
+    }
+
+    async updateArticleCommentCount (articleIds = []) {
+        if (!this.app.utils.validate.isArray(articleIds)) {
+            articleIds = [articleIds]
+        }
+        if (!articleIds.length) return
+        const { validate, share } = this.app.utils
+        // TIP: 这里必须$in的是一个ObjectId对象数组，而不能只是id字符串数组
+        articleIds = [...new Set(articleIds)].filter(id => validate.isObjectId(id)).map(id => share.createObjectId(id))
+        const counts = await this.service.comment.aggregate([
+            { $match: { state: 1, article: { $in: articleIds } } },
+            { $group: { _id: '$article', total_count: { $sum: 1 } } }
+        ])
+            .exec()
+            .catch(err => {
+                this.logger.error('更新文章评论数量前聚合评论数据操作失败，错误：' + err.message)
+                return []
+            })
+        Promise.all(
+            counts.map(count => articleProxy.updateById(count._id, { $set: { 'meta.comments': count.total_count } }).exec())
+        )
+            .then(() => this.logger.info('文章评论数量更新成功'))
+            .catch(err => this.logger.error('文章评论数量更新失败，错误：' + err.message))
     }
 }

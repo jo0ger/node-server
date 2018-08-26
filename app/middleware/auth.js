@@ -20,7 +20,7 @@ module.exports = app => {
                 return ctx.fail(401, '用户不存在')
             }
             ctx._user = user.toObject()
-            ctx._isAuthenticated = true
+            ctx._isAuthed = true
             await next()
         }
     ])

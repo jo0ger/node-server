@@ -39,8 +39,9 @@ module.exports = app => {
                 region: { type: String, default: '' }
             },
             // 163邮箱
-            mail163: {
-                password: { type: String, default: '' }
+            mail: {
+                user: { type: String, default: '' },
+                pass: { type: String, default: '' }
             },
             // gayhub
             github: {

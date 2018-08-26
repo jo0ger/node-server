@@ -67,7 +67,7 @@ class AkismetClient {
 						this.app.coreLogger.warn('[egg-akismet] 评论验证不通过，疑似垃圾评论')
 						resolve(true)
 					} else {
-						this.app.coreLogger.success('[egg-akismet] 评论验证通过')
+						this.app.coreLogger.info('[egg-akismet] 评论验证通过')
 						resolve(false)
 					}
 				})
@@ -88,7 +88,7 @@ class AkismetClient {
 						this.app.coreLogger.error('[egg-akismet] 误检Spam垃圾评论报告提交失败')
 						return reject(err)
 					}
-					this.app.coreLogger.success('[egg-akismet] 误检Spam垃圾评论报告提交成功')
+					this.app.coreLogger.info('[egg-akismet] 误检Spam垃圾评论报告提交成功')
 					resolve()
 				})
 			} else {
@@ -108,7 +108,7 @@ class AkismetClient {
 						this.app.coreLogger.error('[egg-akismet] 误检正常评论报告提交失败')
 						return reject(err)
 					}
-					this.app.coreLogger.success('[egg-akismet] 误检正常评论报告提交成功')
+					this.app.coreLogger.info('[egg-akismet] 误检正常评论报告提交成功')
 					resolve()
 				})
 			} else {

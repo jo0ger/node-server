@@ -6,7 +6,7 @@ module.exports = appInfo => {
 
     config.version = appInfo.pkg.version
 
-    config.site = appInfo.pkg.author.url
+    config.author = appInfo.pkg.author
 
     config.isLocal = appInfo.env === 'local'
 
@@ -45,8 +45,15 @@ module.exports = appInfo => {
 
     config.akismet = {
         client: {
-            blog: config.site,
+            blog: config.author.url,
             key: '7fa12f4a1d08'
+        }
+    }
+
+    config.mailer = {
+        client: {
+            service: '163',
+            secure: true
         }
     }
 

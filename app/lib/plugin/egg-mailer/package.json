@@ -1,5 +1,5 @@
 {
     "eggPlugin": {
-        "name": "akismet"
+        "name": "mailer"
     }
 }

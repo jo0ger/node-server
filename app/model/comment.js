@@ -52,5 +52,25 @@ module.exports = app => {
         forward: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment' } // 前一条评论ID，可以是parent的id， 比如 B评论 是 A评论的回复，则B.forward._id = A._id，主要是为了查看评论对话时的评论树构建
     })
 
-    return mongoose.model('Comment', app.processSchema(CommentSchema))
+    return mongoose.model('Comment', app.processSchema(CommentSchema, {
+        paginate: true
+    }, {
+        pre: {
+            save (next) {
+                this.renderedContent = app.utils.markdown.render(this.content)
+                next()
+            },
+            async findOneAndUpdate () {
+                delete this._update.updatedAt
+                const { content } = this._update
+                const find = await this.findOne()
+                if (find) {
+                    if (content !== find.content) {
+                        this._update.renderedContent = app.utils.markdown.render(content)
+                        this._update.updatedAt = Date.now()
+                    }
+                }
+            }
+        }
+    }))
 }

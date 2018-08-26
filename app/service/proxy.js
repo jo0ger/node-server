@@ -5,6 +5,10 @@
 const { Service } = require('egg')
 
 module.exports = class ProxyService extends Service {
+    init () {
+        return this.model.init()
+    }
+
     newAndSave (docs) {
         if (!Array.isArray(docs)) {
             docs = [docs]
@@ -62,5 +66,12 @@ module.exports = class ProxyService extends Service {
 
     count (query = {}) {
         return this.model.count(query)
+    }
+
+    res (data, error) {
+        return {
+            data,
+            error
+        }
     }
 }

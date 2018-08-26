@@ -70,20 +70,16 @@ module.exports = class AuthService extends Service {
     async info () {
         const { ctx } = this
         const adminId = ctx._user._id
-        if (!adminId && !ctx._isAuthenticated) {
+        if (!adminId && !ctx._isAuthed) {
             return ctx.fail(401)
         }
         let data = null
-        if (ctx._isAuthenticated) {
+        if (ctx._isAuthed) {
             data = await this.service.user.findById(adminId).select('-password').exec()
         }
-        if (data) {
-            ctx.success({
-                info: data,
-                token: ctx.session._token
-            })
-        } else {
-            ctx.fail(401)
+        return {
+            info: data,
+            token: ctx.session._token
         }
     }
 
@@ -120,7 +116,7 @@ module.exports = class AuthService extends Service {
         if (!admin) {
             return this.logger.warn('管理员创建失败')
         }
-        const data = await this.service.user.newAndSave({
+        const data = await this.service.user.create({
             role: ADMIN,
             name: admin.name,
             email: admin.email || this.config.pkg.author.email,
@@ -135,7 +131,7 @@ module.exports = class AuthService extends Service {
                 login: admin.login
             }
         })
-        if (!data || !data.length) {
+        if (!data) {
             return this.logger.warn(`管理员【${admin.name}】创建失败`)
         }
         this.logger.info(`管理员【${admin.name}】创建成功`)

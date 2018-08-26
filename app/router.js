@@ -7,7 +7,7 @@ module.exports = app => {
             version: config.version,
             author: config.pkg.author,
             github: 'https://github.com/jo0ger',
-            site: config.site,
+            site: config.author.url,
             poweredBy: ['Egg', 'Koa2', 'MongoDB', 'Nginx', 'Redis']
         }
     })
@@ -37,6 +37,12 @@ function frontend (app) {
     // Tag
     router.get('/tags', controller.tag.list)
     router.get('/tags/:id', controller.tag.item)
+
+    // Comment
+    router.get('/comments', controller.comment.list)
+    router.get('/comments/:id', controller.comment.item)
+    router.post('/comments', controller.comment.create)
+    router.post('/comments/:id/like', controller.comment.like)
 
     // User
     router.get('/users/:id', controller.user.item)
@@ -76,6 +82,14 @@ function backend (app) {
     router.put('/backend/tags/:id', auth, controller.tag.update)
     router.patch('/backend/tags/:id', auth, controller.tag.update)
     router.delete('/backend/tags/:id', auth, controller.tag.delete)
+
+    // Comment
+    router.get('/backend/comments', auth, controller.comment.list)
+    router.get('/backend/comments/:id', auth, controller.comment.item)
+    router.post('/backend/comments', auth, controller.comment.create)
+    router.patch('/backend/comments/:id', auth, controller.comment.update)
+    router.delete('/backend/comments/:id', auth, controller.comment.delete)
+    router.post('/backend/comments/:id/like', auth, controller.comment.like)
 
     // User
     router.get('/backend/users', auth, controller.user.list)
