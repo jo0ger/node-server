@@ -15,7 +15,7 @@ module.exports = app => {
         renderedContent: { type: String, required: true, validate: /\S+/ },
         // 状态 -2 垃圾评论 | -1 已删除 | 0 待审核 | 1 通过
         state: {
-            type: Number,
+            type: String,
             default: commentValidateConfig.state.default,
             validate: val => Object.values(commentValidateConfig.state.optional).includes(val)
         },
@@ -25,15 +25,11 @@ module.exports = app => {
         author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         // 点赞数
         ups: { type: Number, default: 0, validate: /^\d*$/ },
-        // 是否置顶 0 否 | 1 是
-        sticky: {
-            type: Number,
-            default: commentValidateConfig.sticky.default,
-            validate: val => Object.values(commentValidateConfig.sticky.optional).includes(val)
-        },
+        // 是否置顶
+        sticky: { type: Boolean, default: false },
         // 类型 0 文章评论 | 1 站内留言 | 2 其他（保留）
         type: {
-            type: Number,
+            type: String,
             default: commentValidateConfig.type.default,
             validate: val => Object.values(commentValidateConfig.type.optional).includes(val)
         },
