@@ -1,0 +1,6 @@
+{
+    "name": "egg-akismet",
+    "eggPlugin": {
+        "name": "akismet"
+    }
+}

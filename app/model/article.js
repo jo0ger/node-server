@@ -26,7 +26,7 @@ module.exports = app => {
         thumb: { type: String, validate: /.+?\.(jpg|jpeg|gif|bmp|png)/ },
         // 文章状态 （ 0 草稿 | 1 已发布 ）
         state: {
-            type: Number,
+            type: String,
             default: articleValidateConfig.state.default,
             validate: val => Object.values(articleValidateConfig.state.optional).includes(val)
         },

@@ -6,7 +6,7 @@ module.exports = appInfo => {
 
     config.version = appInfo.pkg.version
 
-    config.site = appInfo.pkg.author.site
+    config.site = appInfo.pkg.author.url
 
     config.isLocal = appInfo.env === 'local'
 
@@ -41,6 +41,13 @@ module.exports = appInfo => {
     config.console = {
         debug: true,
         error: true
+    }
+
+    config.akismet = {
+        client: {
+            blog: config.site,
+            key: '7fa12f4a1d08'
+        }
     }
 
     // mongoose配置
@@ -128,14 +135,6 @@ module.exports = appInfo => {
                     MESSAGE: '1',
                     OTHER: '2'
                 }
-            },
-            // 是否置顶 0 否 | 1 是
-            sticky: {
-                default: '0',
-                optional: {
-                    NORMAL: '0',
-                    STICKY: '1'
-                }
             }
         }
     }
@@ -144,6 +143,15 @@ module.exports = appInfo => {
     config.defaultAdmin = {
         name: appInfo.pkg.author.name,
         password: 'admin123456'
+    }
+
+    config.defaultAvatar = 'http://static.jooger.me/img/common/default-avatar.png'
+
+    // 限制参数
+    config.limit = {
+        relatedArticleLimit: 10,
+        commentSpamLimit: 3,
+        hotLimit: 7
     }
 
     return config

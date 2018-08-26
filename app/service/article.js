@@ -305,7 +305,7 @@ module.exports = class ArticleService extends ProxyService {
                 this.logger.error('相关文章查询失败，错误：' + err.message)
                 return null
             })
-        return articles && articles.slice(0, 10) || null
+        return articles && articles.slice(0, this.config.limit.relatedArticleLimit) || null
     }
 
     // 获取相邻的文章

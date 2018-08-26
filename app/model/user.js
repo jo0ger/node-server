@@ -16,7 +16,7 @@ module.exports = app => {
         description: { type: String, default: '' },
         // 角色 0 管理员 | 1 普通用户 | 2 github用户，不能更改
         role: {
-            type: Number,
+            type: String,
             default: userValidateConfig.role.default,
             validate: val => Object.values(userValidateConfig.role.optional).includes(val)
         },
