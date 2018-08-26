@@ -23,6 +23,7 @@
     "marked": "^0.5.0",
     "mongoose": "5.2.8",
     "mongoose-paginate-v2": "^1.0.12",
+    "nodemailer": "^4.6.8",
     "validator": "^10.6.0",
     "zlib": "^1.0.5"
   },

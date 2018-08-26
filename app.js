@@ -8,6 +8,7 @@ module.exports = app => {
     setSessionstore(app)
     app.beforeStart(async () => {
         const ctx = app.createAnonymousContext()
+        await ctx.service.setting.seed()
         await ctx.service.auth.seed()
     })
 }

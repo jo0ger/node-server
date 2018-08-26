@@ -6,11 +6,12 @@ const { Service } = require('egg')
 const axios = require('axios')
 
 const prefix = 'http://'
+let mailerClient = null
 
 module.exports = class UtilService extends Service {
     proxyUrl (url) {
         if (url.startsWith(prefix)) {
-            return url.replace(prefix, `${this.app.config.site}/proxy/`)
+            return url.replace(prefix, `${this.app.config.author.url}/proxy/`)
         }
         return url
     }
@@ -86,5 +87,33 @@ module.exports = class UtilService extends Service {
             }
         }
         return links
+    }
+
+    // 发送邮件
+    async sendMail (data, toMe = false) {
+        let client = mailerClient
+        const keys = await this.service.setting.keys()
+        if (!client) {
+            mailerClient = client = this.app.mailer.getClient({
+                auth: keys.mail
+            })
+            await this.app.mailer.verify()
+        }
+        return new Promise((resolve, reject) => {
+            const opt = Object.assign({
+                from: `${this.config.author.name} <${keys.mail.user}>`
+            }, data)
+            if (toMe) {
+                opt.to = keys.mail.user
+            }
+            client.sendMail(opt, (err, info) => {
+                if (err) {
+                    this.logger.error('邮件发送失败，' + err.message)
+                    return reject(err)
+                }
+                this.logger.info('邮件发送成功')
+                resolve(info)
+            })
+        })
     }
 }

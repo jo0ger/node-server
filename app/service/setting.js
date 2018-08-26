@@ -17,11 +17,11 @@ module.exports = class SettingService extends ProxyService {
             create: {
                 site: {
                     type: 'object',
-                    required: true
+                    required: false
                 },
                 keys: {
                     type: 'object',
-                    required: true
+                    required: false
                 }
             },
             update: {
@@ -45,17 +45,18 @@ module.exports = class SettingService extends ProxyService {
         if (filter) {
             query.select = filter.split(',').join(' ')
         }
-        if (!ctx._isAuthenticated) {
+        if (!ctx._isAuthed) {
             query.select = 'site'
         }
         return await this.findOne(query).exec()
     }
 
     async keys () {
-        return await this.findOne().select('keys').exec()
+        const data = await this.findOne().select('keys').exec()
+        return data && data.keys || {}
     }
 
-    async create (payload) {
+    async create () {
         const { ctx } = this
         const body = this.ctx.validateBody(this.rules.create, payload)
         const exist = await this.findOne().exec()
@@ -65,12 +66,27 @@ module.exports = class SettingService extends ProxyService {
         return await this.newAndSave(body)
     }
 
+    async seed () {
+        const exist = await this.findOne().exec()
+        if (exist) {
+            return exist
+        }
+        const data = await this.newAndSave()
+        if (data && data.length) {
+            this.logger.info('Setting初始化成功')
+        } else {
+            this.logger.info('Setting初始化失败')
+        }
+        return data
+    }
+
     async update (payload) {
         if (!payload) {
             // http request
             payload = await this.findOne().exec()
             if (!payload) return
         }
+        payload.site = payload.site || {}
         // 更新友链
         payload.site.links = await this.service.common.generateLinks(payload.site.links)
         const data = await this.updateOne({}, payload).exec()

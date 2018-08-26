@@ -18,7 +18,7 @@ module.exports = class UserService extends ProxyService {
     async list () {
         const { ctx } = this
         let select = '-password'
-        if (!ctx._isAuthenticated) {
+        if (!ctx._isAuthed) {
             select += ' -createdAt -updatedAt -role'
         }
         return await this.find()
@@ -32,17 +32,34 @@ module.exports = class UserService extends ProxyService {
         const { params } = ctx
         ctx.validateParamsObjectId()
         let select = '-password'
-        if (!ctx._isAuthenticated) {
+        if (!ctx._isAuthed) {
             select += ' -createdAt -updatedAt -github'
         }
         return await this.findById(params.id).select(select).exec()
+    }
+
+    // 创建用户
+    async create (user) {
+        const { name } = user
+        const exist = await this.findOne({ name }).exec()
+        if (exist) {
+            this.logger.warn(`用户已存在：${name}`)
+            return exist
+        }
+        const data = await this.newAndSave(user)
+        if (!data || !data.length) {
+            this.logger.error(`用户创建失败：${name}`)
+            return null
+        }
+        this.logger.error(`用户创建成功：${name}`)
+        return data[0]
     }
 
     async checkCommentAuthor (author) {
         let user = null
         const { isObjectId, isObject } = this.app.utils.validate
         if (isObjectId(author)) {
-            user = this.findById(author).select('-password').exec90
+            user = this.findById(author).select('-password').exec()
         } else if (isObject(author)) {
             const update = {}
             author.name && (update.name = author.name)
@@ -56,19 +73,17 @@ module.exports = class UserService extends ProxyService {
                 if (isObjectId(author.id)) {
                     user = await this.updateById(author.id, update).exec()
                     if (user) {
-                        this.logger.info(`用户【${user.name}】更新成功`)
+                        this.logger.info('用户更新成功：' + user.name)
                     }
                 }
             } else {
                 // 创建
-                user = await this.newAndSave(Object.assign(update, {
-                    role: config.constant.roleMap.USER
+                user = await this.create(Object.assign(update, {
+                    role: this.config.modelValidate.user.role.optional.NORMAL
                 }))
-                if (user) {
-                    this.logger.info(`用户【${user.name}】创建成功`)
-                }
             }
         }
+        return user
     }
 
     // 检测用户以往spam评论
