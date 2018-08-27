@@ -16,6 +16,7 @@ module.exports = class AuthController extends Controller {
     }
 
     async info () {
+        const { ctx } = this
         const data = await this.service.auth.info()
         if (data.info) {
             ctx.success(data)

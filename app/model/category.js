@@ -15,8 +15,6 @@ module.exports = app => {
         createdAt: { type: Date, default: Date.now },
         // 更新日期
         updatedAt: { type: Date, default: Date.now },
-        // 排序 首页分类展示顺序
-        list: { type: Number, default: 1 },
         // 扩展属性
         extends: [{
             key: { type: String, validate: /\S+/ },

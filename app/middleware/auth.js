@@ -20,6 +20,7 @@ module.exports = app => {
                 return ctx.fail(401, '用户不存在')
             }
             ctx._user = user.toObject()
+            ctx._isAdmin = user.role === app.config.modelValidate.user.role.optional.ADMIN
             ctx._isAuthed = true
             await next()
         }
@@ -28,10 +29,7 @@ module.exports = app => {
 
 // 验证登录token
 function verifyToken (app) {
-    const {
-        config,
-        logger
-    } = app
+    const { config, logger } = app
     return async (ctx, next) => {
         ctx.session._verify = false
         const token = ctx.cookies.get(config.session.key)

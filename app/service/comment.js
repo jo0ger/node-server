@@ -214,7 +214,7 @@ module.exports = class CommentService extends ProxyService {
                 select: 'author meta sticky ups'
             }
         ]).exec()
-        
+
         return data
     }
 
@@ -246,21 +246,21 @@ module.exports = class CommentService extends ProxyService {
             location,
             ip,
             ua: ctx.req.headers['user-agent'] || '',
-            referer: ctx.req.headers['referer'] || ''
+            referer: ctx.req.headers.referer || ''
         }
         // 永链
         const permalink = this.getPermalink(body)
         const isSpam = await this.app.akismet.checkSpam({
-			user_ip: ip,
-			user_agent: body.meta.ua,
-			referrer: body.meta.referer,
-			permalink,
-			comment_type: getCommentType(type),
-			comment_author: user.name,
-			comment_author_email: user.email,
-			comment_author_url: user.site,
-			comment_content: content,
-			is_test: this.app.config.isProd
+            user_ip: ip,
+            user_agent: body.meta.ua,
+            referrer: body.meta.referer,
+            permalink,
+            comment_type: getCommentType(type),
+            comment_author: user.name,
+            comment_author_email: user.email,
+            comment_author_url: user.site,
+            comment_content: content,
+            is_test: this.app.config.isProd
         })
         // 如果是Spam评论
         if (isSpam) {
@@ -308,7 +308,7 @@ module.exports = class CommentService extends ProxyService {
         if (ctx._isAuthed && ctx._user._id.toString() !== cache.author._id.toString()) {
             return ctx.fail('其他人的评论内容不能修改')
         }
-    
+
         if (body.content !== undefined) {
             body.renderedContent = this.app.utils.markdown.render(body.content)
         }
@@ -326,17 +326,17 @@ module.exports = class CommentService extends ProxyService {
                 comment_author_email: cache.author.github.email,
                 comment_author_url: cache.author.github.blog,
                 comment_content: cache.content,
-                is_test: isProd
+                is_test: this.config.isProd
             }
             const SPAM = this.config.modelValidate.comment.state.optional.SPAM
-            if (cache.state === SPAM && state !== SPAM) {
+            if (cache.state === SPAM && body.state !== SPAM) {
                 // 垃圾评论转为正常评论
                 if (cache.spam) {
                     body.spam = false
                     // 报告给Akismet
                     this.app.akismet.submitSpam(opt)
                 }
-            } else if (cache.state !== SPAM && state === SPAM) {
+            } else if (cache.state !== SPAM && body.state === SPAM) {
                 // 正常评论转为垃圾评论
                 if (!cache.spam) {
                     body.spam = true
@@ -347,7 +347,7 @@ module.exports = class CommentService extends ProxyService {
         }
         let data = null
         if (!ctx._isAuthed) {
-            data = await this.updateById(id, comment).select('-content -state -updatedAt')
+            data = await this.updateById(params.id, body).select('-content -state -updatedAt')
                 .populate({
                     path: 'author',
                     select: 'github'
@@ -359,9 +359,10 @@ module.exports = class CommentService extends ProxyService {
                 .populate({
                     path: 'forward',
                     select: 'author meta sticky ups'
-                }).exec()
+                })
+                .exec()
         } else {
-            data = await this.updateById(id, comment).exec()
+            data = await this.updateById(params.id, body).exec()
         }
         data
             ? ctx.success(data, '评论更新成功')
@@ -402,7 +403,7 @@ module.exports = class CommentService extends ProxyService {
             adminType = '评论'
         } else if (type === commentType.MESSAGE) {
             // 站内留言
-            adminTitle = `个人站点有新的留言`
+            adminTitle = '个人站点有新的留言'
             adminType = '留言'
         }
 
@@ -443,12 +444,12 @@ module.exports = class CommentService extends ProxyService {
 
 // 评论类型说明
 function getCommentType (type) {
-	switch (type) {
-	case 0:
-		return '文章评论'
-	case 1:
-		return '站点留言'
-	default:
-		return '评论'
-	}
+    switch (type) {
+    case 0:
+        return '文章评论'
+    case 1:
+        return '站点留言'
+    default:
+        return '评论'
+    }
 }
