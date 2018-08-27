@@ -27,10 +27,6 @@ module.exports = app => {
         },
         // 第三方插件的参数
         keys: {
-            // 反垃圾邮件
-            akismet: {
-                apiKey: { type: String, default: '' }
-            },
             // 阿里云oss
             aliyun: {
                 accessKeyId: { type: String, default: '' },

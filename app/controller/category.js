@@ -51,7 +51,7 @@ module.exports = class CategoryController extends Controller {
                 { name: keywordReg }
             ]
         }
-        const data = await this.service.category.getListByQuery(query)
+        const data = await this.service.category.getList(query)
         data
             ? ctx.success(data, '分类列表获取成功')
             : ctx.fail('分类列表获取失败')
@@ -68,22 +68,22 @@ module.exports = class CategoryController extends Controller {
 
     async create () {
         const { ctx } = this
-        const body = ctx.validateBody(this.service.category.rules.create)
+        const body = ctx.validateBody(this.rules.create)
         const { name } = body
-        const exists = await this.service.category.getItem({ name })
-        if (exists) {
+        const exist = await this.service.category.getItem({ name })
+        if (exist) {
             return ctx.fail('分类已存在')
         }
         const data = await this.service.category.create(body)
         data
-            ? ctx.success(data[0], '分类创建成功')
+            ? ctx.success(data, '分类创建成功')
             : ctx.fail('分类创建失败')
     }
 
     async update () {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
-        const body = ctx.validateBody(this.service.category.rules.update)
+        const body = ctx.validateBody(this.rules.update)
         const data = await this.service.category.updateById(params.id, body)
         data
             ? ctx.success(data, '分类更新成功')
@@ -93,7 +93,7 @@ module.exports = class CategoryController extends Controller {
     async delete () {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
-        const articles = await this.service.article.getListByQuery({ category: params._id }, 'title')
+        const articles = await this.service.article.getList({ category: params._id }, 'title')
         if (articles.length) {
             return ctx.fail('该分类下还有文章，不能删除', articles)
         }

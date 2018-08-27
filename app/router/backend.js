@@ -50,4 +50,5 @@ module.exports = app => {
     backendRouter.post('/auth/login', controller.auth.login)
     backendRouter.get('/auth/logout', auth, controller.auth.logout)
     backendRouter.get('/auth/info', auth, controller.auth.info)
+    backendRouter.post('/auth/password', auth, controller.auth.password)
 }

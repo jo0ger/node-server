@@ -14,7 +14,7 @@ module.exports = app => {
         site: { type: String, validate: app.utils.validate.isSiteUrl },
         slogan: { type: String },
         description: { type: String, default: '' },
-        // 角色 0 管理员 | 1 普通用户 | 2 github用户，不能更改
+        // 角色 0 管理员 | 1 普通用户
         role: {
             type: String,
             default: userValidateConfig.role.default,

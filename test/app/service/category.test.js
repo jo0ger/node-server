@@ -21,9 +21,9 @@ describe('test/app/service/category.test.js', () => {
         category = data
     })
 
-    it('getListByQuery pass', async () => {
+    it('getList pass', async () => {
         const query = {}
-        const data = await categoryService.getListByQuery(query)
+        const data = await categoryService.getList(query)
         assert.equal(data.every(item => 'count' in item), true)
     })
 

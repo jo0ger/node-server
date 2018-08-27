@@ -1,6 +1,8 @@
 const mongoosePaginate = require('mongoose-paginate-v2')
 const lodash = require('lodash')
 
+const prefix = 'http://'
+
 module.exports = {
     // model schema处理
     processSchema (schema, options = {}, middlewares = {}) {
@@ -27,5 +29,11 @@ module.exports = {
     },
     merge () {
         return lodash.merge.apply(null, Array.prototype.slice.call(arguments))
+    },
+    proxyUrl (url) {
+        if (lodash.isString(url) && url.startsWith(prefix)) {
+            return url.replace(prefix, `${this.config.author.url}/proxy/`)
+        }
+        return url
     }
 }

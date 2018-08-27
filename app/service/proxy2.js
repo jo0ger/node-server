@@ -9,7 +9,7 @@ module.exports = class ProxyService extends Service {
         return this.model.init()
     }
 
-    getListByQuery (query, select = null, opt) {
+    getList (query, select = null, opt) {
         return this.model.find(query, select, opt).exec()
     }
 
