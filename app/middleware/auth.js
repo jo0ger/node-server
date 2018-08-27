@@ -15,11 +15,11 @@ module.exports = app => {
             const userId = ctx.cookies.get(app.config.userCookieKey, {
                 signed: false
             })
-            const user = await ctx.service.user.findById(userId).exec()
+            const user = await ctx.service.user.getItemById(userId, '-password')
             if (!user) {
                 return ctx.fail(401, '用户不存在')
             }
-            ctx._user = user.toObject()
+            ctx._user = user
             ctx._isAdmin = user.role === app.config.modelValidate.user.role.optional.ADMIN
             ctx._isAuthed = true
             await next()
@@ -38,8 +38,8 @@ function verifyToken (app) {
             try {
                 decodedToken = await jwt.verify(token, config.secrets)
             } catch (err) {
-                logger.error('Token校验出错，错误：' + err.message)
-                return ctx.throw(401, err)
+                logger.warn('Token校验出错，错误：' + err.message)
+                return ctx.fail(401, '登录失效')
             }
             if (decodedToken && decodedToken.exp > Math.floor(Date.now() / 1000)) {
                 // 已校验权限

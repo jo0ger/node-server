@@ -2,77 +2,24 @@
  * @desc Setting Services
  */
 
-const ProxyService = require('./proxy')
+const ProxyService = require('./proxy2')
 
 module.exports = class SettingService extends ProxyService {
     get model () {
         return this.app.model.Setting
     }
 
-    get rules () {
-        return {
-            index: {
-                filter: { type: 'string', required: false }
-            },
-            create: {
-                site: {
-                    type: 'object',
-                    required: false
-                },
-                keys: {
-                    type: 'object',
-                    required: false
-                }
-            },
-            update: {
-                site: {
-                    type: 'object',
-                    required: false
-                },
-                keys: {
-                    type: 'object',
-                    required: false
-                }
-            }
-        }
-    }
-
-    async index () {
-        const { ctx } = this
-        ctx.validate(this.rules.index, ctx.query)
-        const query = {}
-        const { filter } = ctx.query
-        if (filter) {
-            query.select = filter.split(',').join(' ')
-        }
-        if (!ctx._isAuthed) {
-            query.select = 'site'
-        }
-        return await this.findOne(query).exec()
-    }
-
-    async keys () {
-        const data = await this.findOne().select('keys').exec()
-        return data && data.keys || {}
-    }
-
-    async create () {
-        const { ctx } = this
-        const body = this.ctx.validateBody(this.rules.create, payload)
-        const exist = await this.findOne().exec()
-        if (exist) {
-            ctx.throw(200, '分类已经存在')
-        }
-        return await this.newAndSave(body)
-    }
-
+    /**
+     * @desc 初始化配置数据，用于server初始化时
+     * @return {Setting} 配置数据
+     */
     async seed () {
-        const exist = await this.findOne().exec()
+        const exist = await this.getItem()
         if (exist) {
             return exist
         }
-        const data = await this.newAndSave()
-        if (data && data.length) {
+        const data = await this.create()
+        if (data) {
             this.logger.info('Setting初始化成功')
         } else {
             this.logger.info('Setting初始化失败')
@@ -80,19 +27,45 @@ module.exports = class SettingService extends ProxyService {
         return data
     }
 
-    async update (payload) {
-        if (!payload) {
-            // http request
-            payload = await this.findOne().exec()
-            if (!payload) return
-        }
-        payload.site = payload.site || {}
-        // 更新友链
-        payload.site.links = await this.service.common.generateLinks(payload.site.links)
-        const data = await this.updateOne({}, payload).exec()
-        if (data) {
-            this.logger.info('Setting更新成功')
-        }
-        return data
+    /**
+     * @desc 抓取并生成友链
+     * @param {Array} links 友链
+     * @return {Array} 抓取后的友链
+     */
+    async generateLinks (links = []) {
+        if (!links || !links.length) return []
+        links = await Promise.all(
+            links.map(async link => {
+                if (link) {
+                    const userInfo = await this.service.github.getUserInfo(link.github)
+                    if (userInfo) {
+                        link.avatar = this.app.proxyUrl(userInfo.avatar_url)
+                        link.slogan = userInfo.bio
+                        link.site = link.site || userInfo.blog || userInfo.url
+                        return link
+                    }
+                }
+                return null
+            })
+        )
+        this.logger.info('友链抓取成功')
+        return links.filter(item => !!item)
+    }
+
+    /**
+     * @desc 更新友链
+     * @return {Setting} 更新友链后的配置数据
+     */
+    async updateLinks () {
+        let setting = await this.getItem()
+        if (!setting) return null
+        const update = await this.generateLinks(setting.site.links)
+        setting = await this.updateById(setting._id, {
+            $set: {
+                'site.links': update
+            }
+        })
+        this.logger.info('友链更新成功')
+        return setting
     }
 }

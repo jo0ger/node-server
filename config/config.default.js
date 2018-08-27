@@ -113,13 +113,12 @@ module.exports = appInfo => {
             }
         },
         user: {
-            // 角色 0 管理员 | 1 普通用户 | 2 gayhub用户，不能更改
+            // 角色 0 管理员 | 1 普通用户
             role: {
                 default: '1',
                 optional: {
                     ADMIN: '0',
-                    NORMAL: '1',
-                    GAYHUB: '2'
+                    NORMAL: '1'
                 }
             }
         },

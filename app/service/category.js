@@ -9,7 +9,7 @@ module.exports = class CategoryService extends ProxyService {
         return this.app.model.Category
     }
 
-    async getListByQuery (query, select = null, opt) {
+    async getList (query, select = null, opt) {
         opt = this.app.merge({
             sort: '-createdAt'
         }, opt)
@@ -18,7 +18,7 @@ module.exports = class CategoryService extends ProxyService {
             const PUBLISH = this.app.config.modelValidate.article.state.optional.PUBLISH
             await Promise.all(
                 categories.map(async item => {
-                    const articles = await this.service.article.getListByQuery({
+                    const articles = await this.service.article.getList({
                         category: item._id,
                         state: PUBLISH
                     })
@@ -35,7 +35,7 @@ module.exports = class CategoryService extends ProxyService {
         }, opt)
         const category = await this.model.findOne(query, select, opt).exec()
         if (category) {
-            category.articles = await this.service.article.getListByQuery({ category: category._id })
+            category.articles = await this.service.article.getList({ category: category._id })
         }
         return category
     }

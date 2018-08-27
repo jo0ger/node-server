@@ -2,57 +2,28 @@
  * @desc User Services
  */
 
-const ProxyService = require('./proxy')
+const ProxyService = require('./proxy2')
 
 module.exports = class UserService extends ProxyService {
     get model () {
         return this.app.model.User
     }
 
-    get rules () {
-        return {
-            // TODO:
-        }
-    }
-
-    async list () {
-        const { ctx } = this
-        let select = '-password'
-        if (!ctx._isAuthed) {
-            select += ' -createdAt -updatedAt -role'
-        }
-        return await this.find()
-            .sort('-createdAt')
-            .select(select)
-            .exec()
-    }
-
-    async item () {
-        const { ctx } = this
-        const { params } = ctx
-        ctx.validateParamsObjectId()
-        let select = '-password'
-        if (!ctx._isAuthed) {
-            select += ' -createdAt -updatedAt -github'
-        }
-        return await this.findById(params.id).select(select).exec()
-    }
-
     // 创建用户
     async create (user) {
         const { name } = user
-        const exist = await this.findOne({ name }).exec()
+        const exist = await this.getItem({ name })
         if (exist) {
-            this.logger.warn(`用户已存在：${name}`)
             return exist
         }
-        const data = await this.newAndSave(user)
-        if (!data || !data.length) {
-            this.logger.error(`用户创建失败：${name}`)
-            return null
+        const data = await new this.model(user).save()
+        const type = ['管理员', '用户'][data.role]
+        if (data) {
+            this.logger.info(`${type}创建成功：${name}`)
+        } else {
+            this.logger.error(`${type}创建失败：${name}`)
         }
-        this.logger.error(`用户创建成功：${name}`)
-        return data[0]
+        return data
     }
 
     async checkCommentAuthor (author) {
