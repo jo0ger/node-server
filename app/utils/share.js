@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 
+exports.lodash = require('lodash')
+
 exports.noop = function () {}
 
 // 首字母大写

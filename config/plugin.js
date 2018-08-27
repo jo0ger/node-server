@@ -25,6 +25,11 @@ exports.redis = {
     package: 'egg-redis'
 }
 
+exports.routerPlus = {
+    enable: true,
+    package: 'egg-router-plus'
+}
+
 exports.akismet = {
     enable: true,
     path: path.join(__dirname, '../app/lib/plugin/egg-akismet')

@@ -1,4 +1,5 @@
 const mongoosePaginate = require('mongoose-paginate-v2')
+const lodash = require('lodash')
 
 module.exports = {
     // model schema处理
@@ -23,5 +24,8 @@ module.exports = {
             })
         })
         return schema
+    },
+    merge () {
+        return lodash.merge.apply(null, Array.prototype.slice.call(arguments))
     }
 }

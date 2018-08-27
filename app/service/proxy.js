@@ -20,16 +20,16 @@ module.exports = class ProxyService extends Service {
         return this.model.paginate(query, opt)
     }
 
-    findById (id) {
-        return this.model.findById(id)
+    findById (id, select = null, opt = {}) {
+        return this.model.findById(id, select, opt)
     }
 
-    find (query = {}, opt = {}) {
-        return this.model.find(query, null, opt)
+    find (query = {}, select = null, opt = {}) {
+        return this.model.find(query, select, opt)
     }
 
-    findOne (query = {}, opt = {}) {
-        return this.model.findOne(query, null, opt)
+    findOne (query = {}, select = null, opt = {}) {
+        return this.model.findOne(query, select, opt)
     }
 
     updateById (id, doc, opt = {}) {
@@ -66,12 +66,5 @@ module.exports = class ProxyService extends Service {
 
     count (query = {}) {
         return this.model.count(query)
-    }
-
-    res (data, error) {
-        return {
-            data,
-            error
-        }
     }
 }

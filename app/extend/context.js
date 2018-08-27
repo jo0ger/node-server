@@ -2,7 +2,8 @@ const geoip = require('geoip-lite')
 
 module.exports = {
     validateParams (rules) {
-        return this.validate(rules, this.params)
+        this.validate(rules, this.params)
+        return this.params
     },
     validateBody (rules, body) {
         body = body || this.request.body

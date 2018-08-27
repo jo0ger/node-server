@@ -53,6 +53,34 @@ module.exports = class ArticleService extends ProxyService {
         }
     }
 
+    getListByQuery (query, select = null, opt) {
+        return this.model.find(query, select, opt).exec()
+    }
+
+    async getLimitListByQuery (query, opt) {
+        opt = this.app.merge({
+            sort: {
+                updatedAt: -1,
+                createdAt: -1
+            },
+            page: 1,
+            limit: 10,
+            lean: true,
+            select: '-content -renderedContent',
+            populate: [
+                {
+                    path: 'category',
+                    select: 'name description extends'
+                }, {
+                    path: 'tag',
+                    select: 'name description'
+                }
+            ]
+        }, opt)
+        const data = await this.model.paginate(query, opt)
+        return this.app.utils.share.getDocsPaginationData(data)
+    }
+
     async list () {
         const { ctx } = this
         ctx.query.page = Number(ctx.query.page)
@@ -145,7 +173,7 @@ module.exports = class ArticleService extends ProxyService {
             }
         }
 
-        const data = await this.service.article.paginate(query, options)
+        const data = await this.paginate(query, options)
         return this.app.utils.share.getDocsPaginationData(data)
     }
 
@@ -290,7 +318,7 @@ module.exports = class ArticleService extends ProxyService {
     async getRelatedArticles (data) {
         if (!data || !data._id) return null
         const { _id, tag = [] } = data
-        const articles = await this.service.article.find({
+        const articles = await this.article.find({
             _id: { $nin: [ _id ] },
             state: 1,
             tag: { $in: tag.map(t => t._id) }

@@ -132,8 +132,8 @@ module.exports = class AuthService extends Service {
             }
         })
         if (!data) {
-            return this.logger.warn(`管理员【${admin.name}】创建失败`)
+            return this.logger.warn('管理员创建失败：' + admin.name)
         }
-        this.logger.info(`管理员【${admin.name}】创建成功`)
+        this.logger.info('管理员创建成功：' + admin.name)
     }
 }
