@@ -61,6 +61,9 @@ module.exports = class CategoryController extends Controller {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
         const data = await this.service.category.getItemById(params.id)
+        if (data) {
+            data.articles = await this.service.article.getList({ category: data._id })
+        }
         data
             ? ctx.success(data, '分类详情获取成功')
             : ctx.fail('分类详情获取失败')

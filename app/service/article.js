@@ -2,61 +2,11 @@
  * @desc Article Services
  */
 
-const ProxyService = require('./proxy2')
+const ProxyService = require('./proxy')
 
 module.exports = class ArticleService extends ProxyService {
     get model () {
         return this.app.model.Article
-    }
-
-    get rules () {
-        return {
-            list: {
-                page: { type: 'number', required: true, min: 1 },
-                limit: { type: 'number', required: true, min: 1 },
-                state: { type: 'enum', values: Object.values(this.config.modelValidate.article.state.optional), required: false },
-                category: { type: 'objectId', required: false },
-                tag: { type: 'objectId', required: false },
-                keyword: { type: 'string', required: false },
-                startDate: { type: 'dateTime', required: false },
-                endDate: { type: 'dateTime', required: false },
-                // -1 desc | 1 asc
-                order: { type: 'enum', values: [-1, 1], required: false },
-                sortBy: { type: 'enum', values: ['createdAt', 'updatedAt', 'publishedAt', 'meta.ups', 'meta.pvs', 'meta.comments'], required: false }
-            },
-            item: {
-                // 后台用，只获取当前文章内容，不获取相关文章和上下篇文章
-                single: { type: 'boolean', required: false }
-            },
-            create: {
-                title: { type: 'string', required: true },
-                content: { type: 'string', required: true },
-                description: { type: 'string', required: false },
-                keywords: { type: 'array', required: false },
-                category: { type: 'objectId', required: false },
-                tag: { type: 'array', required: false, itemType: 'objectId' },
-                state: { type: 'enum', values: Object.values(this.config.modelValidate.article.state.optional), required: false },
-                thumb: { type: 'url', required: false },
-                createdAt: { type: 'dateTime', required: false }
-            },
-            update: {
-                title: { type: 'string', required: false },
-                content: { type: 'string', required: false },
-                description: { type: 'string', required: false },
-                keywords: { type: 'array', required: false },
-                category: { type: 'objectId', required: false },
-                tag: { type: 'array', required: false, itemType: 'objectId' },
-                state: { type: 'enum', values: Object.values(this.config.modelValidate.article.state.optional), required: false },
-                thumb: { type: 'url', required: false },
-                createdAt: { type: 'dateTime', required: false }
-            }
-        }
-    }
-
-    async getLimitListByQuery (query, opt) {
-        opt = Object.assign({ lean: true }, opt)
-        const data = await this.model.paginate(query, opt)
-        return this.app.getDocsPaginationData(data)
     }
 
     async getItemById (id, select, opt = {}, single = false) {
@@ -80,17 +30,6 @@ module.exports = class ArticleService extends ProxyService {
             data.adjacent = adjacent
         }
         return data
-    }
-
-    async like () {
-        const { ctx } = this
-        const { params } = ctx
-        ctx.validateParamsObjectId()
-        return await this.updateItemById(params.id, {
-            $inc: {
-                'meta.ups': 1
-            }
-        })
     }
 
     async archives () {
@@ -235,13 +174,11 @@ module.exports = class ArticleService extends ProxyService {
         const { validate, share } = this.app.utils
         // TIP: 这里必须$in的是一个ObjectId对象数组，而不能只是id字符串数组
         articleIds = [...new Set(articleIds)].filter(id => validate.isObjectId(id)).map(id => share.createObjectId(id))
+        const PASS = this.config.modelValidate.comment.state.optional.PASS
         const counts = await this.service.comment.aggregate([
-            { $match: { state: 1, article: { $in: articleIds } } },
+            { $match: { state: PASS, article: { $in: articleIds } } },
             { $group: { _id: '$article', total_count: { $sum: 1 } } }
-        ]).catch(err => {
-            this.logger.error('更新文章评论数量前聚合评论数据操作失败，错误：' + err.message)
-            return []
-        })
+        ])
         Promise.all(
             counts.map(count => this.updateItemById(count._id, { $set: { 'meta.comments': count.total_count } }))
         )

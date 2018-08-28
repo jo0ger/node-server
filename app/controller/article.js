@@ -158,7 +158,7 @@ module.exports = class ArticleController extends Controller {
 
     async create () {
         const { ctx } = this
-        const body = this.ctx.validateBody(this.rules.create)
+        const body = ctx.validateBody(this.rules.create)
         if (body.createdAt) {
             body.createdAt = new Date(body.createdAt)
         }
@@ -204,7 +204,7 @@ module.exports = class ArticleController extends Controller {
             }
         })
         data
-            ? ctx.success(data, '文章点赞成功')
+            ? ctx.success('文章点赞成功')
             : ctx.fail('文章点赞失败')
     }
 

@@ -151,7 +151,7 @@ module.exports = appInfo => {
         password: 'admin123456'
     }
 
-    config.defaultAvatar = 'http://static.jooger.me/img/common/default-avatar.png'
+    config.defaultAvatar = 'https://static.jooger.me/img/common/avatar.png'
 
     // 限制参数
     config.limit = {

@@ -57,7 +57,9 @@ module.exports = app => {
     }, {
         pre: {
             save (next) {
-                this.renderedContent = app.utils.markdown.render(this.content)
+                if (this.content) {
+                    this.renderedContent = app.utils.markdown.render(this.content)
+                }
                 next()
             },
             async findOneAndUpdate () {
@@ -65,7 +67,7 @@ module.exports = app => {
                 const { content } = this._update
                 const find = await this.findOne()
                 if (find) {
-                    if (content !== find.content) {
+                    if (content && content !== find.content) {
                         this._update.renderedContent = app.utils.markdown.render(content)
                         this._update.updatedAt = Date.now()
                     }

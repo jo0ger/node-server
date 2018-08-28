@@ -2,7 +2,7 @@
  * @desc User Services
  */
 
-const ProxyService = require('./proxy2')
+const ProxyService = require('./proxy')
 
 module.exports = class UserService extends ProxyService {
     get model () {
@@ -26,25 +26,36 @@ module.exports = class UserService extends ProxyService {
         return data
     }
 
+    /**
+     * @desc 评论用户创建或更新
+     * @param {*} author 评论的author
+     * @return {User} user
+     */
     async checkCommentAuthor (author) {
         let user = null
         const { isObjectId, isObject } = this.app.utils.validate
         if (isObjectId(author)) {
-            user = this.findById(author).select('-password').exec()
+            user = await this.getItemById(author)
         } else if (isObject(author)) {
             const update = {}
             author.name && (update.name = author.name)
             author.site && (update.site = author.site)
+            update.avatar = this.app.utils.gravatar(author.email)
             if (author.email) {
-                update.avatar = this.app.utils.gravatar(author.email)
                 update.email = author.email
             }
-            if (author.id) {
+            const id = author.id || author._id
+            if (id) {
                 // 更新
-                if (isObjectId(author.id)) {
-                    user = await this.updateItemById(author.id, update).exec()
-                    if (user) {
-                        this.logger.info('用户更新成功：' + user.name)
+                if (isObjectId(id)) {
+                    user = await this.getItemById(id)
+                    const hasDiff = user && Object.keys(update).some(key => update[key] !== user[key])
+                    if (hasDiff) {
+                        // 有变动才更新
+                        user = await this.updateItemById(id, update)
+                        if (user) {
+                            this.logger.info('用户更新成功：' + user.name)
+                        }
                     }
                 }
             } else {
@@ -57,14 +68,20 @@ module.exports = class UserService extends ProxyService {
         return user
     }
 
-    // 检测用户以往spam评论
+    /**
+     * @desc 检测用户以往spam评论
+     * @param {User} user 评论作者
+     * @return {Boolean} 是否能发布评论
+     */
     async checkUserSpam (user) {
-        const comments = await this.service.comment.find({ author: user._id }).exec()
+        if (!user) return
+        const comments = await this.service.comment.getList({ author: user._id })
         const spams = comments.filter(c => c.spam)
-        if (spams.length >= this.config.limit.commentSpamLimit) {
+        if (spams.length >= this.app.setting.limit.commentSpamMaxCount) {
+            // 如果已存在垃圾评论数达到最大限制
             if (!user.mute) {
-                await this.updateItemById(user._id, { mute: true }).exec()
-                this.logger.info(`用户【${user.name}】禁言成功`)
+                user = await this.updateItemById(user._id, { mute: true })
+                this.logger.info(`用户禁言成功：${user.name}`)
             }
             return false
         }
