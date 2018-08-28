@@ -44,6 +44,12 @@ module.exports = app => {
                 clientID: { type: String, default: '' },
                 clientSecret: { type: String, default: '' }
             }
+        },
+        limit: {
+            articleCount: { type: Number, default: 10 },
+            relatedArticleCount: { type: Number, default: 10 },
+            hotArticleCount: { type: Number, default: 7 },
+            commentSpamMaxCount: { type: Number, default: 3 }
         }
     })
 

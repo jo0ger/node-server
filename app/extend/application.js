@@ -35,5 +35,18 @@ module.exports = {
             return url.replace(prefix, `${this.config.author.url}/proxy/`)
         }
         return url
+    },
+    // 获取分页请求的响应数据
+    getDocsPaginationData (docs) {
+        if (!docs) return null
+        return {
+            list: docs.docs,
+            pageInfo: {
+                total: docs.totalDocs,
+                current: docs.page > docs.totalPages ? docs.totalPages : docs.page,
+                pages: docs.totalPages,
+                limit: docs.limit
+            }
+        }
     }
 }

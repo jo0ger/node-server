@@ -2,7 +2,7 @@
  * @desc Article Services
  */
 
-const ProxyService = require('./proxy')
+const ProxyService = require('./proxy2')
 
 module.exports = class ArticleService extends ProxyService {
     get model () {
@@ -53,153 +53,24 @@ module.exports = class ArticleService extends ProxyService {
         }
     }
 
-    getList (query, select = null, opt) {
-        return this.model.find(query, select, opt).exec()
-    }
-
     async getLimitListByQuery (query, opt) {
-        opt = this.app.merge({
-            sort: {
-                updatedAt: -1,
-                createdAt: -1
-            },
-            page: 1,
-            limit: 10,
-            lean: true,
-            select: '-content -renderedContent',
-            populate: [
-                {
-                    path: 'category',
-                    select: 'name description extends'
-                }, {
-                    path: 'tag',
-                    select: 'name description'
-                }
-            ]
-        }, opt)
+        opt = Object.assign({ lean: true }, opt)
         const data = await this.model.paginate(query, opt)
-        return this.app.utils.share.getDocsPaginationData(data)
+        return this.app.getDocsPaginationData(data)
     }
 
-    async list () {
-        const { ctx } = this
-        ctx.query.page = Number(ctx.query.page)
-        ctx.query.limit = Number(ctx.query.limit)
-        ctx.validate(this.rules.list, ctx.query)
-        const { page, limit, state, keyword, category, tag, order, sortBy, startDate, endDate } = ctx.query
-        const options = {
-            sort: {
-                updatedAt: -1,
-                createdAt: -1
-            },
-            page,
-            limit,
-            lean: true,
-            select: '-content -renderedContent',
-            populate: [
-                {
-                    path: 'category',
-                    select: 'name description extends'
-                }, {
-                    path: 'tag',
-                    select: 'name description'
-                }
-            ]
+    async getItemById (id, select, opt = {}, single = false) {
+        let api = this.getItem.bind(this)
+        const query = { _id: id }
+        if (!this.ctx._isAuthed) {
+            api = this.updateItem.bind(this)
+            // 前台博客访问文章的时候pv+1
+            query.state = this.config.modelValidate.article.state.optional.PUBLISH
+            select += ' -content'
+            opt.$inc = { 'meta.pvs': 1 }
         }
-        const query = {}
-        if (state !== undefined) {
-            query.state = state
-        }
-
-        // 搜索关键词
-        if (keyword) {
-            const keywordReg = new RegExp(keyword)
-            query.$or = [
-                { title: keywordReg }
-            ]
-        }
-
-        // 分类
-        if (category) {
-            // 如果是id
-            if (this.app.utils.validate.isObjectId(category)) {
-                query.category = category
-            } else {
-                // 普通字符串，需要先查到id
-                const c = await this.service.category.findOne({ name: category }).exec()
-                query.category = c ? c._id : this.app.utils.share.createObjectId()
-            }
-        }
-
-        // 标签
-        if (tag) {
-            // 如果是id
-            if (this.app.utils.validate.isObjectId(tag)) {
-                query.tag = tag
-            } else {
-                // 普通字符串，需要先查到id
-                const t = await this.service.tag.findOne({ name: tag }).exec()
-                query.tag = t ? t._id : this.app.utils.share.createObjectId()
-            }
-        }
-
-        // 未通过权限校验（前台获取文章列表）
-        if (!ctx._isAuthed) {
-            // 将文章状态重置为1
-            query.state = 1
-            // 文章列表不需要content和state
-            options.select = '-content -renderedContent -state'
-        } else {
-            // 排序
-            if (sortBy && order) {
-                options.sort = {}
-                options.sort[sortBy] = order
-            }
-
-            // 起始日期
-            if (startDate) {
-                const $gte = new Date(startDate)
-                if ($gte.toString() !== 'Invalid Date') {
-                    query.createdAt = { $gte }
-                }
-            }
-
-            // 结束日期
-            if (endDate) {
-                const $lte = new Date(endDate)
-                if ($lte.toString() !== 'Invalid Date') {
-                    query.createdAt = Object.assign({}, query.createdAt, { $lte })
-                }
-            }
-        }
-
-        const data = await this.paginate(query, options)
-        return this.app.utils.share.getDocsPaginationData(data)
-    }
-
-    async item () {
-        const { ctx } = this
-        const { params } = ctx
-        ctx.validateParamsObjectId()
-        ctx.validate(this.rules.item, ctx.query)
-        let query = null
-        // 只有前台博客访问文章的时候pv才+1
-        if (!ctx._isAuthed) {
-            query = this.updateOne({ _id: params.id, state: this.config.modelValidate.article.state.optional.PUBLISH }, { $inc: { 'meta.pvs': 1 } }).select('-content')
-        } else {
-            query = this.findById(params.id)
-        }
-        const data = await query.populate([
-            {
-                path: 'category',
-                select: 'name description extends'
-            }, {
-                path: 'tag',
-                select: 'name description extends'
-            }
-        ]).exec()
-
-        if (data && !ctx.query.single) {
+        const data = await api(query, select, opt)
+        if (data && !single) {
             // 获取相关文章和上下篇文章
             const [related, adjacent] = await Promise.all([
                 this.getRelatedArticles(data),
@@ -211,42 +82,11 @@ module.exports = class ArticleService extends ProxyService {
         return data
     }
 
-    async create () {
-        const body = this.ctx.validateBody(this.rules.create)
-        if (body.createdAt) {
-            body.createdAt = new Date(body.createdAt)
-        }
-        let data = await this.newAndSave(body)
-        if (data && data.length) {
-            data = data[0].toObject()
-        }
-        return data
-    }
-
-    async update () {
-        const { ctx } = this
-        const { params } = ctx
-        ctx.validateParamsObjectId()
-        const body = ctx.validateBody(this.rules.update)
-        if (body.createdAt) {
-            body.createdAt = new Date(body.createdAt)
-        }
-        return await this.updateById(params.id, body).populate('category tag').exec()
-    }
-
-    async delete () {
-        const { ctx } = this
-        const { params } = ctx
-        ctx.validateParamsObjectId()
-        const data = await this.deleteById(params.id).exec()
-        return data && data.ok && data.n
-    }
-
     async like () {
         const { ctx } = this
         const { params } = ctx
         ctx.validateParamsObjectId()
-        return await this.updateById(params.id, {
+        return await this.updateItemById(params.id, {
             $inc: {
                 'meta.ups': 1
             }
@@ -318,66 +158,77 @@ module.exports = class ArticleService extends ProxyService {
     async getRelatedArticles (data) {
         if (!data || !data._id) return null
         const { _id, tag = [] } = data
-        const articles = await this.article.find({
-            _id: { $nin: [ _id ] },
-            state: 1,
-            tag: { $in: tag.map(t => t._id) }
-        })
-            .select('title thumb createdAt publishedAt meta category')
-            .populate({
+        const articles = await this.getList(
+            {
+                _id: { $nin: [ _id ] },
+                state: data.state,
+                tag: { $in: tag.map(t => t._id) }
+            },
+            'title thumb createdAt publishedAt meta category',
+            null,
+            {
                 path: 'category',
                 select: 'name description'
-            })
-            .exec()
-            .catch(err => {
-                this.logger.error('相关文章查询失败，错误：' + err.message)
-                return null
-            })
-        return articles && articles.slice(0, this.config.limit.relatedArticleLimit) || null
+            }
+        ).catch(err => {
+            this.logger.error('相关文章查询失败，错误：' + err.message)
+            return null
+        })
+        return articles && articles.slice(0, this.app.setting.limit.relatedArticleCount) || null
     }
 
     // 获取相邻的文章
-    async getAdjacentArticles (ctx, data) {
+    async getAdjacentArticles (data) {
         if (!data || !data._id) return null
-        const query = {}
+        const query = {
+            createdAt: {
+                $lt: data.createdAt
+            }
+        }
         // 如果未通过权限校验，将文章状态重置为1
-        if (!ctx._isAuthed) {
+        if (!this.ctx._isAuthed) {
             query.state = this.config.modelValidate.article.state.optional.PUBLISH
         }
-        const prev = await this.service.article.findOne(query)
-            .select('title createdAt publishedAt thumb category')
-            .populate({
+        const prev = await this.getItem(
+            query,
+            'title createdAt publishedAt thumb category',
+            {
+                sort: 'createdAt'
+            },
+            {
                 path: 'category',
                 select: 'name description'
-            })
-            .sort('-createdAt')
-            .lt('createdAt', data.createdAt)
-            .exec()
-            .catch(err => {
-                this.logger.error('前一篇文章获取失败，错误：' + err.message)
-                return null
-            })
-        const next = await this.service.article.findOne(query)
-            .select('title createdAt publishedAt thumb category')
-            .populate({
+            }
+        ).catch(err => {
+            this.logger.error('前一篇文章获取失败，错误：' + err.message)
+            return null
+        })
+        query.createdAt = {
+            $gt: data.createdAt
+        }
+        const next = await this.getItem(
+            query,
+            'title createdAt publishedAt thumb category',
+            {
+                sort: 'createdAt'
+            },
+            {
                 path: 'category',
                 select: 'name description'
-            })
-            .sort('createdAt')
-            .gt('createdAt', data.createdAt)
-            .exec()
-            .catch(err => {
-                this.logger.error('后一篇文章获取失败，错误：' + err.message)
-                return null
-            })
+            }
+        ).catch(err => {
+            this.logger.error('后一篇文章获取失败，错误：' + err.message)
+            return null
+        })
         return {
-            prev: prev ? prev.toObject() : null,
-            next: next ? next.toObject() : null
+            prev: prev || null,
+            next: next || null
         }
     }
 
-    async updateArticleCommentCount (articleIds = []) {
-        if (!this.app.utils.validate.isArray(articleIds)) {
+
+    async updateCommentCount (articleIds = []) {
+        if (!Array.isArray(articleIds)) {
             articleIds = [articleIds]
         }
         if (!articleIds.length) return
@@ -387,14 +238,12 @@ module.exports = class ArticleService extends ProxyService {
         const counts = await this.service.comment.aggregate([
             { $match: { state: 1, article: { $in: articleIds } } },
             { $group: { _id: '$article', total_count: { $sum: 1 } } }
-        ])
-            .exec()
-            .catch(err => {
-                this.logger.error('更新文章评论数量前聚合评论数据操作失败，错误：' + err.message)
-                return []
-            })
+        ]).catch(err => {
+            this.logger.error('更新文章评论数量前聚合评论数据操作失败，错误：' + err.message)
+            return []
+        })
         Promise.all(
-            counts.map(count => articleProxy.updateById(count._id, { $set: { 'meta.comments': count.total_count } }).exec())
+            counts.map(count => this.updateItemById(count._id, { $set: { 'meta.comments': count.total_count } }))
         )
             .then(() => this.logger.info('文章评论数量更新成功'))
             .catch(err => this.logger.error('文章评论数量更新失败，错误：' + err.message))

@@ -9,6 +9,7 @@ module.exports = app => {
     app.beforeStart(async () => {
         const ctx = app.createAnonymousContext()
         await ctx.service.setting.seed()
+        await ctx.service.setting.mountToApp()
         await ctx.service.auth.seed()
     })
 }

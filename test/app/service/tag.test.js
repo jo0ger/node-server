@@ -41,13 +41,13 @@ describe('test/app/service/tag.test.js', () => {
         assert.equal(find.description, tag.description)
     })
 
-    it('updateById pass', async () => {
+    it('updateItemById pass', async () => {
         const update = {
             name: '测试标签修改',
             description: '测试标签描述修改',
             extends: [{ key: 'icon', value: 'fa-fuck-m' }]
         }
-        const data = await tagService.updateById(tag._id, update)
+        const data = await tagService.updateItemById(tag._id, update)
         assert.equal(data._id.toString(), tag._id.toString())
         assert.equal(data.name, update.name)
         assert.equal(data.description, update.description)
@@ -57,8 +57,8 @@ describe('test/app/service/tag.test.js', () => {
         assert(data.extends[0].key === tag.extends[0].key && data.extends[0].value !== tag.extends[0].value)
     })
 
-    it('deleteById pass', async () => {
-        const data = await tagService.deleteById(tag._id)
+    it('deleteItemById pass', async () => {
+        const data = await tagService.deleteItemById(tag._id)
         assert.equal(data._id.toString(), tag._id.toString())
         const find = await tagService.getItemById(tag._id)
         assert.equal(find, null)

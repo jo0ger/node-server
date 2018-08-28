@@ -32,7 +32,7 @@ module.exports = class ProxyService extends Service {
         return this.model.findOne(query, select, opt)
     }
 
-    updateById (id, doc, opt = {}) {
+    updateItemById (id, doc, opt = {}) {
         return this.model.findByIdAndUpdate(id, doc, Object.assign({ new: true }, opt))
     }
 
@@ -48,11 +48,11 @@ module.exports = class ProxyService extends Service {
         return this.model.remove(query)
     }
 
-    deleteById (id = '') {
+    deleteItemById (id = '') {
         return this.model.deleteOne({ _id: id })
     }
 
-    deleteByIds (ids = []) {
+    deleteItemByIds (ids = []) {
         return this.model.deleteMany({
             _id: {
                 $in: ids

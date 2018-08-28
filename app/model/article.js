@@ -58,7 +58,7 @@ module.exports = app => {
                 const { content, state } = this._update
                 const find = await this.findOne()
                 if (find) {
-                    if (content !== find.content) {
+                    if (content && content !== find.content) {
                         this._update.renderedContent = app.utils.markdown.render(content)
                     }
                     if (['title', 'content'].some(key => this._update[key] !== find[key])) {

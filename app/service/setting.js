@@ -60,12 +60,17 @@ module.exports = class SettingService extends ProxyService {
         let setting = await this.getItem()
         if (!setting) return null
         const update = await this.generateLinks(setting.site.links)
-        setting = await this.updateById(setting._id, {
+        setting = await this.updateItemById(setting._id, {
             $set: {
                 'site.links': update
             }
         })
         this.logger.info('友链更新成功')
         return setting
+    }
+
+    async mountToApp () {
+        const setting = await this.getItem()
+        this.app.setting = setting || null
     }
 }

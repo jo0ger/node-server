@@ -42,7 +42,7 @@ module.exports = class UserService extends ProxyService {
             if (author.id) {
                 // 更新
                 if (isObjectId(author.id)) {
-                    user = await this.updateById(author.id, update).exec()
+                    user = await this.updateItemById(author.id, update).exec()
                     if (user) {
                         this.logger.info('用户更新成功：' + user.name)
                     }
@@ -63,7 +63,7 @@ module.exports = class UserService extends ProxyService {
         const spams = comments.filter(c => c.spam)
         if (spams.length >= this.config.limit.commentSpamLimit) {
             if (!user.mute) {
-                await this.updateById(user._id, { mute: true }).exec()
+                await this.updateItemById(user._id, { mute: true }).exec()
                 this.logger.info(`用户【${user.name}】禁言成功`)
             }
             return false

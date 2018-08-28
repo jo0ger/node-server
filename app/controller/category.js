@@ -84,7 +84,7 @@ module.exports = class CategoryController extends Controller {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
         const body = ctx.validateBody(this.rules.update)
-        const data = await this.service.category.updateById(params.id, body)
+        const data = await this.service.category.updateItemById(params.id, body)
         data
             ? ctx.success(data, '分类更新成功')
             : ctx.fail('分类更新失败')
@@ -97,7 +97,7 @@ module.exports = class CategoryController extends Controller {
         if (articles.length) {
             return ctx.fail('该分类下还有文章，不能删除', articles)
         }
-        const data = await this.service.category.deleteById(params.id)
+        const data = await this.service.category.deleteItemById(params.id)
         data
             ? ctx.success('分类删除成功')
             : ctx.fail('分类删除失败')
