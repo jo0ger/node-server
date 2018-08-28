@@ -29,11 +29,11 @@ module.exports = class TagService extends ProxyService {
         return categories
     }
 
-    async getItem (query, select = null, opt) {
+    async getItem (id, select = null, opt) {
         opt = this.app.merge({
             lean: true
         }, opt)
-        const category = await this.model.findOne(query, select, opt).exec()
+        const category = await this.model.findById(id, select, opt).exec()
         if (category) {
             category.articles = await this.service.article.getList({ category: category._id })
         }

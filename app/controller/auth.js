@@ -63,7 +63,7 @@ module.exports = class AuthController extends Controller {
     async update () {
         const { ctx } = this
         const body = this.ctx.validateBody(this.rules.update)
-        const data = await this.service.user.updateById(ctx._user_id, body)
+        const data = await this.service.user.updateItemById(ctx._user_id, body)
         data
             ? ctx.success(data, '管理员信息更新成功')
             : ctx.fail('管理员信息更新失败')
@@ -79,7 +79,7 @@ module.exports = class AuthController extends Controller {
         if (!vertifyPassword) {
             ctx.throw(200, '原密码错误')
         }
-        const data = await this.service.user.updateById(ctx._user._id, {
+        const data = await this.service.user.updateItemById(ctx._user._id, {
             password: this.app.utils.encode.bhash(body.password)
         })
         data

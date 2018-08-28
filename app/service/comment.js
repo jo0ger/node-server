@@ -174,7 +174,7 @@ module.exports = class CommentService extends ProxyService {
                 })
         }))
         comments.docs = data
-        return this.app.utils.share.getDocsPaginationData(comments)
+        return this.app.getDocsPaginationData(comments)
     }
 
     async item () {
@@ -347,7 +347,7 @@ module.exports = class CommentService extends ProxyService {
         }
         let data = null
         if (!ctx._isAuthed) {
-            data = await this.updateById(params.id, body).select('-content -state -updatedAt')
+            data = await this.updateItemById(params.id, body).select('-content -state -updatedAt')
                 .populate({
                     path: 'author',
                     select: 'github'
@@ -362,7 +362,7 @@ module.exports = class CommentService extends ProxyService {
                 })
                 .exec()
         } else {
-            data = await this.updateById(params.id, body).exec()
+            data = await this.updateItemById(params.id, body).exec()
         }
         data
             ? ctx.success(data, '评论更新成功')
@@ -373,7 +373,7 @@ module.exports = class CommentService extends ProxyService {
         const { ctx } = this
         const { params } = ctx
         ctx.validateParamsObjectId()
-        const data = await this.deleteById(params.id).exec()
+        const data = await this.deleteItemById(params.id).exec()
         return data && data.ok && data.n
     }
 
@@ -381,7 +381,7 @@ module.exports = class CommentService extends ProxyService {
         const { ctx } = this
         const { params } = ctx
         ctx.validateParamsObjectId()
-        return await this.updateById(params.id, {
+        return await this.updateItemById(params.id, {
             $inc: {
                 ups: 1
             }

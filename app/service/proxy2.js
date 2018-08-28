@@ -9,34 +9,69 @@ module.exports = class ProxyService extends Service {
         return this.model.init()
     }
 
-    getList (query, select = null, opt) {
-        return this.model.find(query, select, opt).exec()
+    getList (query, select = null, opt, populate = []) {
+        const Q = this.model.find(query, select, opt)
+        if (populate) {
+            [].concat(populate).forEach(item => Q.populate(item))
+        }
+        return Q.exec()
     }
 
-    getItem (query, select = null, opt) {
+    getItem (query, select = null, opt, populate = []) {
         opt = this.app.merge({
             lean: true
         }, opt)
-        return this.model.findOne(query, select, opt).exec()
+        const Q = this.model.findOne(query, select, opt)
+        if (populate) {
+            [].concat(populate).forEach(item => Q.populate(item))
+        }
+        return Q.exec()
     }
 
-    getItemById (id) {
-        return this.getItem({ _id: id })
+    getItemById (id, select = null, opt, populate = []) {
+        opt = this.app.merge({
+            lean: true
+        }, opt)
+        const Q = this.model.findById(id, select, opt)
+        if (populate) {
+            [].concat(populate).forEach(item => Q.populate(item))
+        }
+        return Q.exec()
     }
 
     create (data) {
         return new this.model(data).save()
     }
 
-    updateById (id, data, opt) {
+    updateItem (query = {}, data, opt, populate = []) {
         opt = this.app.merge({
             lean: true,
             new: true
         })
-        return this.model.findByIdAndUpdate(id, data, opt).exec()
+        const Q = this.model.findOneAndUpdate(query, data, opt)
+        if (populate) {
+            [].concat(populate).forEach(item => Q.populate(item))
+        }
+        return Q.exec()
     }
 
-    deleteById (id, opt) {
+    updateItemById (id, data, opt, populate = []) {
+        opt = this.app.merge({
+            lean: true,
+            new: true
+        })
+        const Q = this.model.findByIdAndUpdate(id, data, opt)
+        if (populate) {
+            [].concat(populate).forEach(item => Q.populate(item))
+        }
+        return Q.exec()
+    }
+
+    deleteItemById (id, opt) {
         return this.model.findByIdAndDelete(id, opt).exec()
+    }
+
+    aggregate (pipeline = []) {
+        return this.model.aggregate(pipeline)
     }
 }

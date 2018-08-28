@@ -4,7 +4,7 @@ module.exports = app => {
     app.addSingleton('mailer', createClient)
 }
 
-function createClient (config, app) {
+function createClient (config) {
     return {
         client: null,
         getClient (opt) {

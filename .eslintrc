@@ -6,6 +6,7 @@
 		"space-before-function-paren": [ "error", "always"],
 		"strict": 0,
 		"comma-dangle": 0,
-		"array-bracket-spacing": 0
+		"array-bracket-spacing": 0,
+		"no-use-before-define": 0
 	}
 }

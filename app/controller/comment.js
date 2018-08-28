@@ -26,7 +26,7 @@ module.exports = class CommentController extends Controller {
         if (data) {
             if (data.type === this.config.modelValidate.comment.type.optional.COMMENT) {
                 // 如果是文章评论，则更新文章评论数量
-                this.service.article.updateArticleCommentCount(data.article)
+                this.service.article.updateCommentCount(data.article)
             }
             // 发送邮件通知站主和被评论者
             this.service.comment.sendCommentEmailToAdminAndUser(data)

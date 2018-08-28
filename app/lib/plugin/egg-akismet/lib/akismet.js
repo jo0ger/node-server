@@ -21,17 +21,17 @@ let isValidKey = false
 
 /**
  * @desc Akismet Client Class
- * @param {String} [required] key       Akismet apikey
- * @param {String} [required] blog      Akismet blog
+ * @param {String} key       Akismet apikey
+ * @param {String} blog      Akismet blog
  */
 class AkismetClient {
     constructor (config, app) {
         this.config = config
         this.app = app
-        this.initClient()
+        this.init()
     }
 
-    initClient () {
+    init () {
         this.client = akismet.client(this.config)
     }
 
