@@ -2,7 +2,7 @@
  * @desc Setting Services
  */
 
-const ProxyService = require('./proxy2')
+const ProxyService = require('./proxy')
 
 module.exports = class SettingService extends ProxyService {
     get model () {
@@ -69,6 +69,9 @@ module.exports = class SettingService extends ProxyService {
         return setting
     }
 
+    /**
+     * @desc 把配置挂载到app上
+     */
     async mountToApp () {
         const setting = await this.getItem()
         this.app.setting = setting || null

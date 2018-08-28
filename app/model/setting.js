@@ -47,6 +47,7 @@ module.exports = app => {
         },
         limit: {
             articleCount: { type: Number, default: 10 },
+            commentCount: { type: Number, default: 20 },
             relatedArticleCount: { type: Number, default: 10 },
             hotArticleCount: { type: Number, default: 7 },
             commentSpamMaxCount: { type: Number, default: 3 }

@@ -2,7 +2,7 @@
  * @desc 标签 Services
  */
 
-const ProxyService = require('./proxy2')
+const ProxyService = require('./proxy')
 
 module.exports = class TagService extends ProxyService {
     get model () {
@@ -27,16 +27,5 @@ module.exports = class TagService extends ProxyService {
             )
         }
         return categories
-    }
-
-    async getItem (id, select = null, opt) {
-        opt = this.app.merge({
-            lean: true
-        }, opt)
-        const category = await this.model.findById(id, select, opt).exec()
-        if (category) {
-            category.articles = await this.service.article.getList({ category: category._id })
-        }
-        return category
     }
 }

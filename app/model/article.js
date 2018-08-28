@@ -49,7 +49,9 @@ module.exports = app => {
     }, {
         pre: {
             save (next) {
-                this.renderedContent = app.utils.markdown.render(this.content)
+                if (this.content) {
+                    this.renderedContent = app.utils.markdown.render(this.content)
+                }
                 next()
             },
             async findOneAndUpdate () {

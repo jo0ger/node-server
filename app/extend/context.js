@@ -23,6 +23,19 @@ module.exports = {
             }
         })
     },
+    validateCommentAuthor (author) {
+        author = author || this.request.body.author
+        const { isObjectId, isObject } = this.app.utils.validate
+        if (isObject(author)) {
+            this.validate({
+                name: 'string',
+                email: 'string',
+                site: { type: 'string', required: false }
+            }, author)
+        } else if (!isObjectId(author)) {
+            this.throw(422, '发布人不存在')
+        }
+    },
     getLocation () {
         const req = this.req
         const ip = (req.headers['x-forwarded-for'] ||

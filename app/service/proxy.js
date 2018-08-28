@@ -9,62 +9,77 @@ module.exports = class ProxyService extends Service {
         return this.model.init()
     }
 
-    newAndSave (docs) {
-        if (!Array.isArray(docs)) {
-            docs = [docs]
+    getList (query, select = null, opt, populate = []) {
+        const Q = this.model.find(query, select, opt)
+        if (populate) {
+            [].concat(populate).forEach(item => Q.populate(item))
         }
-        return this.model.create(docs)
+        return Q.exec()
     }
 
-    paginate (query, opt = {}) {
-        return this.model.paginate(query, opt)
+    async getLimitListByQuery (query, opt) {
+        opt = Object.assign({ lean: true }, opt)
+        const data = await this.model.paginate(query, opt)
+        return this.app.getDocsPaginationData(data)
     }
 
-    findById (id, select = null, opt = {}) {
-        return this.model.findById(id, select, opt)
+    getItem (query, select = null, opt, populate = []) {
+        opt = this.app.merge({
+            lean: true
+        }, opt)
+        let Q = this.model.findOne(query, select, opt)
+        if (populate) {
+            [].concat(populate).forEach(item => {
+                Q = Q.populate(item)
+            })
+        }
+        return Q.exec()
     }
 
-    find (query = {}, select = null, opt = {}) {
-        return this.model.find(query, select, opt)
+    getItemById (id, select = null, opt, populate = []) {
+        opt = this.app.merge({
+            lean: true
+        }, opt)
+        const Q = this.model.findById(id, select, opt)
+        if (populate) {
+            [].concat(populate).forEach(item => Q.populate(item))
+        }
+        return Q.exec()
     }
 
-    findOne (query = {}, select = null, opt = {}) {
-        return this.model.findOne(query, select, opt)
+    create (data) {
+        return this.model.create(data)
     }
 
-    updateItemById (id, doc, opt = {}) {
-        return this.model.findByIdAndUpdate(id, doc, Object.assign({ new: true }, opt))
-    }
-
-    updateOne (query = {}, doc = {}, opt = {}) {
-        return this.model.findOneAndUpdate(query, doc, Object.assign({ new: true }, opt))
-    }
-
-    updateMany (query = {}, doc = {}, opt = {}) {
-        return this.model.update(query, doc, Object.assign({ multi: true }, opt))
-    }
-
-    remove (query = {}) {
-        return this.model.remove(query)
-    }
-
-    deleteItemById (id = '') {
-        return this.model.deleteOne({ _id: id })
-    }
-
-    deleteItemByIds (ids = []) {
-        return this.model.deleteMany({
-            _id: {
-                $in: ids
-            }
+    updateItem (query = {}, data, opt, populate = []) {
+        opt = this.app.merge({
+            lean: true,
+            new: true
         })
+        const Q = this.model.findOneAndUpdate(query, data, opt)
+        if (populate) {
+            [].concat(populate).forEach(item => Q.populate(item))
+        }
+        return Q.exec()
     }
 
-    aggregate (opt = {}) {
-        return this.model.aggregate(opt)
+    updateItemById (id, data, opt, populate = []) {
+        opt = this.app.merge({
+            lean: true,
+            new: true
+        })
+        const Q = this.model.findByIdAndUpdate(id, data, opt)
+        if (populate) {
+            [].concat(populate).forEach(item => Q.populate(item))
+        }
+        return Q.exec()
     }
 
-    count (query = {}) {
-        return this.model.count(query)
+    deleteItemById (id, opt) {
+        return this.model.findByIdAndDelete(id, opt).exec()
+    }
+
+    aggregate (pipeline = []) {
+        return this.model.aggregate(pipeline)
     }
 }
