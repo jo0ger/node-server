@@ -20,7 +20,7 @@ module.exports = app => {
     fontendRouter.get('/comments', controller.comment.list)
     fontendRouter.get('/comments/:id', controller.comment.item)
     fontendRouter.post('/comments', controller.comment.create)
-    fontendRouter.post('/comments/:id/like', controller.comment.like)
+    fontendRouter.patch('/comments/:id/like', controller.comment.like)
 
     // User
     fontendRouter.get('/users/:id', controller.user.item)

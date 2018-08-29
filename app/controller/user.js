@@ -8,7 +8,7 @@ module.exports = class UserController extends Controller {
     async list () {
         const { ctx } = this
         let select = '-password'
-        if (!ctx._isAuthed) {
+        if (!ctx.session._isAuthed) {
             select += ' -createdAt -updatedAt -role'
         }
         const data = await this.service.user.getList({}, select)
@@ -21,7 +21,7 @@ module.exports = class UserController extends Controller {
         const { ctx } = this
         const { id } = ctx.validateParamsObjectId()
         let select = '-password'
-        if (!ctx._isAuthed) {
+        if (!ctx.session._isAuthed) {
             select += ' -createdAt -updatedAt -github'
         }
         const data = await this.service.user.getItemById(id, select)

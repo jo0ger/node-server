@@ -19,7 +19,7 @@ module.exports = class AuthController extends Controller {
                 site: { type: 'url', required: false },
                 description: { type: 'string', required: false },
                 avatar: { type: 'string', required: false },
-                slogan: { type: 'string', required: false },
+                l: { type: 'string', required: false },
                 company: { type: 'string', required: false },
                 location: { type: 'string', required: false }
             },
@@ -48,22 +48,34 @@ module.exports = class AuthController extends Controller {
 
     async logout () {
         const { ctx } = this
-        this.service.auth.setCookie(ctx._user, false)
-        this.logger.info(`用户退出成功, 用户ID：${ctx._user._id}，用户名：${ctx._user.name}`)
+        this.service.auth.setCookie(ctx.session._user, false)
+        this.logger.info(`用户退出成功, 用户ID：${ctx.session._user._id}，用户名：${ctx.session._user.name}`)
         ctx.success('退出成功')
     }
 
     async info () {
-        this.ctx.success(this.ctx._user, '管理员信息获取成功')
+        this.ctx.success(this.ctx.session._user, '管理员信息获取成功')
     }
 
     /**
      * @desc 管理员信息更新，不包含密码更新
+     * @return {*} null
      */
     async update () {
         const { ctx } = this
         const body = this.ctx.validateBody(this.rules.update)
-        const data = await this.service.user.updateItemById(ctx._user_id, body)
+        const exist = await this.service.user.getItemById(ctx.session._user._id)
+        if (exist && exist.name !== body.name) {
+            // 检测变更的name是否和其他用户冲突
+            const conflict = await this.service.user.getItem({ name: ctx.session._user.name })
+            if (conflict) {
+                // 有冲突
+                return ctx.fail('用户名重复')
+            }
+        }
+        const data = await this.service.user.updateItemById(ctx.session._user._id, body)
+        // 更新session
+        await this.service.auth.updateSessionUser()
         data
             ? ctx.success(data, '管理员信息更新成功')
             : ctx.fail('管理员信息更新失败')
@@ -75,15 +87,16 @@ module.exports = class AuthController extends Controller {
     async password () {
         const { ctx } = this
         const body = this.ctx.validateBody(this.rules.password)
-        const vertifyPassword = this.app.utils.encode.bcompare(body.oldPassword, ctx._user.password)
+        const exist = await this.service.user.getItemById(ctx.session._user._id)
+        const vertifyPassword = this.app.utils.encode.bcompare(body.oldPassword, exist.password)
         if (!vertifyPassword) {
             ctx.throw(200, '原密码错误')
         }
-        const data = await this.service.user.updateItemById(ctx._user._id, {
+        const data = await this.service.user.updateItemById(ctx.session._user._id, {
             password: this.app.utils.encode.bhash(body.password)
         })
         data
-            ? ctx.success(data, '密码更新成功')
+            ? ctx.success('密码更新成功')
             : ctx.fail('密码更新失败')
     }
 }

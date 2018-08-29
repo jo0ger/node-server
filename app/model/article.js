@@ -23,7 +23,7 @@ module.exports = app => {
         // 标签
         tag: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
         // 缩略图 （图片uid, 图片名称，图片URL， 图片大小）
-        thumb: { type: String, validate: /.+?\.(jpg|jpeg|gif|bmp|png)/ },
+        thumb: { type: String, validate: app.utils.validate.isUrl },
         // 文章状态 （ 0 草稿 | 1 已发布 ）
         state: {
             type: String,

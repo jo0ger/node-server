@@ -21,9 +21,12 @@ module.exports = class CommentService extends ProxyService {
             }, {
                 path: 'forward',
                 select: 'author meta sticky ups'
+            }, {
+                path: 'article',
+                select: 'title, description thumb createdAt'
             }
         ]
-        if (!this.ctx._isAuthed) {
+        if (!this.ctx.session._isAuthed) {
             data = await this.getItem(
                 { _id: id, state: 1, spam: false },
                 '-content -state -updatedAt -type -spam',

@@ -19,9 +19,9 @@ module.exports = app => {
             if (!user) {
                 return ctx.fail(401, '用户不存在')
             }
-            ctx._user = user
-            ctx._isAdmin = user.role === app.config.modelValidate.user.role.optional.ADMIN
-            ctx._isAuthed = true
+            ctx.session._user = user
+            ctx.session._isAdmin = user.role === app.config.modelValidate.user.role.optional.ADMIN
+            ctx.session._isAuthed = true
             await next()
         }
     ])
@@ -39,7 +39,7 @@ function verifyToken (app) {
                 decodedToken = await jwt.verify(token, config.secrets)
             } catch (err) {
                 logger.warn('Token校验出错，错误：' + err.message)
-                return ctx.fail(401, '登录失效')
+                return ctx.fail(401, '登录失效，请重新登录')
             }
             if (decodedToken && decodedToken.exp > Math.floor(Date.now() / 1000)) {
                 // 已校验权限
@@ -47,6 +47,8 @@ function verifyToken (app) {
                 ctx.session._token = token
                 logger.info('Token校验成功')
             }
+        } else {
+            return ctx.fail('请先登录')
         }
         await next()
     }

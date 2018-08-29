@@ -133,13 +133,12 @@ module.exports = appInfo => {
                     PASS: '1'
                 }
             },
-            // 类型 0 文章评论 | 1 站内留言 | 2 其他（保留）
+            // 类型 0 文章评论 | 1 站内留言
             type: {
                 default: '0',
                 optional: {
                     COMMENT: '0',
-                    MESSAGE: '1',
-                    OTHER: '2'
+                    MESSAGE: '1'
                 }
             }
         }

@@ -75,7 +75,7 @@ module.exports = class TagController extends Controller {
         const { name } = body
         const exist = await this.service.tag.getItem({ name })
         if (exist) {
-            return ctx.fail('标签已存在')
+            return ctx.fail('标签名称重复')
         }
         const data = await this.service.tag.create(body)
         data
@@ -87,6 +87,15 @@ module.exports = class TagController extends Controller {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
         const body = ctx.validateBody(this.rules.update)
+        const exist = await this.service.tag.getItem({
+            name: body.name,
+            _id: {
+                $nin: [ params.id ]
+            }
+        })
+        if (exist) {
+            return ctx.fail('标签名称重复')
+        }
         const data = await this.service.tag.updateItemById(params.id, body)
         data
             ? ctx.success(data, '标签更新成功')
@@ -96,7 +105,7 @@ module.exports = class TagController extends Controller {
     async delete () {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
-        const articles = await this.service.article.getList({ tag: params._id }, 'title')
+        const articles = await this.service.article.getList({ tag: params.id }, 'title')
         if (articles.length) {
             return ctx.fail('该标签下还有文章，不能删除', articles)
         }
