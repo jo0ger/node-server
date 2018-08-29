@@ -22,10 +22,16 @@ function addValidateRule (app) {
         }
     })
     app.validator.addRule('email', (rule, val) => {
-        return app.utils.validate.isEmail(val)
+        const valid = app.utils.validate.isEmail(val)
+        if (!valid) {
+            return 'must be email'
+        }
     })
     app.validator.addRule('url', (rule, val) => {
-        return app.utils.validate.isSiteUrl(val)
+        const valid = app.utils.validate.isUrl(val)
+        if (!valid) {
+            return 'must be url'
+        }
     })
 }
 

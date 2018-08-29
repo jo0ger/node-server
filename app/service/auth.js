@@ -50,4 +50,10 @@ module.exports = class AuthService extends Service {
             }
         }
     }
+
+    // 更新session
+    async updateSessionUser (admin) {
+        this.ctx.session._user = admin || await this.service.user.getItemById(this.ctx.session._user._id, '-password')
+        this.logger.info('Session管理员信息更新成功')
+    }
 }

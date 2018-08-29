@@ -8,8 +8,8 @@ module.exports = class ArticleController extends Controller {
     get rules () {
         return {
             list: {
-                page: { type: 'number', required: true, min: 1 },
-                limit: { type: 'number', required: false, min: 1 },
+                page: { type: 'int', required: true, min: 1 },
+                limit: { type: 'int', required: false, min: 1 },
                 state: { type: 'enum', values: Object.values(this.config.modelValidate.article.state.optional), required: false },
                 category: { type: 'objectId', required: false },
                 tag: { type: 'objectId', required: false },
@@ -75,10 +75,7 @@ module.exports = class ArticleController extends Controller {
                 }
             ]
         }
-        const query = {}
-        if (state !== undefined) {
-            query.state = state
-        }
+        const query = { state, category, tag }
 
         // 搜索关键词
         if (keyword) {
@@ -88,32 +85,8 @@ module.exports = class ArticleController extends Controller {
             ]
         }
 
-        // 分类
-        if (category) {
-            // 如果是id
-            if (this.app.utils.validate.isObjectId(category)) {
-                query.category = category
-            } else {
-                // 普通字符串，需要先查到id
-                const c = await this.service.category.getItem({ name: category })
-                query.category = c ? c._id : this.app.utils.share.createObjectId()
-            }
-        }
-
-        // 标签
-        if (tag) {
-            // 如果是id
-            if (this.app.utils.validate.isObjectId(tag)) {
-                query.tag = tag
-            } else {
-                // 普通字符串，需要先查到id
-                const t = await this.service.tag.getItem({ name: tag })
-                query.tag = t ? t._id : this.app.utils.share.createObjectId()
-            }
-        }
-
         // 未通过权限校验（前台获取文章列表）
-        if (!ctx._isAuthed) {
+        if (!ctx.session._isAuthed) {
             // 将文章状态重置为1
             query.state = 1
             // 文章列表不需要content和state
@@ -141,7 +114,7 @@ module.exports = class ArticleController extends Controller {
                 }
             }
         }
-        const data = await this.service.article.getLimitListByQuery(query, options)
+        const data = await this.service.article.getLimitListByQuery(ctx.processPayload(query), options)
         data
             ? ctx.success(data, '文章列表获取成功')
             : ctx.fail('文章列表获取失败')
@@ -162,6 +135,10 @@ module.exports = class ArticleController extends Controller {
         if (body.createdAt) {
             body.createdAt = new Date(body.createdAt)
         }
+        const exist = await this.service.article.getItem({ title: body.title })
+        if (exist) {
+            return ctx.fail('文章名称重复')
+        }
         const data = await this.service.article.create(body)
         data
             ? ctx.success(data, '文章创建成功')
@@ -174,6 +151,15 @@ module.exports = class ArticleController extends Controller {
         const body = ctx.validateBody(this.rules.update)
         if (body.createdAt) {
             body.createdAt = new Date(body.createdAt)
+        }
+        const exist = await this.service.article.getItem({
+            _id: {
+                $ne: params.id
+            },
+            title: body.title
+        })
+        if (exist) {
+            return ctx.fail('文章名称重复')
         }
         const data = await this.service.article.updateItemById(
             params.id,

@@ -1,19 +1,37 @@
 const geoip = require('geoip-lite')
 
 module.exports = {
+    processPayload (payload) {
+        if (!payload) return null
+        const result = {}
+        for (const key in payload) {
+            if (payload.hasOwnProperty(key)) {
+                const value = payload[key]
+                if (value !== undefined) {
+                    result[key] = value
+                }
+            }
+        }
+        return result
+    },
     validateParams (rules) {
         this.validate(rules, this.params)
         return this.params
     },
-    validateBody (rules, body) {
-        body = body || this.request.body
+    validateBody (rules, body, dry = true) {
+        if (typeof body === 'number') {
+            dry = body
+            body = this.request.body
+        } else {
+            body = body || this.request.body
+        }
         this.validate(rules, body)
-        return Object.keys(rules).reduce((res, key) => {
+        return dry && Object.keys(rules).reduce((res, key) => {
             if (body.hasOwnProperty(key)) {
                 res[key] = body[key]
             }
             return res
-        }, {})
+        }, {}) || body
     },
     validateParamsObjectId () {
         return this.validateParams({

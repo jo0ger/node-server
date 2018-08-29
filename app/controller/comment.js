@@ -8,8 +8,8 @@ module.exports = class CommentController extends Controller {
     get rules () {
         return {
             list: {
-                page: { type: 'number', required: true, min: 1 },
-                limit: { type: 'number', required: false, min: 1 },
+                page: { type: 'int', required: true, min: 1 },
+                limit: { type: 'int', required: false, min: 1 },
                 state: { type: 'enum', values: Object.values(this.config.modelValidate.comment.state.optional), required: false },
                 type: { type: 'enum', values: Object.values(this.config.modelValidate.comment.type.optional), required: false },
                 author: { type: 'objectId', required: false },
@@ -46,29 +46,31 @@ module.exports = class CommentController extends Controller {
             ctx.query.limit = Number(ctx.query.limit)
         }
         ctx.validate(this.rules.list, ctx.query)
-        const { page, limit, state, keyword, author, article, parent, order, sortBy, startDate, endDate } = ctx.query
+        const { page, limit, state, type, keyword, author, article, parent, order, sortBy, startDate, endDate } = ctx.query
         // 过滤条件
         const options = {
-            sort: { createdAt: 1 },
+            sort: {
+                createdAt: 1
+            },
             page,
             limit: limit || this.app.setting.limit.commentCount,
             select: '',
             populate: [
                 {
                     path: 'author',
-                    select: !ctx._isAuthed ? 'github avatar name site' : ''
+                    select: !ctx.session._isAuthed ? 'github avatar name site' : '-password'
                 },
                 {
                     path: 'parent',
                     select: 'author meta sticky ups',
-                    match: !ctx._isAuthed && {
+                    match: !ctx.session._isAuthed && {
                         state: 1
                     } || null
                 },
                 {
                     path: 'forward',
                     select: 'author meta sticky ups',
-                    match: !ctx._isAuthed && {
+                    match: !ctx.session._isAuthed && {
                         state: 1
                     } || null,
                     populate: {
@@ -80,10 +82,7 @@ module.exports = class CommentController extends Controller {
         }
 
         // 查询条件
-        const query = {}
-        if (state !== undefined) {
-            query.state = state
-        }
+        const query = { state, type, author, article }
 
         // 搜索关键词
         if (keyword) {
@@ -91,30 +90,6 @@ module.exports = class CommentController extends Controller {
             query.$or = [
                 { title: keywordReg }
             ]
-        }
-
-        // 用户
-        if (author) {
-            // 如果是id
-            if (this.app.utils.validate.isObjectId(author)) {
-                query.author = author
-            } else {
-                // 普通字符串，需要先查到id
-                const u = await this.service.user.getItem({ name: author })
-                query.author = u ? u._id : this.app.utils.share.createObjectId()
-            }
-        }
-
-        // 文章
-        if (article) {
-            // 如果是id
-            if (this.app.utils.validate.isObjectId(article)) {
-                query.article = article
-            } else {
-                // 普通字符串，需要先查到id
-                const a = await this.service.article.getItem({ name: article })
-                query.article = a ? a._id : this.app.utils.share.createObjectId()
-            }
         }
 
         if (parent) {
@@ -126,7 +101,7 @@ module.exports = class CommentController extends Controller {
         }
 
         // 未通过权限校验（前台获取文章列表）
-        if (!ctx._isAuthed) {
+        if (!ctx.session._isAuthed) {
             // 将评论状态重置为1
             query.state = 1
             query.spam = false
@@ -155,7 +130,7 @@ module.exports = class CommentController extends Controller {
                 }
             }
         }
-        const data = await this.service.comment.getLimitListByQuery(query, options)
+        const data = await this.service.comment.getLimitListByQuery(ctx.processPayload(query), options)
         data
             ? ctx.success(data, '评论列表获取成功')
             : ctx.fail('评论列表获取失败')
@@ -174,16 +149,19 @@ module.exports = class CommentController extends Controller {
         const { ctx } = this
         ctx.validateCommentAuthor()
         const body = ctx.validateBody(this.rules.create)
-        const COMMENT = this.config.modelValidate.comment.type.optional.COMMENT
+        const { COMMENT, MESSAGE } = type === this.config.modelValidate.comment.optional
         body.author = ctx.request.body.author
         const { article, parent, forward, type, content, author } = body
         if (type === COMMENT) {
             if (!article) {
                 return ctx.fail(422, '缺少文章ID')
             }
+        } else if (type === MESSAGE) {
+            // 站内留言
+            delete body.article
         }
         if ((parent && !forward) || (!parent && forward)) {
-            return ctx.fail(422, '缺少parent和forward参数')
+            return ctx.fail(422, '缺少父评论ID或被回复评论ID')
         }
         const user = await this.service.user.checkCommentAuthor(author)
         if (!user) {
@@ -250,7 +228,7 @@ module.exports = class CommentController extends Controller {
         if (!exist) {
             return ctx.fail('评论不存在')
         }
-        if (ctx._isAuthed && ctx._user._id !== exist.author._id) {
+        if (ctx.session._isAuthed && ctx.session._user._id !== exist.author._id) {
             return ctx.fail('非本人评论不能修改')
         }
         // 状态修改是涉及到spam修改
@@ -287,7 +265,7 @@ module.exports = class CommentController extends Controller {
         }
         body.renderedContent = this.app.utils.markdown.render(body.content)
         let data = null
-        if (!ctx._isAuthed) {
+        if (!ctx.session._isAuthed) {
             data = await this.service.comment.updateItemById(
                 params.id,
                 body,

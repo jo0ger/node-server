@@ -12,7 +12,7 @@ module.exports = class ArticleService extends ProxyService {
     async getItemById (id, select, opt = {}, single = false) {
         let api = this.getItem.bind(this)
         const query = { _id: id }
-        if (!this.ctx._isAuthed) {
+        if (!this.ctx.session._isAuthed) {
             api = this.updateItem.bind(this)
             // 前台博客访问文章的时候pv+1
             query.state = this.config.modelValidate.article.state.optional.PUBLISH
@@ -40,7 +40,7 @@ module.exports = class ArticleService extends ProxyService {
             title: 1,
             createdAt: 1
         }
-        if (!this.ctx._isAuthed) {
+        if (!this.ctx.session._isAuthed) {
             $match.state = 1
         } else {
             $project.state = 1
@@ -125,7 +125,7 @@ module.exports = class ArticleService extends ProxyService {
             }
         }
         // 如果未通过权限校验，将文章状态重置为1
-        if (!this.ctx._isAuthed) {
+        if (!this.ctx.session._isAuthed) {
             query.state = this.config.modelValidate.article.state.optional.PUBLISH
         }
         const prev = await this.getItem(

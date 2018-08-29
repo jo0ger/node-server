@@ -11,7 +11,7 @@ module.exports = app => {
         name: { type: String, required: true },
         email: { type: String, required: true, validate: app.utils.validate.isEmail },
         avatar: { type: String, required: true },
-        site: { type: String, validate: app.utils.validate.isSiteUrl },
+        site: { type: String, validate: app.utils.validate.isUrl },
         slogan: { type: String },
         description: { type: String, default: '' },
         // 角色 0 管理员 | 1 普通用户

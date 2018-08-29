@@ -12,11 +12,13 @@ module.exports = class SettingController extends Controller {
             },
             create: {
                 site: { type: 'object', required: false },
-                keys: { type: 'object', required: false }
+                keys: { type: 'object', required: false },
+                limit: { type: 'object', required: false }
             },
             update: {
                 site: { type: 'object', required: false },
-                keys: { type: 'object', required: false }
+                keys: { type: 'object', required: false },
+                limit: { type: 'object', required: false }
             }
         }
     }
@@ -37,7 +39,9 @@ module.exports = class SettingController extends Controller {
         if (!exist) {
             return ctx.fail('配置未找到')
         }
-        body = this.app.merge(exist, body)
+        body = this.app.merge({}, exist, body)
+        console.log(body);
+        
         await this.service.setting.updateItemById(exist._id, body)
         // 抓取友链
         const data = await this.service.setting.updateLinks()
