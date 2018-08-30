@@ -16,7 +16,7 @@ module.exports = app => {
         description: { type: String, default: '' },
         // 角色 0 管理员 | 1 普通用户
         role: {
-            type: String,
+            type: Number,
             default: userValidateConfig.role.default,
             validate: val => Object.values(userValidateConfig.role.optional).includes(val)
         },

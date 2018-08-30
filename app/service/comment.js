@@ -40,36 +40,47 @@ module.exports = class CommentService extends ProxyService {
     }
 
     async sendCommentEmailToAdminAndUser (comment) {
+        if (comment.toObject) {
+            comment = comment.toObject()
+        }
         const { type, article } = comment
         const commentType = this.config.modelValidate.comment.type.optional
         const permalink = this.getPermalink(comment)
         const adminType = this.getCommentType(comment.type)
         let adminTitle = '未知的评论'
+        let typeTitle = ''
         if (type === commentType.COMMENT) {
             // 文章评论
+            typeTitle = '评论'
             const at = await this.service.article.getItemById(article._id || article)
             if (at && at._id) {
                 adminTitle = `博客文章《${at.title}》有了新的评论`
             }
         } else if (type === commentType.MESSAGE) {
             // 站内留言
+            typeTitle = '留言'
             adminTitle = '个人站点有新的留言'
         }
 
-        // 发送给管理员邮箱config.email
-        this.service.mail.sendToAdmin({
-            subject: adminTitle,
-            text: `来自 ${comment.author.name} 的${adminType}：${comment.content}`,
-            html: `<p>来自 <a href="${comment.author.github.blog || '#'}" target="_blank">${comment.author.name}</a> 的${adminType} => <a href="${permalink}" target="_blank">点击查看</a>：${comment.renderedContent}</p>`
-        })
+        const authorId = comment.author._id.toString()
+        const adminId = this.app._admin._id.toString()
+        const forwardAuthorId = comment.forward && comment.forward.author.toString()
+        // 非管理员评论，发送给管理员邮箱
+        if (authorId !== adminId) {
+            this.service.mail.sendToAdmin(typeTitle, {
+                subject: adminTitle,
+                text: `来自 ${comment.author.name} 的${adminType}：${comment.content}`,
+                html: `<p>来自 <a href="${comment.author.github.blog || '#'}" target="_blank">${comment.author.name}</a> 的${adminType} => <a href="${permalink}" target="_blank">点击查看</a>：${comment.renderedContent}</p>`
+            })
+        }
 
-        // 发送给被评论者
-        if (comment.forward && comment.forward._id !== comment.author._id) {
-            const forwardAuthor = await this.service.user.findById(comment.forward.author).exec().catch(() => null)
-            if (forwardAuthor) {
-                this.service.mail.send({
-                    to: forwardAuthor.github.email,
-                    subject: `你在 ${this.config.author} 的博客的评论有了新的回复`,
+        // 非回复管理员，非回复自身，才发送给被评论者
+        if (forwardAuthorId !== authorId && forwardAuthorId !== adminId) {
+            const forwardAuthor = await this.service.user.getItemById(comment.forward.author).catch(() => null)
+            if (forwardAuthor && forwardAuthor.email) {
+                this.service.mail.send(typeTitle, {
+                    to: forwardAuthor.email,
+                    subject: `你在 ${this.config.author.name} 的博客的评论有了新的回复`,
                     text: `来自 ${comment.author.name} 的回复：${comment.content}`,
                     html: `<p>来自 <a href="${comment.author.github.blog || '#'}" target="_blank">${comment.author.name}</a> 的回复 => <a href="${permalink}" target="_blank">点击查看</a>：${comment.renderedContent}</p>`
                 })

@@ -14,6 +14,7 @@ module.exports = class UserService extends ProxyService {
         const { name } = user
         const exist = await this.getItem({ name })
         if (exist) {
+            this.logger.info('用户已存在，无需创建：' + name)
             return exist
         }
         const data = await new this.model(user).save()
