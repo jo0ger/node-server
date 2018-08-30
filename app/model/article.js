@@ -26,7 +26,7 @@ module.exports = app => {
         thumb: { type: String, validate: app.utils.validate.isUrl },
         // 文章状态 （ 0 草稿 | 1 已发布 ）
         state: {
-            type: String,
+            type: Number,
             default: articleValidateConfig.state.default,
             validate: val => Object.values(articleValidateConfig.state.optional).includes(val)
         },

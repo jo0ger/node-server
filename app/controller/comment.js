@@ -149,7 +149,7 @@ module.exports = class CommentController extends Controller {
         const { ctx } = this
         ctx.validateCommentAuthor()
         const body = ctx.validateBody(this.rules.create)
-        const { COMMENT, MESSAGE } = type === this.config.modelValidate.comment.optional
+        const { COMMENT, MESSAGE } = this.config.modelValidate.comment.type.optional
         body.author = ctx.request.body.author
         const { article, parent, forward, type, content, author } = body
         if (type === COMMENT) {
@@ -221,14 +221,16 @@ module.exports = class CommentController extends Controller {
         const { ctx } = this
         const { params } = ctx
         ctx.validateParamsObjectId()
-        ctx.validateCommentAuthor()
-        const body = ctx.validateBody(this.rules.create)
+        if (!ctx.session._isAuthed) {
+            ctx.validateCommentAuthor()
+        }
+        const body = ctx.validateBody(this.rules.update)
         body.author = ctx.request.body.author
-        const exist = await this.getItemById(params.id)
+        const exist = await this.service.comment.getItemById(params.id)
         if (!exist) {
             return ctx.fail('评论不存在')
         }
-        if (ctx.session._isAuthed && ctx.session._user._id !== exist.author._id) {
+        if (!ctx.session._isAuthed && ctx.session._user._id !== exist.author._id) {
             return ctx.fail('非本人评论不能修改')
         }
         // 状态修改是涉及到spam修改
@@ -263,7 +265,9 @@ module.exports = class CommentController extends Controller {
                 }
             }
         }
+        if (body.content) {
         body.renderedContent = this.app.utils.markdown.render(body.content)
+        }
         let data = null
         if (!ctx.session._isAuthed) {
             data = await this.service.comment.updateItemById(
@@ -284,7 +288,7 @@ module.exports = class CommentController extends Controller {
                 ]
             )
         } else {
-            data = await this.updateItemById(params.id, body)
+            data = await this.service.comment.updateItemById(params.id, body)
         }
         data
             ? ctx.success(data, '评论更新成功')

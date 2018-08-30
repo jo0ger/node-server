@@ -10,7 +10,7 @@ module.exports = {
             return null
         }
         schema.set('versionKey', false)
-        schema.set('toObject', { getters: true })
+        schema.set('toObject', { getters: true, virtuals: false })
         schema.set('toJSON', { getters: true, virtuals: false })
         if (options.paginate) {
             schema.plugin(mongoosePaginate)

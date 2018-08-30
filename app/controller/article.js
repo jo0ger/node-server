@@ -20,10 +20,6 @@ module.exports = class ArticleController extends Controller {
                 order: { type: 'enum', values: [-1, 1], required: false },
                 sortBy: { type: 'enum', values: ['createdAt', 'updatedAt', 'publishedAt', 'meta.ups', 'meta.pvs', 'meta.comments'], required: false }
             },
-            item: {
-                // 后台用，只获取当前文章内容，不获取相关文章和上下篇文章
-                single: { type: 'boolean', required: false }
-            },
             create: {
                 title: { type: 'string', required: true },
                 content: { type: 'string', required: true },

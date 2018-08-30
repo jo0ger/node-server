@@ -5,36 +5,32 @@ module.exports = app => {
 
     const CommentSchema = new Schema({
         // ******* 评论通用项 ************
-        // 创建时间
-        createdAt: { type: Date, default: Date.now },
-        // 修改时间
-        updatedAt: { type: Date, default: Date.now },
         // 评论内容
         content: { type: String, required: true, validate: /\S+/ },
         // marked渲染后的内容
         renderedContent: { type: String, required: true, validate: /\S+/ },
         // 状态 -2 垃圾评论 | -1 已删除 | 0 待审核 | 1 通过
         state: {
-            type: String,
+            type: Number,
             default: commentValidateConfig.state.default,
             validate: val => Object.values(commentValidateConfig.state.optional).includes(val)
         },
         // Akismet判定是否是垃圾评论，方便后台check
         spam: { type: Boolean, default: false },
         // 评论发布者
-        author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        author: { type: Schema.Types.ObjectId, ref: 'User' },
         // 点赞数
         ups: { type: Number, default: 0, validate: /^\d*$/ },
         // 是否置顶
         sticky: { type: Boolean, default: false },
         // 类型 0 文章评论 | 1 站内留言 | 2 其他（保留）
         type: {
-            type: String,
+            type: Number,
             default: commentValidateConfig.type.default,
             validate: val => Object.values(commentValidateConfig.type.optional).includes(val)
         },
         // type为0时此项存在
-        article: { type: mongoose.Schema.Types.ObjectId, ref: 'Article' },
+        article: { type: Schema.Types.ObjectId, ref: 'Article' },
         meta: {
             // 用户IP
             ip: String,

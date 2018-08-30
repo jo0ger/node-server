@@ -8,7 +8,7 @@ let mailerClient = null
 
 module.exports = class MailService extends Service {
     // 发送邮件
-    async send (data, toAdmin = false) {
+    async send (type, data, toAdmin = false) {
         let client = mailerClient
         const keys = this.app.setting.keys
         if (!client) {
@@ -23,19 +23,21 @@ module.exports = class MailService extends Service {
         if (toAdmin) {
             opt.to = keys.mail.user
         }
+        type = type ? `[${type}]` : ''
+        toAdmin = toAdmin ? '管理员' : ''
         await new Promise((resolve, reject) => {
             client.sendMail(opt, (err, info) => {
                 if (err) {
-                    this.logger.error('邮件发送失败，' + err.message)
+                    this.logger.error(type + toAdmin + '邮件发送失败，TO：' + opt.to + '，错误：' + err.message)
                     return reject(err)
                 }
-                this.logger.info('邮件发送成功，TO：' + opt.to)
+                this.logger.info(type + toAdmin + '邮件发送成功，TO：' + opt.to)
                 resolve(info)
             })
         })
     }
 
-    sendToAdmin (data) {
-        return this.send(data, true)
+    sendToAdmin (type, data) {
+        return this.send(type, data, true)
     }
 }

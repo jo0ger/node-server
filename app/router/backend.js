@@ -48,4 +48,10 @@ module.exports = app => {
     backendRouter.get('/auth/info', auth, controller.auth.info)
     backendRouter.patch('/auth/info', auth, controller.auth.update)
     backendRouter.patch('/auth/password', auth, controller.auth.password)
+
+    // Notification
+    backendRouter.get('/notifications', auth, controller.notification.list)
+    backendRouter.patch('/notifications/view', auth, controller.notification.viewAll)
+    backendRouter.patch('/notifications/:id/view', auth, controller.notification.view)
+    backendRouter.delete('/notifications/:id', auth, controller.notification.delete)
 }

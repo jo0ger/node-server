@@ -27,28 +27,30 @@ module.exports = class AuthService extends Service {
      */
     async seed () {
         const ADMIN = this.config.modelValidate.user.role.optional.ADMIN
-        const exist = await this.service.user.getItem({ role: ADMIN })
-        if (!exist) {
+        let admin = await this.service.user.getItem({ role: ADMIN })
+        if (!admin) {
             const defaultAdmin = this.config.defaultAdmin
-            const admin = await this.service.github.getUserInfo(defaultAdmin.name)
-            if (admin) {
-                await this.service.user.create({
+            const userInfo = await this.service.github.getUserInfo(defaultAdmin.name)
+            if (userInfo) {
+                admin = await this.service.user.create({
                     role: ADMIN,
-                    name: admin.name,
-                    email: admin.email || this.config.author.email,
+                    name: userInfo.name,
+                    email: userInfo.email || this.config.author.email,
                     password: this.app.utils.encode.bhash(defaultAdmin.password),
-                    slogan: admin.bio,
-                    site: admin.blog || admin.url,
-                    avatar: this.app.proxyUrl(admin.avatar_url),
-                    company: admin.company,
-                    location: admin.location,
+                    slogan: userInfo.bio,
+                    site: userInfo.blog || userInfo.url,
+                    avatar: this.app.proxyUrl(userInfo.avatar_url),
+                    company: userInfo.company,
+                    location: userInfo.location,
                     github: {
-                        id: admin.id,
-                        login: admin.login
+                        id: userInfo.id,
+                        login: userInfo.login
                     }
                 })
             }
         }
+        // 挂载在session上
+        this.app._admin = admin
     }
 
     // 更新session
