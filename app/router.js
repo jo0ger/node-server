@@ -14,7 +14,6 @@ module.exports = app => {
 
     require('./router/backend')(app)
     require('./router/frontend')(app)
-
     router.all('*', ctx => {
         const code = 404
         ctx.fail(code, app.config.codeMap[code])

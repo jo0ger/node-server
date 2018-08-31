@@ -20,7 +20,6 @@ module.exports = app => {
                 return ctx.fail(401, '用户不存在')
             }
             ctx.session._user = user
-            ctx.session._isAdmin = user.role === app.config.modelEnum.user.role.optional.ADMIN
             ctx.session._isAuthed = true
             await next()
         }
