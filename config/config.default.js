@@ -21,7 +21,7 @@ module.exports = appInfo => {
     ]
 
     config.session = {
-        key: appInfo.name + '-token',
+        key: appInfo.name + '_token',
         maxAge: 60000 * 60 * 24 * 7,
         signed: true
     }
@@ -195,11 +195,10 @@ module.exports = appInfo => {
 
     config.defaultAvatar = 'https://static.jooger.me/img/common/avatar.png'
 
-    // 限制参数
-    config.limit = {
-        relatedArticleLimit: 10,
-        commentSpamLimit: 3,
-        hotLimit: 7
+    config.onerror = {
+        js (err, ctx) {
+
+        }
     }
 
     return config

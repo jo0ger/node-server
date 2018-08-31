@@ -32,6 +32,9 @@ module.exports = class AuthController extends Controller {
 
     async login () {
         const { ctx } = this
+        if (ctx.session._isAuthed) {
+            return ctx.fail('你已登录，请勿重复登录')
+        }
         const body = this.ctx.validateBody(this.rules.login)
         const user = await this.service.user.getItem({ name: body.username })
         if (!user) {
@@ -42,6 +45,8 @@ module.exports = class AuthController extends Controller {
             return ctx.fail('密码错误')
         }
         const token = this.service.auth.setCookie(user, true)
+        // 调用 rotateCsrfSecret 刷新用户的 CSRF token
+        ctx.rotateCsrfSecret()
         this.logger.info(`用户登录成功, ID：${user._id}，用户名：${user.name}`)
         ctx.success({ id: user._id, token }, '登录成功')
     }

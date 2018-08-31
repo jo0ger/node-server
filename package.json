@@ -12,6 +12,7 @@
     "egg-redis": "^2.0.0",
     "egg-router-plus": "^1.2.2",
     "egg-scripts": "^2.5.0",
+    "egg-sentry": "^1.0.0",
     "egg-validate": "^1.1.1",
     "geoip-lite": "^1.3.2",
     "gravatar": "^1.6.0",
