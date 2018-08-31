@@ -16,6 +16,6 @@ module.exports = app => {
             d: 'retro',
             protocol
         }, opt))
-        return url.replace(`${protocol}://`, `${app.config.author.url}/proxy/`)
+        return url && url.replace(`${protocol}://`, `${app.config.author.url}/proxy/`) || app.config.defaultAvatar
     }
 }

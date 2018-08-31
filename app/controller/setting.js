@@ -43,8 +43,6 @@ module.exports = class SettingController extends Controller {
         await this.service.setting.updateItemById(exist._id, body)
         // 抓取友链
         const data = await this.service.setting.updateLinks()
-        // 更新配置后需要挂载到app上
-        await this.service.setting.mountToApp()
         data
             ? ctx.success(data, '配置更新成功')
             : ctx.fail('配置更新失败')
