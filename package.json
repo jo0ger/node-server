@@ -9,6 +9,7 @@
     "egg": "^2.2.1",
     "egg-console": "^2.0.1",
     "egg-mongoose": "^3.1.0",
+    "egg-oss": "^1.1.0",
     "egg-redis": "^2.0.0",
     "egg-router-plus": "^1.2.2",
     "egg-scripts": "^2.5.0",
