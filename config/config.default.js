@@ -101,7 +101,7 @@ module.exports = appInfo => {
         500: '服务器错误'
     }
 
-    config.modelValidate = {
+    config.modelEnum = {
         article: {
             // 文章状态 （ 0 草稿(默认) | 1 已发布 ）
             state: {
@@ -109,6 +109,14 @@ module.exports = appInfo => {
                 optional: {
                     DRAFT: 0,
                     PUBLISH: 1
+                }
+            },
+            // 来源 0 原创 | 1 转载
+            source: {
+                default: 0,
+                optional: {
+                    ORIGINAL: 0,
+                    REPRINT: 1
                 }
             }
         },
@@ -153,24 +161,27 @@ module.exports = appInfo => {
             },
             classify: {
                 optional: {
+                    // 遵循 type_model_action 模式
                     // type === 0，系统通知
                     // todo
                     // type === 1，评论通知
-                    COMMENT_COMMENT_1: 'comment_comment', // 评论（非回复）
-                    COMMENT_COMMENT_REPLY_1: 'comment_comment_reply',	// 评论回复
-                    COMMENT_COMMENT_UPDATE_1: 'comment_update', // 评论更新（保留）
-                    COMMENT_MESSAGE_1: 'comment_message',	// 站内留言
-                    COMMENT_MESSAGE_REPLY_1: 'comment_message_reply',	// 站内留言回复
-                    COMMENT_MESSAGE_UPDATE_1: 'comment_message_reply',	// 站内留言更新
+                    COMMENT_COMMENT_COMMENT: 'comment_comment', // 评论（非回复）
+                    COMMENT_COMMENT_COMMENT_REPLY: 'comment_comment_reply',	// 评论回复
+                    COMMENT_COMMENT_COMMENT_UPDATE: 'comment_comment_update', // 评论更新（保留）
+                    COMMENT_COMMENT_MESSAGE: 'comment_message',	// 站内留言
+                    COMMENT_COMMENT_MESSAGE_REPLY: 'comment_message_reply',	// 站内留言回复
+                    COMMENT_COMMENT_MESSAGE_UPDATE: 'comment_message_reply',	// 站内留言更新
                     // type === 2，点赞通知
-                    ARTICLE_LIKE_2: 'article_like', // 文章点赞
-                    ARTICLE_UNLIKE_2: 'article_unlike', // 文章取消点赞
-                    COMMENT_LIKE_2: 'coment_like', // 评论点赞
-                    COMMENT_UNLIKE_2: 'comment_unlike', // 评论取消点赞
+                    LIKE_ARTICLE_LIKE: 'article_like', // 文章点赞
+                    LIKE_ARTICLE_UNLIKE: 'article_unlike', // 文章取消点赞
+                    LIKE_COMMENT_COMMENT_LIKE: 'coment_like', // 评论点赞
+                    LIKE_COMMENT_MESSAGE_LIKE: 'message_like', // 留言点赞
+                    LIKE_COMMENT_MESSAGE_UNLIKE: 'message_unlike', // 留言取消点赞
+                    LIKE_COMMENT_COMMENT_UNLIKE: 'comment_unlike', // 评论取消点赞
                     // type === 3, 用户操作通知
-                    USER_MUTE_AUTO_3: 'user_mute_auto', // 用户被自动禁言
-                    USER_CREATE_3: 'user_create', // 用户创建
-                    USER_UPDATE_3: 'user_update' // 用户更新
+                    USER_USER_MUTE_AUTO: 'user_mute_auto', // 用户被自动禁言
+                    USER_USER_CREATE: 'user_create', // 用户创建
+                    USER_USER_UPDATE: 'user_update' // 用户更新
                 }
             }
         }

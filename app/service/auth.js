@@ -26,7 +26,7 @@ module.exports = class AuthService extends Service {
      * @desc 创建管理员，用于server初始化时
      */
     async seed () {
-        const ADMIN = this.config.modelValidate.user.role.optional.ADMIN
+        const ADMIN = this.config.modelEnum.user.role.optional.ADMIN
         let admin = await this.service.user.getItem({ role: ADMIN })
         if (!admin) {
             const defaultAdmin = this.config.defaultAdmin

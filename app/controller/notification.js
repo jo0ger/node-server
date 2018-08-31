@@ -11,11 +11,8 @@ module.exports = class NotificationController extends Controller {
                 // 查询关键词
                 page: { type: 'int', required: true, min: 1 },
                 limit: { type: 'int', required: false, min: 1 },
-                type: { type: 'enum', values: Object.values(this.config.modelValidate.notification.type.optional), required: false },
-                classify: { type: 'enum', values: Object.values(this.config.modelValidate.notification.classify.optional), required: false },
-                viewed: { type: 'boolean', required: false }
-            },
-            view: {
+                type: { type: 'enum', values: Object.values(this.config.modelEnum.notification.type.optional), required: false },
+                classify: { type: 'enum', values: Object.values(this.config.modelEnum.notification.classify.optional), required: false },
                 viewed: { type: 'boolean', required: false }
             }
         }
@@ -24,11 +21,18 @@ module.exports = class NotificationController extends Controller {
     async list () {
         const { ctx } = this
         ctx.query.page = Number(ctx.query.page)
-        if (ctx.query.limit) {
-            ctx.query.limit = Number(ctx.query.limit)
+        const tranArray = ['limit', 'type']
+        tranArray.forEach(key => {
+            if (ctx.query[key]) {
+                ctx.query[key] = Number(ctx.query[key])
+            }
+        })
+        if (ctx.query.viewed) {
+            ctx.query.viewed = ctx.query.viewed === 'true'
         }
         ctx.validate(this.rules.list, ctx.query)
-        const { page, limit } = ctx.query
+        const { page, limit, type, classify, viewed } = ctx.query
+        const query = { type, classify, viewed }
         const options = {
             sort: {
                 createdAt: -1
@@ -37,18 +41,24 @@ module.exports = class NotificationController extends Controller {
             limit: limit || 10,
             populate: [
                 {
-                    path: 'article',
+                    path: 'target.article',
                     select: 'title description meta'
                 }, {
-                    path: 'user',
-                    select: 'name email role'
+                    path: 'target.user',
+                    select: 'name email role github'
                 }, {
-                    path: 'comment',
+                    path: 'target.comment',
                     select: 'state spam type meta'
+                }, {
+                    path: 'actors.from',
+                    select: 'name email github'
+                }, {
+                    path: 'actors.to',
+                    select: 'name email github'
                 }
             ]
         }
-        const data = await this.service.notification.getLimitListByQuery(ctx.processPayload(ctx.query), options)
+        const data = await this.service.notification.getLimitListByQuery(ctx.processPayload(query), options)
         data
             ? ctx.success(data, '通告列表获取成功')
             : ctx.fail('通告列表获取失败')
@@ -60,8 +70,8 @@ module.exports = class NotificationController extends Controller {
         const update = { viewed: true }
         const data = await this.service.notification.updateItemById(params.id, update)
         data
-            ? ctx.success(data, '标记已读成功')
-            : ctx.fail('标记已读失败')
+            ? ctx.success('通告标记已读成功')
+            : ctx.fail('通告标记已读失败')
     }
 
     async viewAll () {
@@ -69,8 +79,8 @@ module.exports = class NotificationController extends Controller {
         const update = { viewed: true }
         const data = await this.service.notification.updateMany({}, update)
         data
-            ? ctx.success(data, '全部标记已读成功')
-            : ctx.fail('全部标记已读失败')
+            ? ctx.success('通告全部标记已读成功')
+            : ctx.fail('通告全部标记已读失败')
     }
 
     async delete () {

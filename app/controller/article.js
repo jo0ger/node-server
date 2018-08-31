@@ -10,7 +10,8 @@ module.exports = class ArticleController extends Controller {
             list: {
                 page: { type: 'int', required: true, min: 1 },
                 limit: { type: 'int', required: false, min: 1 },
-                state: { type: 'enum', values: Object.values(this.config.modelValidate.article.state.optional), required: false },
+                state: { type: 'enum', values: Object.values(this.config.modelEnum.article.state.optional), required: false },
+                source: { type: 'enum', values: Object.values(this.config.modelEnum.article.source.optional), required: false },
                 category: { type: 'objectId', required: false },
                 tag: { type: 'objectId', required: false },
                 keyword: { type: 'string', required: false },
@@ -27,7 +28,8 @@ module.exports = class ArticleController extends Controller {
                 keywords: { type: 'array', required: false },
                 category: { type: 'objectId', required: false },
                 tag: { type: 'array', required: false, itemType: 'objectId' },
-                state: { type: 'enum', values: Object.values(this.config.modelValidate.article.state.optional), required: false },
+                state: { type: 'enum', values: Object.values(this.config.modelEnum.article.state.optional), required: false },
+                source: { type: 'enum', values: Object.values(this.config.modelEnum.article.source.optional), required: false },
                 thumb: { type: 'url', required: false },
                 createdAt: { type: 'dateTime', required: false }
             },
@@ -38,7 +40,8 @@ module.exports = class ArticleController extends Controller {
                 keywords: { type: 'array', required: false },
                 category: { type: 'objectId', required: false },
                 tag: { type: 'array', required: false, itemType: 'objectId' },
-                state: { type: 'enum', values: Object.values(this.config.modelValidate.article.state.optional), required: false },
+                state: { type: 'enum', values: Object.values(this.config.modelEnum.article.state.optional), required: false },
+                source: { type: 'enum', values: Object.values(this.config.modelEnum.article.source.optional), required: false },
                 thumb: { type: 'url', required: false },
                 createdAt: { type: 'dateTime', required: false }
             }
@@ -48,9 +51,12 @@ module.exports = class ArticleController extends Controller {
     async list () {
         const { ctx } = this
         ctx.query.page = Number(ctx.query.page)
-        if (ctx.query.limit) {
-            ctx.query.limit = Number(ctx.query.limit)
-        }
+        const tranArray = ['limit', 'state', 'source']
+        tranArray.forEach(key => {
+            if (ctx.query[key]) {
+                ctx.query[key] = Number(ctx.query[key])
+            }
+        })
         ctx.validate(this.rules.list, ctx.query)
         const { page, limit, state, keyword, category, tag, order, sortBy, startDate, endDate } = ctx.query
         const options = {
@@ -185,10 +191,32 @@ module.exports = class ArticleController extends Controller {
                 'meta.ups': 1
             }
         })
-        data
-            ? ctx.success('文章点赞成功')
-            : ctx.fail('文章点赞失败')
+        if (data) {
+            // 生成like通告
+            this.service.notification.recordLike('article', data, ctx.request.body.user, true)
+            ctx.success('文章点赞成功')
+        } else {
+            ctx.fail('文章点赞失败')
+        }
     }
+
+    async unlike () {
+        const { ctx } = this
+        const params = ctx.validateParamsObjectId()
+        const data = await this.service.article.updateItemById(params.id, {
+            $inc: {
+                'meta.ups': -1
+            }
+        })
+        if (data) {
+            // 生成unlike通告
+            this.service.notification.recordLike('article', data, ctx.request.body.user, false)
+            ctx.success('文章取消点赞成功')
+        } else {
+            ctx.fail('文章取消点赞失败')
+        }
+    }
+
 
     async archives () {
         this.ctx.success(await this.service.article.archives(), '归档获取成功')

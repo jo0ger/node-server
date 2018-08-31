@@ -10,6 +10,7 @@ module.exports = app => {
     backendRouter.post('/articles', auth, controller.article.create)
     backendRouter.patch('/articles/:id', auth, controller.article.update)
     backendRouter.patch('/articles/:id/like', auth, controller.article.like)
+    backendRouter.patch('/articles/:id/unlike', auth, controller.article.unlike)
     backendRouter.delete('/articles/:id', auth, controller.article.delete)
 
     // Category
@@ -31,8 +32,9 @@ module.exports = app => {
     backendRouter.get('/comments/:id', auth, controller.comment.item)
     backendRouter.post('/comments', auth, controller.comment.create)
     backendRouter.patch('/comments/:id', auth, controller.comment.update)
-    backendRouter.delete('/comments/:id', auth, controller.comment.delete)
     backendRouter.patch('/comments/:id/like', auth, controller.comment.like)
+    backendRouter.patch('/comments/:id/unlike', auth, controller.comment.unlike)
+    backendRouter.delete('/comments/:id', auth, controller.comment.delete)
 
     // User
     backendRouter.get('/users', auth, controller.user.list)

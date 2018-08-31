@@ -48,51 +48,7 @@ module.exports = class ProxyService extends Service {
     }
 
     async create (payload) {
-        const data = await this.model.create(payload)
-        const modelName = this.model.modelName
-        // FIX:  触发通告，待优化
-        const n = this.service.notification
-        const record = n.record.bind(n)
-        const target = {}
-        let action = ''
-        if (modelName === 'Comment') {
-            target.comment = data._id
-            // 评论|留言创建
-            if (data._id !== this.app._admin._id) {
-                // 非管理员才触发
-                const { COMMENT, MESSAGE } = this.config.modelValidate.comment.type.optional
-                if (data.type === COMMENT) {
-                    // 文章评论
-                    if (data.parent) {
-                        // 评论回复
-                        action = 'COMMENT_REPLY'
-                    } else {
-                        // 评论，非回复
-                        action = 'COMMENT'
-                    }
-                } else if (data.type === MESSAGE) {
-                    // 站内留言
-                    if (data.parent) {
-                        // 留言回复
-                        action = 'MESSAGE_REPLY'
-                    } else {
-                        // 留言，非回复
-                        action = 'MESSAGE'
-                    }
-                }
-            }
-        } else if (modelName === 'User') {
-            target.user = data._id
-            // 用户创建
-            const { ADMIN } = this.config.modelValidate.user.role.optional
-            if (data.role !== ADMIN) {
-                // 非管理员才触发
-                action = 'CREATE'
-            }
-        }
-        const type = this.service.notification.getTypeByModel(this.model, action)
-        record(type.type, type.classify, target)
-        return data
+        return await this.model.create(payload)
     }
 
     updateItem (query = {}, data, opt, populate = []) {

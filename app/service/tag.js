@@ -15,7 +15,7 @@ module.exports = class TagService extends ProxyService {
         }, opt)
         const categories = await this.model.find(query, select, opt).exec()
         if (categories.length) {
-            const PUBLISH = this.app.config.modelValidate.article.state.optional.PUBLISH
+            const PUBLISH = this.app.config.modelEnum.article.state.optional.PUBLISH
             await Promise.all(
                 categories.map(async item => {
                     const articles = await this.service.article.getList({
