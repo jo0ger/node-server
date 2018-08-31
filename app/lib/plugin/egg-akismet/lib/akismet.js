@@ -39,9 +39,7 @@ class AkismetClient {
         let valid = true
         let error = ''
         if (!isValidKey) {
-            const v = await this.client.verifyKey().catch(err => {
-                error = 'Apikey验证失败，错误：' + err.message
-            })
+            const v = await this.client.verifyKey()
             valid = v
             if (v) {
                 isValidKey = true

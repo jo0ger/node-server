@@ -76,7 +76,7 @@ module.exports = class CommentService extends ProxyService {
 
         // 非回复管理员，非回复自身，才发送给被评论者
         if (forwardAuthorId && forwardAuthorId !== authorId && forwardAuthorId !== adminId) {
-            const forwardAuthor = await this.service.user.getItemById(forwardAuthorId).catch(() => null)
+            const forwardAuthor = await this.service.user.getItemById(forwardAuthorId)
             if (forwardAuthor && forwardAuthor.email) {
                 this.service.mail.send(typeTitle, {
                     to: forwardAuthor.email,
