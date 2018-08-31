@@ -5,7 +5,7 @@ const path = require('path')
 module.exports = app => {
     app.loader.loadToApp(path.join(app.config.baseDir, 'app/utils'), 'utils')
     addValidateRule(app)
-    setSessionstore(app)
+    mountSessionstoreToApp(app)
     app.beforeStart(async () => {
         const ctx = app.createAnonymousContext()
         await ctx.service.setting.seed()
@@ -35,7 +35,7 @@ function addValidateRule (app) {
     })
 }
 
-function setSessionstore (app) {
+function mountSessionstoreToApp (app) {
     app.sessionStore = class Store {
         constructor (app) {
             this.app = app

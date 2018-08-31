@@ -66,14 +66,20 @@ module.exports = class SettingService extends ProxyService {
             }
         })
         this.logger.info('友链更新成功')
+        // 更新后挂载到app上
+        this.mountToApp(setting)
         return setting
     }
 
     /**
      * @desc 把配置挂载到app上
+     * @param {Setting} setting 配置
      */
-    async mountToApp () {
-        const setting = await this.getItem()
+    async mountToApp (setting) {
+        if (!setting) {
+            setting = await this.getItem()
+        }
         this.app.setting = setting || null
+        this.logger.info('配置挂载App成功')
     }
 }
