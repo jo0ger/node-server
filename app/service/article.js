@@ -109,10 +109,7 @@ module.exports = class ArticleService extends ProxyService {
                 path: 'category',
                 select: 'name description'
             }
-        ).catch(err => {
-            this.logger.error('相关文章查询失败，错误：' + err.message)
-            return null
-        })
+        )
         return articles && articles.slice(0, this.app.setting.limit.relatedArticleCount) || null
     }
 
@@ -138,10 +135,7 @@ module.exports = class ArticleService extends ProxyService {
                 path: 'category',
                 select: 'name description'
             }
-        ).catch(err => {
-            this.logger.error('前一篇文章获取失败，错误：' + err.message)
-            return null
-        })
+        )
         query.createdAt = {
             $gt: data.createdAt
         }
@@ -155,10 +149,7 @@ module.exports = class ArticleService extends ProxyService {
                 path: 'category',
                 select: 'name description'
             }
-        ).catch(err => {
-            this.logger.error('后一篇文章获取失败，错误：' + err.message)
-            return null
-        })
+        )
         return {
             prev: prev || null,
             next: next || null
@@ -177,10 +168,9 @@ module.exports = class ArticleService extends ProxyService {
             { $match: { article: { $in: articleIds } } },
             { $group: { _id: '$article', total_count: { $sum: 1 } } }
         ])
-        Promise.all(
+        await Promise.all(
             counts.map(count => this.updateItemById(count._id, { $set: { 'meta.comments': count.total_count } }))
         )
-            .then(() => this.logger.info('文章评论数量更新成功'))
-            .catch(err => this.logger.error('文章评论数量更新失败，错误：' + err.message))
+        this.logger.info('文章评论数量更新成功')
     }
 }
