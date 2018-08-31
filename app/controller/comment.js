@@ -10,8 +10,8 @@ module.exports = class CommentController extends Controller {
             list: {
                 page: { type: 'int', required: true, min: 1 },
                 limit: { type: 'int', required: false, min: 1 },
-                state: { type: 'enum', values: Object.values(this.config.modelValidate.comment.state.optional), required: false },
-                type: { type: 'enum', values: Object.values(this.config.modelValidate.comment.type.optional), required: false },
+                state: { type: 'enum', values: Object.values(this.config.modelEnum.comment.state.optional), required: false },
+                type: { type: 'enum', values: Object.values(this.config.modelEnum.comment.type.optional), required: false },
                 author: { type: 'objectId', required: false },
                 article: { type: 'objectId', required: false },
                 parent: { type: 'objectId', required: false },
@@ -26,14 +26,14 @@ module.exports = class CommentController extends Controller {
             },
             create: {
                 content: { type: 'string', required: true },
-                type: { type: 'enum', values: Object.values(this.config.modelValidate.comment.type.optional), required: true },
+                type: { type: 'enum', values: Object.values(this.config.modelEnum.comment.type.optional), required: true },
                 article: { type: 'objectId', required: false },
                 parent: { type: 'objectId', required: false },
                 forward: { type: 'objectId', required: false }
             },
             update: {
                 content: { type: 'string', required: false },
-                state: { type: 'enum', values: Object.values(this.config.modelValidate.comment.state.optional), required: false },
+                state: { type: 'enum', values: Object.values(this.config.modelEnum.comment.state.optional), required: false },
                 sticky: { type: 'boolean', required: false }
             }
         }
@@ -42,9 +42,12 @@ module.exports = class CommentController extends Controller {
     async list () {
         const { ctx } = this
         ctx.query.page = Number(ctx.query.page)
-        if (ctx.query.limit) {
-            ctx.query.limit = Number(ctx.query.limit)
-        }
+        const tranArray = ['limit', 'state', 'type', 'order', 'sortBy']
+        tranArray.forEach(key => {
+            if (ctx.query[key]) {
+                ctx.query[key] = Number(ctx.query[key])
+            }
+        })
         ctx.validate(this.rules.list, ctx.query)
         const { page, limit, state, type, keyword, author, article, parent, order, sortBy, startDate, endDate } = ctx.query
         // 过滤条件
@@ -149,7 +152,7 @@ module.exports = class CommentController extends Controller {
         const { ctx } = this
         ctx.validateCommentAuthor()
         const body = ctx.validateBody(this.rules.create)
-        const { COMMENT, MESSAGE } = this.config.modelValidate.comment.type.optional
+        const { COMMENT, MESSAGE } = this.config.modelEnum.comment.type.optional
         body.author = ctx.request.body.author
         const { article, parent, forward, type, content, author } = body
         if (type === COMMENT) {
@@ -163,9 +166,9 @@ module.exports = class CommentController extends Controller {
         if ((parent && !forward) || (!parent && forward)) {
             return ctx.fail(422, '缺少父评论ID或被回复评论ID')
         }
-        const user = await this.service.user.checkCommentAuthor(author)
+        const { user, error } = await this.service.user.checkCommentAuthor(author)
         if (!user) {
-            return ctx.fail('用户不存在')
+            return ctx.fail(error)
         } else if (user.mute) {
             // 被禁言
             return ctx.fail('该用户已被禁言')
@@ -194,11 +197,12 @@ module.exports = class CommentController extends Controller {
             comment_author_email: user.email,
             comment_author_url: user.site,
             comment_content: content,
-            is_test: this.config.isProd
+            is_test: !this.config.isProd
         })
         // 如果是Spam评论
         if (isSpam) {
-            return ctx.fail('检测为垃圾评论，该评论将不会显示')
+            this.logger.warn('检测为垃圾评论，禁止发布')
+            return ctx.fail('检测为垃圾评论，请修改后在提交')
         }
         this.logger.info('评论检测正常，可以发布')
         body.renderedContent = this.app.utils.markdown.render(body.content)
@@ -207,10 +211,12 @@ module.exports = class CommentController extends Controller {
             const data = await this.service.comment.getItemById(comment._id)
             if (data.type === COMMENT) {
                 // 如果是文章评论，则更新文章评论数量
-                this.service.article.updateCommentCount(data.article)
+                this.service.article.updateCommentCount(data.article._id)
             }
             // 发送邮件通知站主和被评论者
             this.service.comment.sendCommentEmailToAdminAndUser(data)
+            // 生成通告
+            this.service.notification.recordComment(comment, 'create')
             ctx.success(data, data.type === COMMENT ? '评论发布成功' : '留言发布成功')
         } else {
             ctx.fail('发布失败')
@@ -233,22 +239,29 @@ module.exports = class CommentController extends Controller {
         if (!ctx.session._isAuthed && ctx.session._user._id !== exist.author._id) {
             return ctx.fail('非本人评论不能修改')
         }
+        const permalink = this.service.comment.getPermalink(exist)
+        const opt = {
+            user_ip: exist.meta.ip,
+            user_agent: exist.meta.ua,
+            referrer: exist.meta.referer,
+            permalink,
+            comment_type: this.service.comment.getCommentType(exist.type),
+            comment_author: exist.author.github.login,
+            comment_author_email: exist.author.github.email,
+            comment_author_url: exist.author.github.blog,
+            comment_content: exist.content,
+            is_test: !this.config.isProd
+        }
+        const isSpam = await this.app.akismet.checkSpam(opt)
+        // 如果是Spam评论
+        if (isSpam) {
+            this.logger.warn('检测为垃圾评论，禁止发布')
+            return ctx.fail('检测为垃圾评论，不能更新')
+        }
+        this.logger.info('评论检测正常，可以更新')
         // 状态修改是涉及到spam修改
         if (body.state !== undefined) {
-            const permalink = this.service.comment.getPermalink(exist)
-            const opt = {
-                user_ip: exist.meta.ip,
-                user_agent: exist.meta.ua,
-                referrer: exist.meta.referer,
-                permalink,
-                comment_type: this.service.comment.getCommentType(exist.type),
-                comment_author: exist.author.github.login,
-                comment_author_email: exist.author.github.email,
-                comment_author_url: exist.author.github.blog,
-                comment_content: exist.content,
-                is_test: this.config.isProd
-            }
-            const SPAM = this.config.modelValidate.comment.state.optional.SPAM
+            const SPAM = this.config.modelEnum.comment.state.optional.SPAM
             if (exist.state === SPAM && body.state !== SPAM) {
                 // 垃圾评论转为正常评论
                 if (exist.spam) {
@@ -266,7 +279,7 @@ module.exports = class CommentController extends Controller {
             }
         }
         if (body.content) {
-        body.renderedContent = this.app.utils.markdown.render(body.content)
+            body.renderedContent = this.app.utils.markdown.render(body.content)
         }
         let data = null
         if (!ctx.session._isAuthed) {
@@ -290,18 +303,22 @@ module.exports = class CommentController extends Controller {
         } else {
             data = await this.service.comment.updateItemById(params.id, body)
         }
-        data
-            ? ctx.success(data, '评论更新成功')
-            : ctx.fail('评论更新失败')
+        if (data) {
+            // 生成通告
+            this.service.notification.recordComment(data, 'update')
+            ctx.success(data, '评论更新成功')
+        } else {
+            ctx.fail('评论更新失败')
+        }
     }
 
     async delete () {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
         const data = await this.service.comment.deleteItemById(params.id)
-        if (data.type === this.config.modelValidate.comment.type.optional.COMMENT) {
+        if (data.type === this.config.modelEnum.comment.type.optional.COMMENT) {
             // 异步 如果是文章评论，则更新文章评论数量
-            this.service.article.updateCommentCount(data.article)
+            this.service.article.updateCommentCount(data.article._id)
         }
         data
             ? ctx.success('评论删除成功')
@@ -316,8 +333,29 @@ module.exports = class CommentController extends Controller {
                 ups: 1
             }
         })
-        data
-            ? ctx.success('评论点赞成功')
-            : ctx.fail('评论点赞失败')
+        if (data) {
+            // 生成评论点赞通告
+            this.service.notification.recordLike('comment', data, ctx.request.body.user, true)
+            ctx.success('评论点赞成功')
+        } else {
+            ctx.fail('评论点赞失败')
+        }
+    }
+
+    async unlike () {
+        const { ctx } = this
+        const params = ctx.validateParamsObjectId()
+        const data = await this.service.comment.updateItemById(params.id, {
+            $inc: {
+                ups: -1
+            }
+        })
+        if (data) {
+            // 生成评论unlike通告
+            this.service.notification.recordLike('comment', data, ctx.request.body.user, false)
+            ctx.success('评论取消点赞成功')
+        } else {
+            ctx.fail('评论取消点赞失败')
+        }
     }
 }

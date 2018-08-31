@@ -44,7 +44,7 @@ module.exports = class CommentService extends ProxyService {
             comment = comment.toObject()
         }
         const { type, article } = comment
-        const commentType = this.config.modelValidate.comment.type.optional
+        const commentType = this.config.modelEnum.comment.type.optional
         const permalink = this.getPermalink(comment)
         const adminType = this.getCommentType(comment.type)
         let adminTitle = '未知的评论'
@@ -75,8 +75,8 @@ module.exports = class CommentService extends ProxyService {
         }
 
         // 非回复管理员，非回复自身，才发送给被评论者
-        if (forwardAuthorId !== authorId && forwardAuthorId !== adminId) {
-            const forwardAuthor = await this.service.user.getItemById(comment.forward.author).catch(() => null)
+        if (forwardAuthorId && forwardAuthorId !== authorId && forwardAuthorId !== adminId) {
+            const forwardAuthor = await this.service.user.getItemById(forwardAuthorId).catch(() => null)
             if (forwardAuthor && forwardAuthor.email) {
                 this.service.mail.send(typeTitle, {
                     to: forwardAuthor.email,
@@ -95,7 +95,7 @@ module.exports = class CommentService extends ProxyService {
      */
     getPermalink (comment = {}) {
         const { type, article } = comment
-        const { COMMENT, MESSAGE } = this.config.modelValidate.comment.type.optional
+        const { COMMENT, MESSAGE } = this.config.modelEnum.comment.type.optional
         const url = this.config.author.url
         switch (type) {
         case COMMENT:

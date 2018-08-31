@@ -40,8 +40,6 @@ module.exports = class SettingController extends Controller {
             return ctx.fail('配置未找到')
         }
         body = this.app.merge({}, exist, body)
-        console.log(body);
-        
         await this.service.setting.updateItemById(exist._id, body)
         // 抓取友链
         const data = await this.service.setting.updateLinks()

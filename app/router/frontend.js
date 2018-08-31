@@ -7,6 +7,8 @@ module.exports = app => {
     fontendRouter.get('/articles/archives', controller.article.archives)
     fontendRouter.get('/articles/:id', controller.article.item)
     fontendRouter.patch('/articles/:id', controller.article.like)
+    fontendRouter.patch('/articles/:id/like', controller.article.like)
+    fontendRouter.patch('/articles/:id/unlike', controller.article.unlike)
 
     // Category
     fontendRouter.get('/categories', controller.category.list)
@@ -21,6 +23,7 @@ module.exports = app => {
     fontendRouter.get('/comments/:id', controller.comment.item)
     fontendRouter.post('/comments', controller.comment.create)
     fontendRouter.patch('/comments/:id/like', controller.comment.like)
+    fontendRouter.patch('/comments/:id/unlike', controller.comment.unlike)
 
     // User
     fontendRouter.get('/users/:id', controller.user.item)

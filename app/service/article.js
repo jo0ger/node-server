@@ -15,7 +15,7 @@ module.exports = class ArticleService extends ProxyService {
         if (!this.ctx.session._isAuthed) {
             api = this.updateItem.bind(this)
             // 前台博客访问文章的时候pv+1
-            query.state = this.config.modelValidate.article.state.optional.PUBLISH
+            query.state = this.config.modelEnum.article.state.optional.PUBLISH
             select += ' -content'
             opt.$inc = { 'meta.pvs': 1 }
         }
@@ -126,7 +126,7 @@ module.exports = class ArticleService extends ProxyService {
         }
         // 如果未通过权限校验，将文章状态重置为1
         if (!this.ctx.session._isAuthed) {
-            query.state = this.config.modelValidate.article.state.optional.PUBLISH
+            query.state = this.config.modelEnum.article.state.optional.PUBLISH
         }
         const prev = await this.getItem(
             query,
@@ -165,7 +165,6 @@ module.exports = class ArticleService extends ProxyService {
         }
     }
 
-
     async updateCommentCount (articleIds = []) {
         if (!Array.isArray(articleIds)) {
             articleIds = [articleIds]
@@ -174,9 +173,8 @@ module.exports = class ArticleService extends ProxyService {
         const { validate, share } = this.app.utils
         // TIP: 这里必须$in的是一个ObjectId对象数组，而不能只是id字符串数组
         articleIds = [...new Set(articleIds)].filter(id => validate.isObjectId(id)).map(id => share.createObjectId(id))
-        const PASS = this.config.modelValidate.comment.state.optional.PASS
         const counts = await this.service.comment.aggregate([
-            { $match: { state: PASS, article: { $in: articleIds } } },
+            { $match: { article: { $in: articleIds } } },
             { $group: { _id: '$article', total_count: { $sum: 1 } } }
         ])
         Promise.all(

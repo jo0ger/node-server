@@ -1,7 +1,7 @@
 module.exports = app => {
     const { mongoose, config } = app
     const { Schema } = mongoose
-    const commentValidateConfig = config.modelValidate.comment
+    const commentValidateConfig = config.modelEnum.comment
 
     const CommentSchema = new Schema({
         // ******* 评论通用项 ************

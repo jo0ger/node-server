@@ -5,7 +5,7 @@
 module.exports = app => {
     const { mongoose, config } = app
     const { Schema } = mongoose
-    const userValidateConfig = config.modelValidate.user
+    const userValidateConfig = config.modelEnum.user
 
     const UserSchema = new Schema({
         name: { type: String, required: true },

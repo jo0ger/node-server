@@ -34,6 +34,7 @@ module.exports = class UserService extends ProxyService {
      */
     async checkCommentAuthor (author) {
         let user = null
+        let error = ''
         const { isObjectId, isObject } = this.app.utils.validate
         if (isObjectId(author)) {
             user = await this.getItemById(author)
@@ -56,17 +57,31 @@ module.exports = class UserService extends ProxyService {
                         user = await this.updateItemById(id, update)
                         if (user) {
                             this.logger.info('用户更新成功：' + user.name)
+                            this.service.notification.recordUser(user, 'update')
                         }
                     }
                 }
             } else {
-                // 创建
-                user = await this.create(Object.assign(update, {
-                    role: this.config.modelValidate.user.role.optional.NORMAL
-                }))
+                user = await this.getItem({ name: author.name })
+                if (user) {
+                    // 名称重复，不能创建评论
+                    user = null
+                    error = '用户名重复，请修改后再提交'
+                } else {
+                    // 可以创建
+                    user = await this.create(Object.assign(update, {
+                        role: this.config.modelEnum.user.role.optional.NORMAL
+                    }))
+                    if (user) {
+                        this.service.notification.recordUser(user, 'create')
+                    }
+                }
             }
         }
-        return user
+        if (!user && !error) {
+            error = '用户不存在'
+        }
+        return { user, error }
     }
 
     /**
