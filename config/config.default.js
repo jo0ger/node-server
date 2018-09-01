@@ -202,11 +202,5 @@ module.exports = appInfo => {
 
     config.defaultAvatar = 'https://static.jooger.me/img/common/avatar.png'
 
-    config.onerror = {
-        js (err, ctx) {
-
-        }
-    }
-
     return config
 }

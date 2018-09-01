@@ -39,6 +39,7 @@ module.exports = app => {
     // User
     backendRouter.get('/users', auth, controller.user.list)
     backendRouter.get('/users/:id', auth, controller.user.item)
+    backendRouter.patch('/users/:id', auth, controller.user.update)
 
     // Setting
     backendRouter.get('/setting', auth, controller.setting.index)

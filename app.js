@@ -8,8 +8,11 @@ module.exports = app => {
     mountSessionstoreToApp(app)
     app.beforeStart(async () => {
         const ctx = app.createAnonymousContext()
+        // 初始化配置（如果有必要）
         await ctx.service.setting.seed()
+        // 配置挂载到App上
         await ctx.service.setting.mountToApp()
+        // 初始化管理员（如果有必要）
         await ctx.service.auth.seed()
     })
 }

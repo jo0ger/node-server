@@ -26,7 +26,11 @@ module.exports = class SettingController extends Controller {
     async index () {
         const { ctx } = this
         ctx.validate(this.rules.index, ctx.query)
-        const data = await this.service.setting.getItem()
+        let select = null
+        if (ctx.query.filter) {
+            select = ctx.query.filter
+        }
+        const data = await this.service.setting.getItem({}, select)
         data
             ? ctx.success(data, '配置获取成功')
             : ctx.fail('配置获取失败')
