@@ -19,7 +19,7 @@ module.exports = class AuthController extends Controller {
                 site: { type: 'url', required: false },
                 description: { type: 'string', required: false },
                 avatar: { type: 'string', required: false },
-                l: { type: 'string', required: false },
+                slogan: { type: 'string', required: false },
                 company: { type: 'string', required: false },
                 location: { type: 'string', required: false }
             },

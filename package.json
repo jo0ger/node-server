@@ -4,6 +4,7 @@
   "description": "",
   "private": true,
   "dependencies": {
+    "agentx": "^1.9.11",
     "akismet-api": "^4.2.0",
     "bcryptjs": "^2.4.3",
     "egg": "^2.2.1",
@@ -25,6 +26,7 @@
     "marked": "^0.5.0",
     "mongoose": "5.2.8",
     "mongoose-paginate-v2": "^1.0.12",
+    "node-homedir": "^1.1.1",
     "nodemailer": "^4.6.8",
     "validator": "^10.6.0",
     "zlib": "^1.0.5"

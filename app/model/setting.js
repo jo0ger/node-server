@@ -34,6 +34,11 @@ module.exports = app => {
                 bucket: { type: String, default: '' },
                 region: { type: String, default: '' }
             },
+            // 阿里node平台
+            alinode: {
+                appid: { type: String, default: '' },
+                secret: { type: String, default: '' }
+            },
             // 163邮箱
             mail: {
                 user: { type: String, default: '' },
