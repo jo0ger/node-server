@@ -59,7 +59,10 @@ module.exports = class AuthController extends Controller {
     }
 
     async info () {
-        this.ctx.success(this.ctx.session._user, '管理员信息获取成功')
+        this.ctx.success({
+            info: this.ctx.session._user,
+            token: this.ctx.session._token
+        }, '管理员信息获取成功')
     }
 
     /**

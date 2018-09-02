@@ -8,6 +8,10 @@ module.exports = () => {
         }
     }
 
+    config.session = {
+        domain: '.jooger.me'
+    }
+
     config.console = {
         debug: false,
         error: false

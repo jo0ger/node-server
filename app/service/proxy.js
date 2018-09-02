@@ -47,8 +47,8 @@ module.exports = class ProxyService extends Service {
         return Q.exec()
     }
 
-    async create (payload) {
-        return await this.model.create(payload)
+    create (payload) {
+        return this.model.create(payload)
     }
 
     updateItem (query = {}, data, opt, populate = []) {
@@ -89,5 +89,9 @@ module.exports = class ProxyService extends Service {
 
     aggregate (pipeline = []) {
         return this.model.aggregate(pipeline)
+    }
+
+    count (filter) {
+        return this.model.count(filter).exec()
     }
 }

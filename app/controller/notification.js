@@ -64,6 +64,12 @@ module.exports = class NotificationController extends Controller {
             : ctx.fail('通告列表获取失败')
     }
 
+    async count () {
+        const { ctx } = this
+        const count = await this.service.notification.count({ viewed: false })
+        ctx.success(count, '未读通告数量获取成功')
+    }
+
     async view () {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
