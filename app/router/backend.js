@@ -54,6 +54,7 @@ module.exports = app => {
 
     // Notification
     backendRouter.get('/notifications', auth, controller.notification.list)
+    backendRouter.get('/notifications/count', auth, controller.notification.count)
     backendRouter.patch('/notifications/view', auth, controller.notification.viewAll)
     backendRouter.patch('/notifications/:id/view', auth, controller.notification.view)
     backendRouter.delete('/notifications/:id', auth, controller.notification.delete)

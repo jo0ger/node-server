@@ -12,9 +12,7 @@ module.exports = app => {
             if (!ctx.session._verify) {
                 return ctx.fail(401)
             }
-            const userId = ctx.cookies.get(app.config.userCookieKey, {
-                signed: false
-            })
+            const userId = ctx.cookies.get(app.config.userCookieKey, app.config.session.signed)
             const user = await ctx.service.user.getItemById(userId, '-password')
             if (!user) {
                 return ctx.fail(401, '用户不存在')
@@ -31,7 +29,7 @@ function verifyToken (app) {
     const { config, logger } = app
     return async (ctx, next) => {
         ctx.session._verify = false
-        const token = ctx.cookies.get(config.session.key)
+        const token = ctx.cookies.get(config.session.key, app.config.session.signed)
         if (token) {
             let decodedToken = null
             try {
