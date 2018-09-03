@@ -5,10 +5,11 @@
   "private": true,
   "dependencies": {
     "agentx": "^1.9.11",
-    "akismet": "^1.0.0",
+    "akismet-api": "^4.2.0",
     "bcryptjs": "^2.4.3",
     "egg": "^2.2.1",
     "egg-console": "^2.0.1",
+    "egg-cors": "^2.1.0",
     "egg-mongoose": "^3.1.0",
     "egg-oss": "^1.1.0",
     "egg-redis": "^2.0.0",

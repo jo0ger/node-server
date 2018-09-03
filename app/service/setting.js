@@ -18,7 +18,7 @@ module.exports = class SettingService extends ProxyService {
         if (exist) {
             return exist
         }
-        const data = await this.create()
+        const data = await this.newAndSave()
         if (data) {
             this.logger.info('Setting初始化成功')
         } else {

@@ -5,6 +5,11 @@ const path = require('path')
 // had enabled by egg
 // exports.static = true
 
+exports.cors = {
+    enable: true,
+    package: 'egg-cors'
+}
+
 exports.mongoose = {
     enable: true,
     package: 'egg-mongoose'

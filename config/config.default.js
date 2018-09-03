@@ -27,6 +27,12 @@ module.exports = appInfo => {
         'headers'
     ]
 
+    config.cors = {
+        enable: true,
+        credentials: true,
+        allowMethods: 'GET,PUT,POST,DELETE,PATCH,OPTIONS'
+    }
+
     config.session = {
         key: appInfo.name + '_token',
         maxAge: 60000 * 60 * 24 * 7,
@@ -170,7 +176,9 @@ module.exports = appInfo => {
                 optional: {
                     // 遵循 type_model_action 模式
                     // type === 0，系统通知
-                    // todo
+                    GENERAL_MAIL_VERIFY_FAIL: 'mail_verify_fail', // 邮件客户端校验失败
+                    GENERAL_MAIL_SEND_FAIL: 'mail_send_fail', // 邮件发送失败
+                    GENERAL_AKISMET_CHECK_FAIL: 'akismet_check_fail', // akismet检测失败
                     // type === 1，评论通知
                     COMMENT_COMMENT_COMMENT: 'comment_comment', // 评论（非回复）
                     COMMENT_COMMENT_COMMENT_REPLY: 'comment_comment_reply',	// 评论回复

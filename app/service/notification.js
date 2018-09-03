@@ -14,7 +14,7 @@ module.exports = class NotificationService extends ProxyService {
     }
 
     // 记录通告
-    async record (typeKey, model, action, target, actors) {
+    async record (typeKey, model, action, verb, target, actors) {
         if (!typeKey || !model || !action) return
         const modelName = this.app.utils.validate.isString(model)
             ? model
@@ -22,12 +22,18 @@ module.exports = class NotificationService extends ProxyService {
         const type = this.notificationConfig.type.optional[typeKey]
         const classifyKey = [typeKey, modelName, action].join('_')
         const classify = this.notificationConfig.classify.optional[classifyKey]
-        const verb = this.genVerb(classifyKey)
+        if (!verb) {
+            verb = this.genVerb(classifyKey)
+        }
         const payload = { type, classify, verb, target, actors }
         const data = await this.create(payload)
         if (data) {
             this.logger.info(`通告生成成功，[id: ${data._id}] [type：${typeKey}]，[classify: ${classifyKey}]`)
         }
+    }
+
+    async recordGeneral (model, action, err) {
+        this.record('GENERAL', model, action, err.message || err)
     }
 
     // 记录评论相关动作
@@ -64,7 +70,7 @@ module.exports = class NotificationService extends ProxyService {
             // 更新
             action += '_UPDATE'
         }
-        this.record('COMMENT', 'COMMENT', action, target, actors)
+        this.record('COMMENT', 'COMMENT', action, null, target, actors)
     }
 
     recordLike (type, model, user, like = false) {
@@ -92,7 +98,7 @@ module.exports = class NotificationService extends ProxyService {
             }
         }
         action += actionSuffix
-        this.record('LIKE', modelName, action, target, actors)
+        this.record('LIKE', modelName, action, null, target, actors)
     }
 
     recordUser (user, handle) {
@@ -110,7 +116,7 @@ module.exports = class NotificationService extends ProxyService {
         } else if (handle === 'mute') {
             action += 'MUTE_AUTO'
         }
-        this.record('USER', 'USER', action, target, actors)
+        this.record('USER', 'USER', action, null, target, actors)
     }
 
     // 获取操作简语
