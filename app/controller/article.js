@@ -58,7 +58,7 @@ module.exports = class ArticleController extends Controller {
             }
         })
         ctx.validate(this.rules.list, ctx.query)
-        const { page, limit, state, keyword, category, tag, order, sortBy, startDate, endDate } = ctx.query
+        const { page, limit, state, keyword, category, tag, source, order, sortBy, startDate, endDate } = ctx.query
         const options = {
             sort: {
                 updatedAt: -1,
@@ -77,7 +77,7 @@ module.exports = class ArticleController extends Controller {
                 }
             ]
         }
-        const query = { state, category, tag }
+        const query = { state, category, tag, source }
 
         // 搜索关键词
         if (keyword) {
@@ -116,6 +116,8 @@ module.exports = class ArticleController extends Controller {
                 }
             }
         }
+        console.log(query)
+        
         const data = await this.service.article.getLimitListByQuery(ctx.processPayload(query), options)
         data
             ? ctx.success(data, '文章列表获取成功')

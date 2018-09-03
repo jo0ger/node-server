@@ -15,7 +15,9 @@ module.exports = class MailService extends Service {
             mailerClient = client = this.app.mailer.getClient({
                 auth: keys.mail
             })
-            await this.app.mailer.verify()
+            await this.app.mailer.verify().catch(err => {
+                this.service.notification.recordGeneral('MAIL', 'VERIFY_FAIL', err)
+            })
         }
         const opt = Object.assign({
             from: `${this.config.author.name} <${keys.mail.user}>`
@@ -28,10 +30,11 @@ module.exports = class MailService extends Service {
         await new Promise((resolve, reject) => {
             client.sendMail(opt, (err, info) => {
                 if (err) {
-                    this.logger.error(type + toAdmin + '邮件发送失败，TO：' + opt.to + '，错误：' + err.message)
+                    this.logger.error(type + toAdmin + ' 邮件发送失败，TO：' + opt.to + '，错误：' + err.message)
+                    this.service.notification.recordGeneral('MAIL', 'SEND_FAIL', err)
                     return reject(err)
                 }
-                this.logger.info(type + toAdmin + '邮件发送成功，TO：' + opt.to)
+                this.logger.info(type + toAdmin + ' 邮件发送成功，TO：' + opt.to)
                 resolve(info)
             })
         })

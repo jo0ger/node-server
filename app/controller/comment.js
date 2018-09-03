@@ -187,7 +187,7 @@ module.exports = class CommentController extends Controller {
         }
         // 永链
         const permalink = this.service.comment.getPermalink(body)
-        const isSpam = await this.app.akismet.checkSpam({
+        const isSpam = await this.service.akismet.checkSpam({
             user_ip: ip,
             user_agent: meta.ua,
             referrer: meta.referer,
@@ -252,7 +252,7 @@ module.exports = class CommentController extends Controller {
             comment_content: exist.content,
             is_test: !this.config.isProd
         }
-        const isSpam = await this.app.akismet.checkSpam(opt)
+        const isSpam = await this.service.akismet.checkSpam(opt)
         // 如果是Spam评论
         if (isSpam) {
             this.logger.warn('检测为垃圾评论，禁止发布')

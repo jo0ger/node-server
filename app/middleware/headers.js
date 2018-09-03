@@ -15,8 +15,6 @@ module.exports = (opt, app) => {
             response.set('Access-Control-Allow-Origin', origin)
         }
         response.set('Access-Control-Allow-Headers', 'token, Authorization, Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With')
-        response.set('Access-Control-Allow-Methods', 'PUT,PATCH,POST,GET,DELETE,OPTIONS')
-        response.set('Access-Control-Allow-Credentials', true)
         response.set('Content-Type', 'application/json;charset=utf-8')
         response.set('X-Powered-By', `${app.config.name}/${app.config.version}`)
 
