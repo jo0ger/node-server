@@ -26,10 +26,10 @@ module.exports = class ArticleController extends Controller {
                 content: { type: 'string', required: true },
                 description: { type: 'string', required: false },
                 keywords: { type: 'array', required: false },
-                category: { type: 'objectId', required: false },
+                category: { type: 'objectId', required: true },
                 tag: { type: 'array', required: false, itemType: 'objectId' },
-                state: { type: 'enum', values: Object.values(this.config.modelEnum.article.state.optional), required: false },
-                source: { type: 'enum', values: Object.values(this.config.modelEnum.article.source.optional), required: false },
+                state: { type: 'enum', values: Object.values(this.config.modelEnum.article.state.optional), required: true },
+                source: { type: 'enum', values: Object.values(this.config.modelEnum.article.source.optional), required: true },
                 thumb: { type: 'url', required: false },
                 createdAt: { type: 'dateTime', required: false }
             },
