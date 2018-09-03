@@ -1,4 +1,4 @@
-const akismet = require('akismet-api')
+const akismet = require('akismet')
 
 module.exports = app => {
     app.addSingleton('akismet', createClient)
