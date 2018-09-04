@@ -116,9 +116,18 @@ module.exports = class ArticleController extends Controller {
                 }
             }
         }
-        console.log(query)
-        
         const data = await this.service.article.getLimitListByQuery(ctx.processPayload(query), options)
+        const statService = this.service.stat
+        // 生成搜索统计
+        if (query.category) {
+            statService.record('CATEGORY_SEARCH', { category: query.category }, 'count')
+        }
+        if (query.tag) {
+            statService.record('TAG_SEARCH', { tag: query.tag }, 'count')
+        }
+        if (keyword) {
+            statService.record('KEYWORD_SEARCH', { keyword }, 'count')
+        }
         data
             ? ctx.success(data, '文章列表获取成功')
             : ctx.fail('文章列表获取失败')
@@ -128,6 +137,10 @@ module.exports = class ArticleController extends Controller {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
         const data = await this.service.article.getItemById(params.id)
+        if (!this.ctx.session._isAuthed) {
+            // 生成 pv 统计项
+            this.service.stat.record('ARTICLE_VIEW', { article: params.id }, 'count')
+        }
         data
             ? ctx.success(data, '文章详情获取成功')
             : ctx.fail('文章详情获取失败')
@@ -194,8 +207,12 @@ module.exports = class ArticleController extends Controller {
             }
         })
         if (data) {
-            // 生成like通告
-            this.service.notification.recordLike('article', data, ctx.request.body.user, true)
+            if (!this.ctx.session._isAuthed) {
+                // 生成like通告
+                this.service.notification.recordLike('article', data, ctx.request.body.user, true)
+                // 生成 like 统计项
+                this.service.stat.record('ARTICLE_LIKE', { article: params.id }, 'count')
+            }
             ctx.success('文章点赞成功')
         } else {
             ctx.fail('文章点赞失败')

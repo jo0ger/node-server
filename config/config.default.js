@@ -199,6 +199,18 @@ module.exports = appInfo => {
                     USER_USER_UPDATE: 'user_update' // 用户更新
                 }
             }
+        },
+        stat: {
+            type: {
+                optional: {
+                    // 遵循 target_action 模式
+                    KEYWORD_SEARCH: 0, // 文章关键词搜索
+                    CATEGORY_SEARCH: 1, // 文章分类搜索
+                    TAG_SEARCH: 2, // 文章标签搜索
+                    ARTICLE_VIEW: 3, // 文章访问
+                    ARTICLE_LIKE: 4 // 文章点赞
+                }
+            }
         }
     }
 
