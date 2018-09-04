@@ -54,7 +54,7 @@ module.exports = {
             this.throw(422, '发布人不存在')
         }
     },
-    getLocation () {
+    async getLocation () {
         const req = this.req
         const ip = (req.headers['x-forwarded-for'] ||
             req.headers['x-real-ip'] ||
@@ -63,9 +63,13 @@ module.exports = {
             req.connection.socket.remoteAddress ||
             req.ip ||
             req.ips[0] || '').replace('::ffff:', '')
-        return {
-            ip,
-            location: geoip.lookup(ip) || {}
+        let location = {}
+        const { success, data } = await this.service.aliApi.lookupIp(ip)
+        if (success) {
+            location = data
+        } else {
+            location = geoip.lookup(ip) || {}
         }
+        return { ip, location }
     }
 }

@@ -178,7 +178,7 @@ module.exports = class CommentController extends Controller {
         if (!spamValid) {
             return ctx.fail('该用户的垃圾评论数量已达到最大限制，已被禁言')
         }
-        const { ip, location } = ctx.getLocation()
+        const { ip, location } = await ctx.getLocation()
         const meta = body.meta = {
             location,
             ip,

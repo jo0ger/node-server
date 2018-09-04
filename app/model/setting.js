@@ -39,6 +39,12 @@ module.exports = app => {
                 appid: { type: String, default: '' },
                 secret: { type: String, default: '' }
             },
+            aliApiGateway: {
+                // 查询IP
+                ip: {
+                    appCode: { type: String, default: '' }
+                }
+            },
             // 163邮箱
             mail: {
                 user: { type: String, default: '' },
