@@ -20,6 +20,7 @@ module.exports = app => {
             default: userValidateConfig.role.default,
             validate: val => Object.values(userValidateConfig.role.optional).includes(val)
         },
+        tags: [{ type: String }],
         // role = 0的时候才有该项
         password: { type: String },
         // 是否被禁言
