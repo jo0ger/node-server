@@ -13,19 +13,21 @@ module.exports = class TagService extends ProxyService {
         opt = this.app.merge({
             sort: '-createdAt'
         }, opt)
-        const categories = await this.model.find(query, select, opt).exec()
-        if (categories.length) {
+        let tag = await this.model.find(query, select, opt).exec()
+        if (tag.length) {
             const PUBLISH = this.app.config.modelEnum.article.state.optional.PUBLISH
-            await Promise.all(
-                categories.map(async item => {
+            tag = await Promise.all(
+                tag.map(async item => {
+                    item = item.toObject()
                     const articles = await this.service.article.getList({
-                        category: item._id,
+                        tag: item._id,
                         state: PUBLISH
                     })
                     item.count = articles.length
+                    return item
                 })
             )
         }
-        return categories
+        return tag
     }
 }

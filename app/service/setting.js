@@ -42,8 +42,8 @@ module.exports = class SettingService extends ProxyService {
                         link.avatar = this.app.proxyUrl(userInfo.avatar_url)
                         link.slogan = userInfo.bio
                         link.site = link.site || userInfo.blog || userInfo.url
-                        return link
                     }
+                    return link
                 }
                 return null
             })

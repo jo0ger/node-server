@@ -13,7 +13,6 @@ module.exports = app => {
             description: { type: String, default: '' },
             hobby: { type: String, default: '' },
             skill: { type: String, default: '' },
-            music: { type: String, default: '' },
             location: { type: String, default: '' },
             company: { type: String, default: '' },
             links: [{
