@@ -80,6 +80,6 @@ module.exports = class SettingService extends ProxyService {
             setting = await this.getItem()
         }
         this.app.setting = setting || null
-        this.logger.info('配置挂载App成功')
+        this.logger.info('配置挂载成功')
     }
 }
