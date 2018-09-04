@@ -10,16 +10,28 @@ module.exports = class ArticleService extends ProxyService {
     }
 
     async getItemById (id, select, opt = {}, single = false) {
-        let api = this.getItem.bind(this)
-        const query = { _id: id }
+        let data = null
+        const populate = [
+            {
+                path: 'category',
+                select: 'name description extends'
+            },
+            {
+                path: 'tag',
+                select: 'name description extends'
+            }
+        ]
         if (!this.ctx.session._isAuthed) {
-            api = this.updateItem.bind(this)
             // 前台博客访问文章的时候pv+1
-            query.state = this.config.modelEnum.article.state.optional.PUBLISH
-            select += ' -content'
-            opt.$inc = { 'meta.pvs': 1 }
+            data = await this.updateItem({
+                _id: id,
+                state: this.config.modelEnum.article.state.optional.PUBLISH
+            }, {
+                $inc: { 'meta.pvs': 1 }
+            }, opt, populate)
+        } else {
+            data = await this.getItem({ _id: id }, '-content', opt, populate)
         }
-        const data = await api(query, select, opt)
         if (data && !single) {
             // 获取相关文章和上下篇文章
             const [related, adjacent] = await Promise.all([
