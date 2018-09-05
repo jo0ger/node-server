@@ -109,7 +109,7 @@ module.exports = class CommentController extends Controller {
             query.state = 1
             query.spam = false
             // 评论列表不需要content和state
-            options.select = '-content -state -updatedAt -spam -type'
+            options.select = '-content -state -updatedAt -spam -type -meta.ip'
         } else {
             // 排序
             if (sortBy && order) {
