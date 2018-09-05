@@ -123,7 +123,7 @@ module.exports = class StatService extends ProxyService {
         if (em) {
             const format = em.format('YYYY-MM-DD 23:59:59')
             em = moment(format)
-            $match.createdAt.$lte = new Date(em.format('YYYY-MM-DD 23:59:59'))
+            $match.createdAt.$lte = new Date(format)
         }
         const $project = {
             _id: 0,
@@ -131,7 +131,9 @@ module.exports = class StatService extends ProxyService {
             date: {
                 $dateToString: {
                     format: this.dimensions[dimension].format,
-                    date: '$createdAt'
+                    date: '$createdAt',
+                    // TIP: mongod是ISODate，是GMT-8h
+                    timezone: '+08'
                 }
             }
         }

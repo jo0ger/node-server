@@ -21,7 +21,7 @@ module.exports = app => {
         },
         // 个人信息
         personal: {
-            slogan: { type: String },
+            slogan: { type: String, default: '' },
             description: { type: String, default: '' },
             tag: [{ type: String }],
             hobby: [{ type: String }],

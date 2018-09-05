@@ -36,10 +36,6 @@ module.exports = app => {
             default: articleValidateConfig.state.default,
             validate: val => Object.values(articleValidateConfig.state.optional).includes(val)
         },
-        // 创建日期
-        createdAt: { type: Date, default: Date.now },
-        // 更新日期
-        updatedAt: { type: Date, default: Date.now },
         // 发布日期
         publishedAt: { type: Date, default: Date.now },
         // 文章元数据 （浏览量， 喜欢数， 评论数）
