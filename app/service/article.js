@@ -78,14 +78,14 @@ module.exports = class ArticleService extends ProxyService {
                 }
             }
         ])
-        let count = 0
+        let total = 0
         if (data && data.length) {
             data = [...new Set(data.map(item => item._id.year))].map(year => {
                 const months = []
                 data.forEach(item => {
                     const { _id, articles } = item
                     if (year === _id.year) {
-                        count += articles.length
+                        total += articles.length
                         months.push({
                             month: _id.month,
                             monthStr: this.app.utils.share.getMonthFromNum(_id.month),
@@ -100,7 +100,7 @@ module.exports = class ArticleService extends ProxyService {
             })
         }
         return {
-            count,
+            total,
             list: data || []
         }
     }

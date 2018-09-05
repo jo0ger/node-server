@@ -110,7 +110,7 @@ module.exports = class StatService extends ProxyService {
         let em = moment(end)
         let service = null
         const $sort = {
-            createdAt: 1
+            createdAt: -1
         }
         const $match = {
             createdAt: {}
@@ -174,7 +174,7 @@ module.exports = class StatService extends ProxyService {
         }
         const diff = Math.ceil(em.diff(sm) / radix)
         return new Array(diff || 1).fill().map((item, index) => {
-            const date = moment(em).subtract(index, dimension + 's').format(this.dimensions[dimension].mFormat)
+            const date = moment(sm).add(index, dimension + 's').format(this.dimensions[dimension].mFormat)
             let count = 0
             const hit = data.find(d => d._id === date)
             if (hit) {

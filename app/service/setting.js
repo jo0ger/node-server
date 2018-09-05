@@ -18,6 +18,7 @@ module.exports = class SettingService extends ProxyService {
         if (exist) {
             return exist
         }
+        // TIP: 这里不能用create，create如果不传model，是不会创建的
         const data = await this.newAndSave()
         if (data) {
             this.logger.info('Setting初始化成功')
@@ -60,6 +61,7 @@ module.exports = class SettingService extends ProxyService {
         let setting = await this.getItem()
         if (!setting) return null
         const update = await this.generateLinks(setting.site.links)
+        if (!update.length) return
         setting = await this.updateItemById(setting._id, {
             $set: {
                 'site.links': update
@@ -67,6 +69,28 @@ module.exports = class SettingService extends ProxyService {
         })
         this.logger.info('友链更新成功')
         // 更新后挂载到app上
+        this.mountToApp(setting)
+        return setting
+    }
+
+    /**
+     * @desc 更新personal的github信息
+     * @return {Setting} 更新后的setting
+     */
+    async updateGithubInfo () {
+        let setting = await this.getItem()
+        if (!setting) return null
+        const github = setting.personal.github
+        if (!github.login) return
+        const user = await this.service.github.getUserInfo(github.login)
+        if (!user) return
+        setting = await this.updateItemById(setting._id, {
+            $set: {
+                'personal.github': user
+            }
+        })
+        // 个人github信息更新成功
+        this.logger.info('个人github信息更新成功')
         this.mountToApp(setting)
         return setting
     }

@@ -10,11 +10,6 @@ module.exports = app => {
         // 站点设置
         site: {
             welcome: { type: String, default: '' },
-            description: { type: String, default: '' },
-            hobby: { type: String, default: '' },
-            skill: { type: String, default: '' },
-            location: { type: String, default: '' },
-            company: { type: String, default: '' },
             links: [{
                 name: { type: String, required: true },
                 github: { type: String, default: '' },
@@ -23,6 +18,17 @@ module.exports = app => {
                 site: { type: String, required: true }
             }],
             musicId: { type: String, default: '' }
+        },
+        // 个人信息
+        personal: {
+            slogan: { type: String },
+            description: { type: String, default: '' },
+            tag: [{ type: String }],
+            hobby: [{ type: String }],
+            skill: [{ type: String }],
+            location: { type: String, default: '' },
+            company: { type: String, default: '' },
+            github: { type: Object, default: {} }
         },
         // 第三方插件的参数
         keys: {

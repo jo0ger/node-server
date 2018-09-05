@@ -10,13 +10,9 @@ module.exports = class SettingController extends Controller {
             index: {
                 filter: { type: 'string', required: false }
             },
-            create: {
-                site: { type: 'object', required: false },
-                keys: { type: 'object', required: false },
-                limit: { type: 'object', required: false }
-            },
             update: {
                 site: { type: 'object', required: false },
+                personal: { type: 'object', required: false },
                 keys: { type: 'object', required: false },
                 limit: { type: 'object', required: false }
             }
@@ -38,7 +34,7 @@ module.exports = class SettingController extends Controller {
 
     async update () {
         const { ctx } = this
-        let body = ctx.validateBody(this.rules.create)
+        let body = ctx.validateBody(this.rules.update)
         const exist = await this.service.setting.getItem()
         if (!exist) {
             return ctx.fail('配置未找到')
@@ -46,7 +42,9 @@ module.exports = class SettingController extends Controller {
         body = this.app.merge({}, exist, body)
         await this.service.setting.updateItemById(exist._id, body)
         // 抓取友链
-        const data = await this.service.setting.updateLinks()
+        await this.service.setting.updateLinks()
+        // 更新github信息
+        const data = await this.service.setting.updateGithubInfo()
         data
             ? ctx.success(data, '配置更新成功')
             : ctx.fail('配置更新失败')

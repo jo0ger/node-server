@@ -42,10 +42,8 @@ module.exports = class UserService extends ProxyService {
             const update = {}
             author.name && (update.name = author.name)
             author.site && (update.site = author.site)
+            author.email && (update.email = author.email)
             update.avatar = this.app.utils.gravatar(author.email)
-            if (author.email) {
-                update.email = author.email
-            }
             const id = author.id || author._id
             if (id) {
                 // 更新
