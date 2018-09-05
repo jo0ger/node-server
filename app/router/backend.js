@@ -61,4 +61,5 @@ module.exports = app => {
 
     // Stat
     backendRouter.get('/stat/count', auth, controller.stat.count)
+    backendRouter.get('/stat/trend', auth, controller.stat.trend)
 }
