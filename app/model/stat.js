@@ -24,11 +24,7 @@ module.exports = app => {
         // 统计项
         stat: {
             count: { type: Number, required: false, default: 0 }
-        },
-        // 创建日期
-        createdAt: { type: Date, default: Date.now },
-        // 更新日期
-        updatedAt: { type: Date, default: Date.now }
+        }
     })
 
     return mongoose.model('Stat', app.processSchema(StatSchema))

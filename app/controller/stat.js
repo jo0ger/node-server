@@ -42,6 +42,7 @@ module.exports = class StatController extends Controller {
             target
         )
         this.ctx.success({
+            target,
             dimension,
             startDate,
             endDate,

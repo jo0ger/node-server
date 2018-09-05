@@ -34,15 +34,17 @@ module.exports = class SettingController extends Controller {
 
     async update () {
         const { ctx } = this
-        let body = ctx.validateBody(this.rules.update)
+        const body = ctx.validateBody(this.rules.update)
         const exist = await this.service.setting.getItem()
         if (!exist) {
             return ctx.fail('配置未找到')
         }
-        body = this.app.merge({}, exist, body)
-        await this.service.setting.updateItemById(exist._id, body)
-        // 抓取友链
-        await this.service.setting.updateLinks()
+        const update = this.app.merge({}, exist, body)
+        await this.service.setting.updateItemById(exist._id, update)
+        if (body.site && body.site.links) {
+            // 抓取友链
+            await this.service.setting.updateLinks()
+        }
         // 更新github信息
         const data = await this.service.setting.updateGithubInfo()
         data
