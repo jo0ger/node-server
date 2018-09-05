@@ -37,15 +37,8 @@ module.exports = class AuthService extends Service {
                     name: userInfo.name,
                     email: userInfo.email || this.config.author.email,
                     password: this.app.utils.encode.bhash(defaultAdmin.password),
-                    slogan: userInfo.bio,
                     site: userInfo.blog || userInfo.url,
-                    avatar: this.app.proxyUrl(userInfo.avatar_url),
-                    company: userInfo.company,
-                    location: userInfo.location,
-                    github: {
-                        id: userInfo.id,
-                        login: userInfo.login
-                    }
+                    avatar: this.app.proxyUrl(userInfo.avatar_url)
                 })
             }
         }
