@@ -19,7 +19,8 @@ module.exports = app => {
             keyword: { type: String, required: false },
             article: { type: mongoose.Schema.Types.ObjectId, ref: 'Article', required: false },
             category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: false },
-            tag: { type: mongoose.Schema.Types.ObjectId, ref: 'Tag', required: false }
+            tag: { type: mongoose.Schema.Types.ObjectId, ref: 'Tag', required: false },
+            user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false }
         },
         // 统计项
         stat: {
