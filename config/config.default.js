@@ -208,7 +208,8 @@ module.exports = appInfo => {
                     CATEGORY_SEARCH: 1, // 文章分类搜索
                     TAG_SEARCH: 2, // 文章标签搜索
                     ARTICLE_VIEW: 3, // 文章访问
-                    ARTICLE_LIKE: 4 // 文章点赞
+                    ARTICLE_LIKE: 4, // 文章点赞
+                    USER_CREATE: 5 // 用户创建
                 }
             }
         }

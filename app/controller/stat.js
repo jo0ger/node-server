@@ -15,19 +15,20 @@ module.exports = class StatController extends Controller {
             }
         }
     }
-    
+
     async count () {
         // 文章浏览量 文章点赞数 文章评论量 站内留言量
-        const [pv, like, comment, message] = await Promise.all(
-            ['pv', 'like', 'comment', 'message'].map(type => {
+        const [pv, up, comment, message, user] = await Promise.all(
+            ['pv', 'up', 'comment', 'message', 'user'].map(type => {
                 return this.service.stat.getCount(type)
             })
         )
         this.ctx.success({
             pv,
-            like,
+            up,
             comment,
-            message
+            message,
+            user
         }, '获取数量统计成功')
     }
 

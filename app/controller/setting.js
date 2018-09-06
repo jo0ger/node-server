@@ -26,6 +26,9 @@ module.exports = class SettingController extends Controller {
         if (ctx.query.filter) {
             select = ctx.query.filter
         }
+        if (!ctx.session._isAuthed) {
+            select = '-keys'
+        }
         const data = await this.service.setting.getItem({}, select)
         data
             ? ctx.success(data, '配置获取成功')

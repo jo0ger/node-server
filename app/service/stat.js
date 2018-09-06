@@ -85,12 +85,12 @@ module.exports = class StatService extends ProxyService {
         if (em) {
             const format = em.format('YYYY-MM-DD 23:59:59')
             em = moment(format)
-            filter.createdAt.$lte = new Date(em.format('YYYY-MM-DD 23:59:59'))
+            filter.createdAt.$lte = new Date(format)
         }
         if (type === 'pv') {
             service = this
             filter.type = this.statConfig.ARTICLE_VIEW
-        } else if (type === 'like') {
+        } else if (type === 'up') {
             service = this
             filter.type = this.statConfig.ARTICLE_LIKE
         } else if (type === 'comment') {
@@ -101,7 +101,13 @@ module.exports = class StatService extends ProxyService {
             // 站内留言量
             service = this.service.comment
             filter.type = this.config.modelEnum.comment.type.optional.MESSAGE
+        } else if (type === 'user') {
+            // 用户创建
+            service = this
+            filter.type = this.statConfig.USER_CREATE
         }
+        console.log(filter);
+        
         return service && service.count(filter) || null
     }
 
@@ -146,7 +152,7 @@ module.exports = class StatService extends ProxyService {
         if (type === 'pv') {
             service = this
             $match.type = this.statConfig.ARTICLE_VIEW
-        } else if (type === 'like') {
+        } else if (type === 'up') {
             service = this
             $match.type = this.statConfig.ARTICLE_LIKE
         } else if (type === 'comment') {
@@ -157,6 +163,10 @@ module.exports = class StatService extends ProxyService {
             // 站内留言量
             service = this.service.comment
             $match.type = this.config.modelEnum.comment.type.optional.MESSAGE
+        } else if (type === 'user') {
+            // 用户创建
+            service = this
+            $match.type = this.statConfig.USER_CREATE
         }
         if (!service) return []
         const data = await service.aggregate([

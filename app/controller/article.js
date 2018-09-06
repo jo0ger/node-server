@@ -51,7 +51,7 @@ module.exports = class ArticleController extends Controller {
     async list () {
         const { ctx } = this
         ctx.query.page = Number(ctx.query.page)
-        const tranArray = ['limit', 'state', 'source']
+        const tranArray = ['limit', 'state', 'source', 'order']
         tranArray.forEach(key => {
             if (ctx.query[key]) {
                 ctx.query[key] = Number(ctx.query[key])

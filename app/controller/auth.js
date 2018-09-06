@@ -76,7 +76,7 @@ module.exports = class AuthController extends Controller {
         const exist = await this.service.user.getItemById(ctx.session._user._id)
         if (exist && exist.name !== body.name) {
             // 检测变更的name是否和其他用户冲突
-            const conflict = await this.service.user.getItem({ name: ctx.session._user.name })
+            const conflict = await this.service.user.getItem({ name: body.name })
             if (conflict) {
                 // 有冲突
                 return ctx.fail('用户名重复')

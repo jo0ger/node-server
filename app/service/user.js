@@ -72,6 +72,7 @@ module.exports = class UserService extends ProxyService {
                     }))
                     if (user) {
                         this.service.notification.recordUser(user, 'create')
+                        this.service.stat.record('USER_CREATE', { user: user._id }, 'count')
                     }
                 }
             }
