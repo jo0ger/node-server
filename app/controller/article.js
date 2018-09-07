@@ -15,8 +15,8 @@ module.exports = class ArticleController extends Controller {
                 category: { type: 'objectId', required: false },
                 tag: { type: 'objectId', required: false },
                 keyword: { type: 'string', required: false },
-                startDate: { type: 'dateTime', required: false },
-                endDate: { type: 'dateTime', required: false },
+                startDate: { type: 'string', required: false },
+                endDate: { type: 'string', required: false },
                 // -1 desc | 1 asc
                 order: { type: 'enum', values: [-1, 1], required: false },
                 sortBy: { type: 'enum', values: ['createdAt', 'updatedAt', 'publishedAt', 'meta.ups', 'meta.pvs', 'meta.comments'], required: false }
@@ -31,7 +31,7 @@ module.exports = class ArticleController extends Controller {
                 state: { type: 'enum', values: Object.values(this.config.modelEnum.article.state.optional), required: true },
                 source: { type: 'enum', values: Object.values(this.config.modelEnum.article.source.optional), required: true },
                 thumb: { type: 'url', required: false },
-                createdAt: { type: 'dateTime', required: false }
+                createdAt: { type: 'string', required: false }
             },
             update: {
                 title: { type: 'string', required: false },
@@ -43,7 +43,7 @@ module.exports = class ArticleController extends Controller {
                 state: { type: 'enum', values: Object.values(this.config.modelEnum.article.state.optional), required: false },
                 source: { type: 'enum', values: Object.values(this.config.modelEnum.article.source.optional), required: false },
                 thumb: { type: 'url', required: false },
-                createdAt: { type: 'dateTime', required: false }
+                createdAt: { type: 'string', required: false }
             }
         }
     }
@@ -175,6 +175,8 @@ module.exports = class ArticleController extends Controller {
             },
             title: body.title
         })
+        this.logger.info(exist);
+        
         if (exist) {
             return ctx.fail('文章名称重复')
         }

@@ -30,7 +30,7 @@ module.exports = class ArticleService extends ProxyService {
                 $inc: { 'meta.pvs': 1 }
             }, opt, populate)
         } else {
-            data = await this.getItem({ _id: id }, '-content', opt, populate)
+            data = await this.getItem({ _id: id }, opt, populate)
         }
         if (data && !single) {
             // 获取相关文章和上下篇文章

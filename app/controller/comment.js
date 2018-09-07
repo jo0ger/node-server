@@ -17,8 +17,8 @@ module.exports = class CommentController extends Controller {
                 parent: { type: 'objectId', required: false },
                 keyword: { type: 'string', required: false },
                 // 时间区间查询仅后台可用，且依赖于createdAt
-                startDate: { type: 'dateTime', required: false },
-                endDate: { type: 'dateTime', required: false },
+                startDate: { type: 'string', required: false },
+                endDate: { type: 'string', required: false },
                 // 排序仅后台能用，且order和sortBy需同时传入才起作用
                 // -1 desc | 1 asc
                 order: { type: 'enum', values: [-1, 1], required: false },

@@ -4,8 +4,8 @@ module.exports = class StatController extends Controller {
     get rules () {
         return {
             trend: {
-                startDate: { type: 'dateTime', required: true },
-                endDate: { type: 'dateTime', required: true },
+                startDate: { type: 'string', required: true },
+                endDate: { type: 'string', required: true },
                 dimension: {
                     type: 'enum',
                     values: this.service.stat.dimensionsValidate,
