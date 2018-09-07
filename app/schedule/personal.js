@@ -13,7 +13,7 @@ module.exports = class Links extends Subscription {
         }
     }
 
-    async task () {
+    async subscribe () {
         await this.service.setting.updateGithubInfo()
     }
 }
