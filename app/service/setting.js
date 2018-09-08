@@ -19,12 +19,15 @@ module.exports = class SettingService extends ProxyService {
             return exist
         }
         // TIP: 这里不能用create，create如果不传model，是不会创建的
-        const data = await this.newAndSave()
+        const model = new this.model()
+        model.personal.user = this.app._admin._id
+        const data = await model.save()
         if (data) {
             this.logger.info('Setting初始化成功')
         } else {
             this.logger.info('Setting初始化失败')
         }
+        this.mountToApp(data)
         return data
     }
 
@@ -40,6 +43,7 @@ module.exports = class SettingService extends ProxyService {
                 if (link) {
                     const userInfo = await this.service.github.getUserInfo(link.github)
                     if (userInfo) {
+                        link.name = link.name || userInfo.name
                         link.avatar = this.app.proxyUrl(userInfo.avatar_url)
                         link.slogan = userInfo.bio
                         link.site = link.site || userInfo.blog || userInfo.url

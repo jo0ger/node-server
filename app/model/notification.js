@@ -26,13 +26,13 @@ module.exports = app => {
         verb: { type: String, required: true, default: '' },
         target: {
             // article user comment 根据情况是否包含
-            article: { type: mongoose.Schema.Types.ObjectId, ref: 'Article' },
-            user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-            comment: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment' },
+            article: { type: Schema.Types.ObjectId, ref: 'Article' },
+            user: { type: Schema.Types.ObjectId, ref: 'User' },
+            comment: { type: Schema.Types.ObjectId, ref: 'Comment' },
         },
         actors: {
-            from: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-            to: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+            from: { type: Schema.Types.ObjectId, ref: 'User' },
+            to: { type: Schema.Types.ObjectId, ref: 'User' }
         }
     })
 

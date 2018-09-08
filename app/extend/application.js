@@ -1,5 +1,6 @@
 const mongoosePaginate = require('mongoose-paginate-v2')
 const lodash = require('lodash')
+const merge = require('merge')
 
 const prefix = 'http://'
 
@@ -34,7 +35,7 @@ module.exports = {
         return schema
     },
     merge () {
-        return lodash.merge.apply(null, Array.prototype.slice.call(arguments))
+        return merge.recursive.apply(null, [true].concat(Array.prototype.slice.call(arguments)))
     },
     proxyUrl (url) {
         if (lodash.isString(url) && url.startsWith(prefix)) {

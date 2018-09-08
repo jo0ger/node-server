@@ -26,10 +26,23 @@ module.exports = class SettingController extends Controller {
         if (ctx.query.filter) {
             select = ctx.query.filter
         }
+        let populate = null
         if (!ctx.session._isAuthed) {
             select = '-keys'
+        } else {
+            populate = [
+                {
+                    path: 'personal.user',
+                    select: '-password'
+                }
+            ]
         }
-        const data = await this.service.setting.getItem({}, select)
+        const data = await this.service.setting.getItem(
+            {},
+            select,
+            null,
+            populate
+        )
         data
             ? ctx.success(data, '配置获取成功')
             : ctx.fail('配置获取失败')
@@ -43,13 +56,25 @@ module.exports = class SettingController extends Controller {
             return ctx.fail('配置未找到')
         }
         const update = this.app.merge({}, exist, body)
-        await this.service.setting.updateItemById(exist._id, update)
+        let data = await this.service.setting.updateItemById(
+            exist._id,
+            update,
+            null,
+            [
+                {
+                    path: 'personal.user',
+                    select: '-password'
+                }
+            ]
+        )
         if (body.site && body.site.links) {
             // 抓取友链
-            await this.service.setting.updateLinks()
+            data = await this.service.setting.updateLinks()
         }
-        // 更新github信息
-        const data = await this.service.setting.updateGithubInfo()
+        if (body.personal && body.personal.github) {
+            // 更新github信息
+            data = await this.service.setting.updateGithubInfo()
+        }
         data
             ? ctx.success(data, '配置更新成功')
             : ctx.fail('配置更新失败')

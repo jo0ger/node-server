@@ -17,12 +17,7 @@ module.exports = class AuthController extends Controller {
                 name: { type: 'string', required: false },
                 email: { type: 'email', required: false },
                 site: { type: 'url', required: false },
-                description: { type: 'string', required: false },
-                avatar: { type: 'string', required: false },
-                slogan: { type: 'string', required: false },
-                company: { type: 'string', required: false },
-                location: { type: 'string', required: false },
-                tags: { type: 'array', required: false }
+                avatar: { type: 'string', required: false }
             },
             password: {
                 password: { type: 'string', required: true, min: 6 },
@@ -73,7 +68,10 @@ module.exports = class AuthController extends Controller {
     async update () {
         const { ctx } = this
         const body = this.ctx.validateBody(this.rules.update)
-        const exist = await this.service.user.getItemById(ctx.session._user._id)
+        const exist = await this.service.user.getItemById(
+            ctx.session._user._id,
+            Object.keys(this.rules.update).join(' ')
+        )
         if (exist && exist.name !== body.name) {
             // 检测变更的name是否和其他用户冲突
             const conflict = await this.service.user.getItem({ name: body.name })
@@ -82,7 +80,8 @@ module.exports = class AuthController extends Controller {
                 return ctx.fail('用户名重复')
             }
         }
-        const data = await this.service.user.updateItemById(ctx.session._user._id, body)
+        const update = this.app.merge({}, exist, body)
+        const data = await this.service.user.updateItemById(ctx.session._user._id, update)
         // 更新session
         await this.service.auth.updateSessionUser()
         data

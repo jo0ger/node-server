@@ -28,6 +28,7 @@ module.exports = app => {
             skill: [{ type: String }],
             location: { type: String, default: '' },
             company: { type: String, default: '' },
+            user: { type: Schema.Types.ObjectId, ref: 'User' },
             github: { type: Object, default: {} }
         },
         // 第三方插件的参数
