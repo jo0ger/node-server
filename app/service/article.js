@@ -28,7 +28,9 @@ module.exports = class ArticleService extends ProxyService {
                 state: this.config.modelEnum.article.state.optional.PUBLISH
             }, {
                 $inc: { 'meta.pvs': 1 }
-            }, opt, populate)
+            }, Object.assign({}, opt, {
+                select: '-content'
+            }), populate)
         } else {
             data = await this.getItem({ _id: id }, opt, populate)
         }
