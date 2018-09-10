@@ -42,19 +42,24 @@ module.exports = class NotificationController extends Controller {
             populate: [
                 {
                     path: 'target.article',
-                    select: 'title description meta'
+                    populate: [
+                        {
+                            path: 'category'
+                        }, {
+                            path: 'tag'
+                        }
+                    ]
                 }, {
                     path: 'target.user',
-                    select: 'name email role github'
+                    select: '-password'
                 }, {
                     path: 'target.comment',
-                    select: 'state spam type meta'
                 }, {
                     path: 'actors.from',
-                    select: 'name email github'
+                    select: '-password'
                 }, {
                     path: 'actors.to',
-                    select: 'name email github'
+                    select: '-password'
                 }
             ]
         }
@@ -64,10 +69,31 @@ module.exports = class NotificationController extends Controller {
             : ctx.fail('通告列表获取失败')
     }
 
-    async count () {
+    async unviewedCount () {
         const { ctx } = this
-        const count = await this.service.notification.count({ viewed: false })
-        ctx.success(count, '未读通告数量获取成功')
+        const list = await this.service.notification.getList({ viewed: false })
+        const notificationTypes = this.config.modelEnum.notification.type.optional
+        const data = list.reduce((map, item) => {
+            if (item.type === notificationTypes.GENERAL) {
+                map.general++
+            } else if (item.type === notificationTypes.COMMENT) {
+                map.comment++
+            } else if (item.type === notificationTypes.LIKE) {
+                map.like++
+            } else if (item.type === notificationTypes.USER) {
+                map.user++
+            }
+            return map
+        }, {
+            general: 0,
+            comment: 0,
+            like: 0,
+            user: 0
+        })
+        ctx.success({
+            total: list.length,
+            counts: data
+        }, '未读通告数量获取成功')
     }
 
     async view () {
