@@ -14,18 +14,17 @@ module.exports = class SettingService extends ProxyService {
      * @return {Setting} 配置数据
      */
     async seed () {
-        const exist = await this.getItem()
-        if (exist) {
-            return exist
-        }
-        // TIP: 这里不能用create，create如果不传model，是不会创建的
-        const model = new this.model()
-        model.personal.user = this.app._admin._id
-        const data = await model.save()
-        if (data) {
-            this.logger.info('Setting初始化成功')
-        } else {
-            this.logger.info('Setting初始化失败')
+        let data = await this.getItem()
+        if (!data) {
+            // TIP: 这里不能用create，create如果不传model，是不会创建的
+            const model = new this.model()
+            model.personal.user = this.app._admin._id
+            data = await model.save()
+            if (data) {
+                this.logger.info('Setting初始化成功')
+            } else {
+                this.logger.info('Setting初始化失败')
+            }
         }
         this.mountToApp(data)
         return data
