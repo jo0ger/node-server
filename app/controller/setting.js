@@ -75,8 +75,11 @@ module.exports = class SettingController extends Controller {
             // 更新github信息
             data = await this.service.setting.updateGithubInfo()
         }
-        data
-            ? ctx.success(data, '配置更新成功')
-            : ctx.fail('配置更新失败')
+        if (data) {
+            this.service.setting.mountToApp(data)
+            ctx.success(data, '配置更新成功')
+        } else {
+            ctx.fail('配置更新失败')
+        }
     }
 }

@@ -103,10 +103,12 @@ module.exports = class SettingService extends ProxyService {
      * @param {Setting} setting 配置
      */
     async mountToApp (setting) {
+        let msg = '配置挂载成功'
         if (!setting) {
+            msg = '配置更新成功'
             setting = await this.getItem()
         }
         this.app.setting = setting || null
-        this.logger.info('配置挂载成功')
+        this.logger.info(msg)
     }
 }
