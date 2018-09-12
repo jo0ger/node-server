@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 
 COPY package.json /usr/src/app/package.json
 
-RUN npm i --registry=https://registry.npm.taobao.org
+RUN yarn install
 
 COPY . /usr/src/app
 
