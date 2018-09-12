@@ -72,7 +72,7 @@ module.exports = appInfo => {
 
     // mongoose配置
     config.mongoose = {
-        url: 'mongodb://127.0.0.1/node-server',
+        url: process.env.EGG_MONGODB_URL || 'mongodb://node-server:node-server@127.0.0.1:27017/node-server',
         options: {
             useNewUrlParser: true,
             poolSize: 20,
@@ -89,13 +89,13 @@ module.exports = appInfo => {
                 host: '127.0.0.1',
                 port: 6379,
                 db: 0,
-                password: appInfo.name
+                password: process.env.EGG_REDIS_PASSWORD || appInfo.name
             },
             util: {
                 host: '127.0.0.1',
                 port: 6379,
                 db: 1,
-                password: appInfo.name
+                password: process.env.EGG_REDIS_PASSWORD || appInfo.name
             }
         }
     }
