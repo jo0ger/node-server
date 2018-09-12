@@ -1,0 +1,50 @@
+version: "3"
+services:
+    node-server:
+        image: node-server:latest
+        environment:
+            NODE_ENV: production
+            EGG_SERVER_ENV: prod
+            EGG_MONGODB_URL: mongodb://node-server:node-server@mongodb:27017/node-server
+            EGG_REDIS_PASSWORD: node-server
+        depends_on:
+            - redis
+            - mongodb
+        networks:
+            - docker-node-server
+        ports:
+            - 3002:3002
+  
+    redis:
+        image: redis:4.0.11-alpine
+        # appendonly 数据持久化
+        command: redis-server --appendonly yes --requirepass node-server
+        volumes:
+            - egg-redis:/data
+        networks: 
+            - docker-node-server
+        ports:
+            - 6379:6379
+  
+    mongodb:
+        image: mongo:3.6.7
+        restart: always
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: mongodb
+            MONGO_INITDB_DATABASE: node-server
+        volumes:
+            - egg-mongo:/data/db
+            - ./init.d/mongo/:/docker-entrypoint-initdb.d
+        networks: 
+            - docker-node-server
+        ports:
+            - 27017:27017
+
+volumes:
+    egg-mongo:
+    egg-redis:
+
+networks:
+    docker-node-server:
+        driver: bridge
