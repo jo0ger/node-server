@@ -1,7 +1,8 @@
 version: "3"
 services:
     node-server:
-        image: node-server:latest
+        # 阿里云容器代理
+        image: registry.cn-beijing.aliyuncs.com/jooger/node-server:latest
         environment:
             NODE_ENV: production
             EGG_SERVER_ENV: prod
