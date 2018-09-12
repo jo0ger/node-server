@@ -11,7 +11,7 @@ module.exports = class StatController extends Controller {
                     values: this.service.stat.dimensionsValidate,
                     required: true
                 },
-                target: { type: 'string', required: true  }
+                target: { type: 'string', required: true }
             }
         }
     }

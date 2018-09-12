@@ -176,7 +176,7 @@ module.exports = class ArticleController extends Controller {
             title: body.title
         })
         this.logger.info(exist);
-        
+
         if (exist) {
             return ctx.fail('文章名称重复')
         }
