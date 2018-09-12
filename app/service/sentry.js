@@ -1,4 +1,4 @@
-const { Service } = require('egg') 
+const { Service } = require('egg')
 
 module.exports = class SentryService extends Service {
     /**

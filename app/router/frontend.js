@@ -1,6 +1,6 @@
 module.exports = app => {
     const fontendRouter = app.router.namespace('/v2')
-    const { router, controller } = app
+    const { controller } = app
 
     // Article
     fontendRouter.get('/articles', controller.article.list)

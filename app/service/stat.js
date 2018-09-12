@@ -107,7 +107,7 @@ module.exports = class StatService extends ProxyService {
             filter.type = this.statConfig.USER_CREATE
         }
         console.log(filter);
-        
+
         return service && service.count(filter) || null
     }
 
