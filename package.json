@@ -48,8 +48,9 @@
     "node": ">=8.9.0"
   },
   "scripts": {
-    "start": "egg-scripts start --daemon --title=egg-server-node-server",
-    "stop": "egg-scripts stop --title=egg-server-node-server",
+    "start": "egg-scripts start --daemon --title=node-server",
+    "stop": "egg-scripts stop --title=node-server",
+    "docker": "egg-scripts start --title=node-server",
     "dev": "egg-bin dev",
     "debug": "egg-bin debug",
     "test": "npm run lint -- --fix && npm run test-local",
