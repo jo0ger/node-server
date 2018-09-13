@@ -42,6 +42,7 @@
     "egg-mock": "^3.14.0",
     "eslint": "^4.11.0",
     "eslint-config-egg": "^6.0.0",
+    "release-it": "^7.6.1",
     "webstorm-disable-index": "^1.2.0"
   },
   "engines": {
@@ -58,7 +59,8 @@
     "cov": "egg-bin cov",
     "lint": "eslint . --fix",
     "ci": "npm run lint && npm run cov",
-    "autod": "autod"
+    "autod": "autod",
+    "rc": "release-it"
   },
   "ci": {
     "version": "8"
