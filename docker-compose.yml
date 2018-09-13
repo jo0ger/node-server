@@ -7,6 +7,8 @@ services:
             NODE_ENV: production
             EGG_SERVER_ENV: prod
             EGG_MONGODB_URL: mongodb://node-server:node-server@mongodb:27017/node-server
+            EGG_REDIS_HOST: redis
+            EGG_REDIS_PORT: 6379
             EGG_REDIS_PASSWORD: node-server
         depends_on:
             - redis
@@ -24,8 +26,8 @@ services:
             - egg-redis:/data
         networks: 
             - docker-node-server
-        ports:
-            - 6379:6379
+        # ports:
+        #     - 6379:6379
   
     mongodb:
         image: mongo:3.6.7
@@ -39,8 +41,8 @@ services:
             - ./init.d/mongo/:/docker-entrypoint-initdb.d
         networks: 
             - docker-node-server
-        ports:
-            - 27017:27017
+        # ports:
+        #     - 27017:27017
 
 volumes:
     egg-mongo:
