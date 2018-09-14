@@ -9,6 +9,24 @@ module.exports = class UserService extends ProxyService {
         return this.app.model.User
     }
 
+    async getListWithComments (query, select) {
+        let list = await this.getList(query, select, {
+            sort: '-createdAt'
+        })
+        if (list && list.length) {
+            list = await Promise.all(
+                list.map(async item => {
+                    item = item.toObject()
+                    item.comments = await this.service.comment.count({
+                        author: item._id
+                    })
+                    return item
+                })
+            )
+        }
+        return list
+    }
+
     // 创建用户
     async create (user) {
         const { name } = user

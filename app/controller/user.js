@@ -19,7 +19,14 @@ module.exports = class UserController extends Controller {
         if (!ctx.session._isAuthed) {
             select += ' -createdAt -updatedAt -role'
         }
-        const data = await this.service.user.getList({}, select)
+        const query = {
+            $nor: [
+                {
+                    role: this.config.modelEnum.user.role.optional.ADMIN
+                }
+            ]
+        }
+        const data = await this.service.user.getListWithComments(query, select)
         data
             ? ctx.success(data, '用户列表获取成功')
             : ctx.fail('用户列表获取失败')
