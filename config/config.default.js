@@ -27,6 +27,18 @@ module.exports = appInfo => {
         'headers'
     ]
 
+    config.security = {
+        domainWhiteList: [
+            '*.jooger.me',
+            'jooger.me',
+            'localhost:8081'
+        ],
+        csrf: {
+            enable: false
+        }
+    }
+
+
     config.cors = {
         enable: true,
         credentials: true,
@@ -35,7 +47,7 @@ module.exports = appInfo => {
 
     config.session = {
         key: appInfo.name + '_token',
-        maxAge: 60000 * 60 * 24 * 7,
+        maxAge: 60 * 60 * 24 * 7,
         signed: true
     }
 

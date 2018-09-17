@@ -8,15 +8,6 @@ module.exports = () => {
         consoleLevel: 'DEBUG',
     }
 
-    config.security = {
-        domainWhiteList: [
-            '*'
-        ],
-        csrf: {
-            ignore: () => true
-        }
-    }
-
     // 本地开发调试用
     config.github = {
         clientId: '5b4d4a7945347d0fd2e2',

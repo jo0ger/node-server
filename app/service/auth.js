@@ -2,23 +2,35 @@
  * @desc Auth Services
  */
 
+const jwt = require('jsonwebtoken')
 const { Service } = require('egg')
 
 module.exports = class AuthService extends Service {
+    sign (app, payload = {}, isLogin = true) {
+        return jwt.sign(payload, app.config.secrets, { expiresIn: isLogin ? app.config.session.maxAge : 0 })
+    }
+
     /**
      * @desc 设置cookie，用于登录和退出
      * @param {User} user 登录用户
      * @param {Boolean} isLogin 是否是登录操作
      * @return {String} token 用户token
      */
-    setCookie (user, isLogin = false) {
+    setCookie (user, isLogin = true) {
         const { key, domain, maxAge, signed } = this.app.config.session
-        const token = this.app.utils.token.sign(this.app, {
+        const token = this.sign(this.app, {
             id: user._id,
             name: user.name
         }, isLogin)
-        this.ctx.cookies.set(key, token, { signed, domain, maxAge: isLogin ? maxAge : 0, httpOnly: false })
-        this.ctx.cookies.set(this.app.config.userCookieKey, user._id, { signed, domain, maxAge: isLogin ? maxAge : 0, httpOnly: false })
+        const payload = {
+            signed,
+            domain,
+            maxAge:
+            isLogin ? maxAge : 0,
+            httpOnly: false
+        }
+        this.ctx.cookies.set(key, token, payload)
+        this.ctx.cookies.set(this.app.config.userCookieKey, user._id, payload)
         return token
     }
 

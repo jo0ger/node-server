@@ -1,16 +1,6 @@
 module.exports = () => {
     const config = exports = {}
 
-    config.security = {
-        csrf: {
-            headerName: 'x-csrf-token',
-            cookieName: 'csrfToken'
-        },
-        domainWhiteList: [
-            '*.jooger.me'
-        ]
-    }
-
     config.session = {
         domain: '.jooger.me'
     }
