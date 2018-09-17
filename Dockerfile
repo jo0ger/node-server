@@ -13,6 +13,6 @@ RUN yarn install
 
 COPY . /usr/src/app
 
-EXPOSE 3002
+EXPOSE 7001
 
 CMD npm run docker
