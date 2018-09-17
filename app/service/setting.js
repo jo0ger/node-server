@@ -18,7 +18,9 @@ module.exports = class SettingService extends ProxyService {
         if (!data) {
             // TIP: 这里不能用create，create如果不传model，是不会创建的
             const model = new this.model()
-            model.personal.user = this.app._admin._id
+            if (this.app._admin) {
+                model.personal.user = this.app._admin._id
+            }
             data = await model.save()
             if (data) {
                 this.logger.info('Setting初始化成功')
