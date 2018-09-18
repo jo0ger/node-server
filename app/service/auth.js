@@ -42,17 +42,11 @@ module.exports = class AuthService extends Service {
         let admin = await this.service.user.getItem({ role: ADMIN })
         if (!admin) {
             const defaultAdmin = this.config.defaultAdmin
-            const userInfo = await this.service.github.getUserInfo(defaultAdmin.name)
-            if (userInfo) {
-                admin = await this.service.user.create({
-                    role: ADMIN,
-                    name: userInfo.name,
-                    email: userInfo.email || this.config.author.email,
-                    password: this.app.utils.encode.bhash(defaultAdmin.password),
-                    site: userInfo.blog || userInfo.url,
-                    avatar: this.app.proxyUrl(userInfo.avatar_url)
-                })
-            }
+            admin = await this.service.user.create(Object.assign({}, defaultAdmin, {
+                role: ADMIN,
+                password: this.app.utils.encode.bhash(defaultAdmin.password),
+                avatar: this.app.utils.gravatar(defaultAdmin.email)
+            }))
         }
         // 挂载在session上
         this.app._admin = admin

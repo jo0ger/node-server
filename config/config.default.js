@@ -229,8 +229,10 @@ module.exports = appInfo => {
 
     // 初始化管理员，默认的名称和密码，名称需要是github名称
     config.defaultAdmin = {
-        name: appInfo.pkg.author.name,
-        password: 'admin123456'
+        name: 'Jooger',
+        password: 'admin123456',
+        email: 'iamjooger@gmail.com',
+        site: 'https://jooger.me'
     }
 
     config.defaultAvatar = 'https://static.jooger.me/img/common/avatar.png'
