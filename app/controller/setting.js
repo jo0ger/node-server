@@ -29,6 +29,12 @@ module.exports = class SettingController extends Controller {
         let populate = null
         if (!ctx.session._isAuthed) {
             select = '-keys'
+            populate = [
+                {
+                    path: 'personal.user',
+                    select: 'name email site avatar'
+                }
+            ]
         } else {
             populate = [
                 {
