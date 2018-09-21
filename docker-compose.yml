@@ -1,8 +1,9 @@
 version: "3"
 services:
     node-server:
-        # 阿里云容器代理（内网）
+        # 阿里云容器代理
         image: registry.cn-beijing.aliyuncs.com/jooger/node-server:latest
+        # 环境变量
         environment:
             NODE_ENV: production
             EGG_SERVER_ENV: prod
@@ -10,25 +11,27 @@ services:
             EGG_REDIS_HOST: redis
             EGG_REDIS_PORT: 6379
             EGG_REDIS_PASSWORD: node-server
+        # 依赖项，会在redis和mongo启动之后再启动
         depends_on:
             - redis
             - mongodb
         networks:
             - docker-node-server
+        # 端口映射
         ports:
             - 7001:7001
-  
+
     redis:
         image: redis:4.0.11-alpine
         # appendonly 数据持久化
         command: redis-server --appendonly yes --requirepass node-server
         volumes:
             - egg-redis:/data
-        networks: 
+        networks:
             - docker-node-server
-        # ports:
-        #     - 6379:6379
-  
+        ports:
+            - 6379:6379
+
     mongodb:
         image: mongo:3.6.7
         restart: always
@@ -39,10 +42,10 @@ services:
         volumes:
             - egg-mongo:/data/db
             - ./init.d/mongo/:/docker-entrypoint-initdb.d
-        networks: 
+        networks:
             - docker-node-server
-        # ports:
-        #     - 27017:27017
+        ports:
+            - 27017:27017
 
 volumes:
     egg-mongo:
