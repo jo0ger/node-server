@@ -12,8 +12,8 @@ module.exports = class ArticleController extends Controller {
                 limit: { type: 'int', required: false, min: 1 },
                 state: { type: 'enum', values: Object.values(this.config.modelEnum.article.state.optional), required: false },
                 source: { type: 'enum', values: Object.values(this.config.modelEnum.article.source.optional), required: false },
-                category: { type: 'objectId', required: false },
-                tag: { type: 'objectId', required: false },
+                category: { type: 'string', required: false },
+                tag: { type: 'string', required: false },
                 keyword: { type: 'string', required: false },
                 startDate: { type: 'string', required: false },
                 endDate: { type: 'string', required: false },
@@ -49,7 +49,7 @@ module.exports = class ArticleController extends Controller {
     }
 
     async list () {
-        const { ctx } = this
+        const { ctx, app } = this
         ctx.query.page = Number(ctx.query.page)
         const tranArray = ['limit', 'state', 'source', 'order']
         tranArray.forEach(key => {
@@ -77,7 +77,7 @@ module.exports = class ArticleController extends Controller {
                 }
             ]
         }
-        const query = { state, category, tag, source }
+        const query = { state, source }
 
         // 搜索关键词
         if (keyword) {
@@ -85,6 +85,30 @@ module.exports = class ArticleController extends Controller {
             query.$or = [
                 { title: keywordReg }
             ]
+        }
+
+        // 分类
+        if (category) {
+            // 如果是id
+            if (app.utils.validate.isObjectId(category)) {
+                query.category = category
+            } else {
+                // 普通字符串，需要先查到id
+                const c = await this.service.category.getItem({ name: category })
+                query.category = c ? c._id : app.utils.share.createObjectId()
+            }
+        }
+
+        // 标签
+        if (tag) {
+            // 如果是id
+            if (app.utils.validate.isObjectId(tag)) {
+                query.tag = tag
+            } else {
+                // 普通字符串，需要先查到id
+                const t = await this.service.tag.getItem({ name: tag })
+                query.tag = t ? t._id : app.utils.share.createObjectId()
+            }
         }
 
         // 未通过权限校验（前台获取文章列表）
@@ -241,5 +265,23 @@ module.exports = class ArticleController extends Controller {
 
     async archives () {
         this.ctx.success(await this.service.article.archives(), '归档获取成功')
+    }
+
+    async hot () {
+        const { ctx } = this
+        const limit = this.app.setting.limit.hotArticleCount
+        const data = await this.service.article.getList(
+            {
+                state: this.config.modelEnum.article.state.optional.PUBLISH
+            },
+            '-content -renderedContent -state',
+            {
+                sort: '-meta.comments -meta.ups -meta.pvs',
+                limit
+            }
+        )
+        data
+            ? ctx.success(data, '热门文章获取成功')
+            : ctx.fail('热门文章获取失败')
     }
 }
