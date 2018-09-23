@@ -11,7 +11,7 @@ module.exports = class CategoryService extends ProxyService {
 
     async getList (query, select = null, opt) {
         opt = this.app.merge({
-            sort: '-createdAt'
+            sort: 'createdAt'
         }, opt)
         let categories = await this.model.find(query, select, opt).exec()
         if (categories.length) {

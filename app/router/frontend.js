@@ -5,6 +5,7 @@ module.exports = app => {
     // Article
     fontendRouter.get('/articles', controller.article.list)
     fontendRouter.get('/articles/archives', controller.article.archives)
+    fontendRouter.get('/articles/hot', controller.article.hot)
     fontendRouter.get('/articles/:id', controller.article.item)
     fontendRouter.patch('/articles/:id', controller.article.like)
     fontendRouter.patch('/articles/:id/like', controller.article.like)
