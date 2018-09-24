@@ -8,6 +8,17 @@ Object.keys(lodash).forEach(key => {
     }
 })
 
+exports.isEmptyObject = obj => {
+    if (typeof obj !== 'object') {
+        return false
+    }
+    /* eslint-disable */
+    for (let key in obj) {
+        return false
+    }
+    return true
+}
+
 exports.isObjectId = (str = '') => mongoose.Types.ObjectId.isValid(str)
 
 Object.keys(validator).forEach(key => {

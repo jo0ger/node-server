@@ -61,7 +61,7 @@ module.exports = app => {
             async findOneAndUpdate () {
                 delete this._update.updatedAt
                 const { content } = this._update
-                const find = await this.findOne()
+                const find = await this.model.findOne(this._conditions)
                 if (find) {
                     if (content && content !== find.content) {
                         this._update.renderedContent = app.utils.markdown.render(content)

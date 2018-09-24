@@ -68,7 +68,7 @@ renderer.code = function (code, lang) {
             '\n</code></pre>'
     }
 
-    return '<pre><code class="' +
+    return '<pre><code class="hljs ' +
         this.options.langPrefix +
         escape(lang, true) +
         '">' +
@@ -83,6 +83,7 @@ marked.setOptions({
     sanitize: false,
     tables: true,
     breaks: true,
+    headerIds: true,
     smartLists: true,
     smartypants: true,
     highlight (code, lang) {

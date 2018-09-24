@@ -61,7 +61,6 @@ module.exports = class ArticleController extends Controller {
         const { page, limit, state, keyword, category, tag, source, order, sortBy, startDate, endDate } = ctx.query
         const options = {
             sort: {
-                updatedAt: -1,
                 createdAt: -1
             },
             page,
@@ -117,6 +116,10 @@ module.exports = class ArticleController extends Controller {
             query.state = 1
             // 文章列表不需要content和state
             options.select = '-content -renderedContent -state'
+            options.sort = {
+                updatedAt: -1,
+                createdAt: -1
+            }
         } else {
             // 排序
             if (sortBy && order) {
