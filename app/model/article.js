@@ -60,12 +60,15 @@ module.exports = app => {
                 // HACK: 这里this指向的是query，而不是这个model
                 delete this._update.updatedAt
                 const { content, state } = this._update
-                const find = await this.findOne()
+                const find = await this.model.findOne(this._conditions)
                 if (find) {
                     if (content && content !== find.content) {
                         this._update.renderedContent = app.utils.markdown.render(content)
                     }
-                    if (['title', 'content'].some(key => this._update[key] !== find[key])) {
+                    if (['title', 'content'].some(key => {
+                        return this._update.hasOwnProperty(key)
+                            && this._update[key] !== find[key]
+                    })) {
                         // 只有内容和标题不一样时才更新updatedAt
                         this._update.updatedAt = Date.now()
                     }
