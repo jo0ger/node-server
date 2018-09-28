@@ -51,30 +51,52 @@ renderer.image = function (href, title, text) {
 	`.replace(/\s+/g, ' ').replace('\n', '')
 }
 
-renderer.code = function (code, lang) {
+renderer.code = function (code, lang, escaped) {
     if (this.options.highlight) {
-        const out = this.options.highlight(code, lang)
+        const out = this.options.highlight(code, lang);
         if (out != null && out !== code) {
-            code = out
+            escaped = true;
+            code = out;
         }
     }
 
-    const lineCode = code.split('\n')
-    const codeWrapper = lineCode.map((line, index) => `<span class="line" data-index="${index + 1}">${line}</span>${index !== lineCode.length - 1 ? '<br>' : ''}`.replace(/\s+/g, ' ')).join('')
-
     if (!lang) {
-        return '<pre><code>' +
-            codeWrapper +
-            '\n</code></pre>'
+        return '<pre><code>'
+          + (escaped ? code : escape(code, true))
+          + '</code></pre>';
     }
 
-    return '<pre><code class="hljs ' +
-        this.options.langPrefix +
-        escape(lang, true) +
-        '">' +
-        codeWrapper +
-        '\n</code></pre>\n'
+    return '<pre><code class="hljs '
+        + this.options.langPrefix
+        + escape(lang, true)
+        + '">'
+        + (escaped ? code : escape(code, true))
+        + '</code></pre>\n';
 }
+// renderer.code = function (code, lang) {
+//     if (this.options.highlight) {
+//         const out = this.options.highlight(code, lang)
+//         if (out != null && out !== code) {
+//             code = out
+//         }
+//     }
+
+//     const lineCode = code.split('\n')
+//     const codeWrapper = lineCode.map((line, index) => `<span class="line" data-index="${index + 1}">${line}</span>${index !== lineCode.length - 1 ? '<br>' : ''}`.replace(/\s+/g, ' ')).join('')
+
+//     if (!lang) {
+//         return '<pre><code>' +
+//             codeWrapper +
+//             '\n</code></pre>'
+//     }
+
+//     return '<pre><code class="hljs ' +
+//         this.options.langPrefix +
+//         escape(lang, true) +
+//         '">' +
+//         codeWrapper +
+//         '\n</code></pre>\n'
+// }
 
 marked.setOptions({
     renderer,
