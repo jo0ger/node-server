@@ -5,11 +5,11 @@ services:
         command: redis-server --appendonly yes --requirepass node-server
         volumes:
             - egg-redis:/data
-        networks: 
+        networks:
             - docker-node-server
         ports:
-            - 6379:6379
-  
+            - 6378:6378
+
     mongodb:
         image: mongo:3.6.7
         restart: always
@@ -20,10 +20,10 @@ services:
         volumes:
             - egg-mongo:/data/db
             - ./init.d/mongo/:/docker-entrypoint-initdb.d
-        networks: 
+        networks:
             - docker-node-server
         ports:
-            - 27017:27017
+            - 27016:27016
 
 volumes:
     egg-mongo:
