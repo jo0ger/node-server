@@ -86,7 +86,7 @@ module.exports = class SettingService extends ProxyService {
         let setting = await this.getItem()
         if (!setting) return null
         const github = setting.personal.github
-        if (!github.login) return
+        if (!github || !github.login) return
         const user = await this.service.github.getUserInfo(github.login)
         if (!user) return
         setting = await this.updateItemById(setting._id, {
