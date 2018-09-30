@@ -9,6 +9,7 @@ module.exports = app => {
     const SettingSchema = new Schema({
         // 站点设置
         site: {
+            logo: { type: String, validate: app.utils.validate.isUrl },
             welcome: { type: String, default: '' },
             links: [{
                 name: { type: String, required: true },
