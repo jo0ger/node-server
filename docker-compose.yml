@@ -30,7 +30,7 @@ services:
         networks:
             - docker-node-server
         ports:
-            - 6378:6378
+            - 6378:6379
 
     mongodb:
         image: mongo:3.6.7
@@ -45,7 +45,7 @@ services:
         networks:
             - docker-node-server
         ports:
-            - 27016:27016
+            - 27016:27017
 
 volumes:
     egg-mongo:

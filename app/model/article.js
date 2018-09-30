@@ -30,6 +30,8 @@ module.exports = app => {
             default: articleValidateConfig.source.default,
             validate: val => Object.values(articleValidateConfig.source.optional).includes(val)
         },
+        // source为1的时候的原文链接
+        from: { type: String, validate: app.utils.validate.isUrl },
         // 文章状态 （ 0 草稿 | 1 已发布 ）
         state: {
             type: Number,
