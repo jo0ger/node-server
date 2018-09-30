@@ -6,12 +6,13 @@ const { Controller } = require('egg')
 
 module.exports = class ArticleController extends Controller {
     get rules () {
+        const { state, source } = this.config.modelEnum.article
         return {
             list: {
                 page: { type: 'int', required: true, min: 1 },
                 limit: { type: 'int', required: false, min: 1 },
-                state: { type: 'enum', values: Object.values(this.config.modelEnum.article.state.optional), required: false },
-                source: { type: 'enum', values: Object.values(this.config.modelEnum.article.source.optional), required: false },
+                state: { type: 'enum', values: Object.values(state.optional), required: false },
+                source: { type: 'enum', values: Object.values(source.optional), required: false },
                 category: { type: 'string', required: false },
                 tag: { type: 'string', required: false },
                 keyword: { type: 'string', required: false },
@@ -28,8 +29,9 @@ module.exports = class ArticleController extends Controller {
                 keywords: { type: 'array', required: false },
                 category: { type: 'objectId', required: true },
                 tag: { type: 'array', required: false, itemType: 'objectId' },
-                state: { type: 'enum', values: Object.values(this.config.modelEnum.article.state.optional), required: true },
-                source: { type: 'enum', values: Object.values(this.config.modelEnum.article.source.optional), required: true },
+                state: { type: 'enum', values: Object.values(state.optional), required: true },
+                source: { type: 'enum', values: Object.values(source.optional), required: true },
+                from: { type: 'url', required: false },
                 thumb: { type: 'url', required: false },
                 createdAt: { type: 'string', required: false }
             },
@@ -40,8 +42,9 @@ module.exports = class ArticleController extends Controller {
                 keywords: { type: 'array', required: false },
                 category: { type: 'objectId', required: false },
                 tag: { type: 'array', required: false, itemType: 'objectId' },
-                state: { type: 'enum', values: Object.values(this.config.modelEnum.article.state.optional), required: false },
-                source: { type: 'enum', values: Object.values(this.config.modelEnum.article.source.optional), required: false },
+                state: { type: 'enum', values: Object.values(state.optional), required: false },
+                source: { type: 'enum', values: Object.values(source.optional), required: false },
+                from: { type: 'url', required: false },
                 thumb: { type: 'url', required: false },
                 createdAt: { type: 'string', required: false }
             }
@@ -176,6 +179,9 @@ module.exports = class ArticleController extends Controller {
     async create () {
         const { ctx } = this
         const body = ctx.validateBody(this.rules.create)
+        if (body.source === this.config.modelEnum.article.source.optional.REPRINT && !body.from) {
+            return ctx.fail(422, '转载文章缺少原链接')
+        }
         if (body.createdAt) {
             body.createdAt = new Date(body.createdAt)
         }
@@ -193,6 +199,9 @@ module.exports = class ArticleController extends Controller {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
         const body = ctx.validateBody(this.rules.update)
+        if (body.source === this.config.modelEnum.article.source.optional.REPRINT && !body.from) {
+            return ctx.fail(422, '转载文章缺少原链接')
+        }
         if (body.createdAt) {
             body.createdAt = new Date(body.createdAt)
         }
