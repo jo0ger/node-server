@@ -78,20 +78,12 @@ module.exports = class UserService extends ProxyService {
                     }
                 }
             } else {
-                user = await this.getItem({ name: author.name })
+                user = await this.create(Object.assign(update, {
+                    role: this.config.modelEnum.user.role.optional.NORMAL
+                }))
                 if (user) {
-                    // 名称重复，不能创建评论
-                    user = null
-                    error = '用户名重复，请修改后再提交'
-                } else {
-                    // 可以创建
-                    user = await this.create(Object.assign(update, {
-                        role: this.config.modelEnum.user.role.optional.NORMAL
-                    }))
-                    if (user) {
-                        this.service.notification.recordUser(user, 'create')
-                        this.service.stat.record('USER_CREATE', { user: user._id }, 'count')
-                    }
+                    this.service.notification.recordUser(user, 'create')
+                    this.service.stat.record('USER_CREATE', { user: user._id }, 'count')
                 }
             }
         }

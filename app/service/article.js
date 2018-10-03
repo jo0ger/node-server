@@ -139,31 +139,21 @@ module.exports = class ArticleService extends ProxyService {
         if (!this.ctx.session._isAuthed) {
             query.state = this.config.modelEnum.article.state.optional.PUBLISH
         }
-        const prev = await this.getItem(
-            query,
-            'title createdAt publishedAt thumb category',
-            {
-                sort: 'createdAt'
-            },
-            {
-                path: 'category',
-                select: 'name description'
+        const nextQuery = Object.assign({}, query, {
+            createdAt: {
+                $gt: data.createdAt
             }
-        )
-        query.createdAt = {
-            $gt: data.createdAt
+        })
+        const select = '-renderedContent'
+        const opt = { sort: 'createdAt' }
+        const populate = {
+            path: 'category',
+            select: 'name description'
         }
-        const next = await this.getItem(
-            query,
-            'title createdAt publishedAt thumb category',
-            {
-                sort: 'createdAt'
-            },
-            {
-                path: 'category',
-                select: 'name description'
-            }
-        )
+        const [prev, next] = await Promise.all([
+            this.getItem(query, select, opt, populate),
+            this.getItem(nextQuery, select, opt, populate)
+        ])
         return {
             prev: prev || null,
             next: next || null

@@ -14,7 +14,7 @@ module.exports = class CommentService extends ProxyService {
         const populate = [
             {
                 path: 'author',
-                select: 'github name avatar'
+                select: 'github name avatar email site'
             }, {
                 path: 'parent',
                 select: 'author meta sticky ups'
@@ -29,7 +29,7 @@ module.exports = class CommentService extends ProxyService {
         if (!this.ctx.session._isAuthed) {
             data = await this.getItem(
                 { _id: id, state: 1, spam: false },
-                '-content -state -updatedAt -type -spam',
+                '-content -state -updatedAt -spam',
                 null,
                 populate
             )

@@ -47,8 +47,7 @@ module.exports = {
         if (isObject(author)) {
             this.validate({
                 name: 'string',
-                email: 'string',
-                site: { type: 'string', required: false }
+                email: 'string'
             }, author)
         } else if (!isObjectId(author)) {
             this.throw(422, '发布人不存在')
