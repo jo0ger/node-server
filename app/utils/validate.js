@@ -27,7 +27,10 @@ Object.keys(validator).forEach(key => {
     }
 })
 
-exports.isUrl = (site = '') => validator.isURL(site, {
-    protocols: ['http', 'https'],
-    require_protocol: true
-})
+exports.isUrl = (site = '') => {
+    if (!site) return true
+    return validator.isURL(site, {
+        protocols: ['http', 'https'],
+        require_protocol: true
+    })
+}

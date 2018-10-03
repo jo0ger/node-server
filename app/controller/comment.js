@@ -42,7 +42,7 @@ module.exports = class CommentController extends Controller {
     async list () {
         const { ctx } = this
         ctx.query.page = Number(ctx.query.page)
-        const tranArray = ['limit', 'state', 'type', 'order', 'sortBy']
+        const tranArray = ['limit', 'state', 'type', 'order']
         tranArray.forEach(key => {
             if (ctx.query[key]) {
                 ctx.query[key] = Number(ctx.query[key])
@@ -103,6 +103,12 @@ module.exports = class CommentController extends Controller {
             query.parent = { $exists: false }
         }
 
+        // 排序
+        if (sortBy && order) {
+            options.sort = {}
+            options.sort[sortBy] = order
+        }
+
         // 未通过权限校验（前台获取文章列表）
         if (!ctx.session._isAuthed) {
             // 将评论状态重置为1
@@ -111,12 +117,6 @@ module.exports = class CommentController extends Controller {
             // 评论列表不需要content和state
             options.select = '-content -state -updatedAt -spam -type -meta.ip'
         } else {
-            // 排序
-            if (sortBy && order) {
-                options.sort = {}
-                options.sort[sortBy] = order
-            }
-
             // 起始日期
             if (startDate) {
                 const $gte = new Date(startDate)
@@ -134,9 +134,20 @@ module.exports = class CommentController extends Controller {
             }
         }
         const data = await this.service.comment.getLimitListByQuery(ctx.processPayload(query), options)
-        data
-            ? ctx.success(data, '评论列表获取成功')
-            : ctx.fail('评论列表获取失败')
+        if (!data) {
+            return ctx.fail('评论列表获取失败')
+        }
+
+        let { list, pageInfo } = data
+        list = await Promise.all(
+            list.map(async doc => {
+                doc.subCount = 0
+                const count = await this.service.comment.count({ parent: doc._id })
+                doc.subCount = count
+                return doc
+            })
+        )
+        ctx.success({ list, pageInfo }, '评论列表获取成功')
     }
 
     async item () {
@@ -171,7 +182,7 @@ module.exports = class CommentController extends Controller {
             return ctx.fail(error)
         } else if (user.mute) {
             // 被禁言
-            return ctx.fail('该用户已被禁言')
+            return ctx.fail('你已被禁言，请联系管理员解禁')
         }
         body.author = user._id
         const spamValid = await this.service.user.checkUserSpam(user)

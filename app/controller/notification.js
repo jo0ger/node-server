@@ -54,6 +54,13 @@ module.exports = class NotificationController extends Controller {
                     select: '-password'
                 }, {
                     path: 'target.comment',
+                    populate: [
+                        {
+                            path: 'article'
+                        }, {
+                            path: 'author'
+                        }
+                    ]
                 }, {
                     path: 'actors.from',
                     select: '-password'
