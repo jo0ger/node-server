@@ -52,7 +52,8 @@ module.exports = class ArticleService extends ProxyService {
             year: { $year: '$createdAt' },
             month: { $month: '$createdAt' },
             title: 1,
-            createdAt: 1
+            createdAt: 1,
+            source: 1
         }
         if (!this.ctx.session._isAuthed) {
             $match.state = 1
@@ -74,7 +75,8 @@ module.exports = class ArticleService extends ProxyService {
                             title: '$title',
                             _id: '$_id',
                             createdAt: '$createdAt',
-                            state: '$state'
+                            state: '$state',
+                            source: '$source'
                         }
                     }
                 }
@@ -97,7 +99,7 @@ module.exports = class ArticleService extends ProxyService {
                 })
                 return {
                     year,
-                    months
+                    months: months.sort((a, b) => b.month - a.month)
                 }
             })
         }
