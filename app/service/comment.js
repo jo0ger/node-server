@@ -80,7 +80,7 @@ module.exports = class CommentService extends ProxyService {
             if (forwardAuthor && forwardAuthor.email) {
                 this.service.mail.send(typeTitle, {
                     to: forwardAuthor.email,
-                    subject: `你在 ${this.config.author.name} 的博客的评论有了新的回复`,
+                    subject: '你在 Jooger.me 的博客的评论有了新的回复',
                     text: `来自 ${comment.author.name} 的回复：${comment.content}`,
                     html: `<p>来自 <a href="${comment.author.site || '#'}" target="_blank">${comment.author.name}</a> 的回复 => <a href="${permalink}" target="_blank">点击查看</a>：${comment.renderedContent}</p>`
                 })

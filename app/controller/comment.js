@@ -134,8 +134,10 @@ module.exports = class CommentController extends Controller {
             }
         }
         const data = await this.service.comment.getLimitListByQuery(ctx.processPayload(query), options)
+        const commentType = this.config.modelEnum.comment.type.optional.COMMENT
+        const typeText = type === commentType ? '评论' : '留言'
         if (!data) {
-            return ctx.fail('评论列表获取失败')
+            return ctx.fail(typeText + '列表获取失败')
         }
 
         let { list, pageInfo } = data
@@ -147,7 +149,7 @@ module.exports = class CommentController extends Controller {
                 return doc
             })
         )
-        ctx.success({ list, pageInfo }, '评论列表获取成功')
+        ctx.success({ list, pageInfo }, typeText + '列表获取成功')
     }
 
     async item () {
@@ -224,8 +226,10 @@ module.exports = class CommentController extends Controller {
                 // 如果是文章评论，则更新文章评论数量
                 this.service.article.updateCommentCount(data.article._id)
             }
-            // 发送邮件通知站主和被评论者
-            this.service.comment.sendCommentEmailToAdminAndUser(data)
+            if (this.config.isProd) {
+                // 发送邮件通知站主和被评论者
+                this.service.comment.sendCommentEmailToAdminAndUser(data)
+            }
             // 生成通告
             this.service.notification.recordComment(comment, 'create')
             ctx.success(data, data.type === COMMENT ? '评论发布成功' : '留言发布成功')
