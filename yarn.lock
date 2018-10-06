@@ -373,9 +373,9 @@ agentkeepalive@^3.4.1, agentkeepalive@^3.5.1:
   dependencies:
     humanize-ms "^1.2.1"
 
-agentx@^1.9.11:
-  version "1.9.11"
-  resolved "http://registry.npm.taobao.org/agentx/download/agentx-1.9.11.tgz#1058138977a53d814d975791a2f5b5afc3c3f44b"
+agentx@^1.9.3:
+  version "1.9.12"
+  resolved "http://registry.npm.taobao.org/agentx/download/agentx-1.9.12.tgz#e43565cc33b5f38402731ce5099b4d2f36cbbf88"
   dependencies:
     debug "^3.1.0"
     nounou "^1.2.1"
@@ -1893,6 +1893,14 @@ commander@~2.17.1:
   version "2.17.1"
   resolved "http://registry.npm.taobao.org/commander/download/commander-2.17.1.tgz#bd77ab7de6de94205ceacc72f1716d29f20a77bf"
 
+commandx@^1.5.0:
+  version "1.5.4"
+  resolved "http://registry.npm.taobao.org/commandx/download/commandx-1.5.4.tgz#2e09187a93df845433e9ae791e9922a7b16d8f10"
+  dependencies:
+    formstream "^1.1.0"
+    tunnel-agent "^0.6.0"
+    urllib "^2.22.0"
+
 common-bin@^2.7.1, common-bin@^2.7.3:
   version "2.7.3"
   resolved "http://registry.npm.taobao.org/common-bin/download/common-bin-2.7.3.tgz#9841b72d954ad0d62f08b0f530fde56aff0154e2"
@@ -2536,6 +2544,17 @@ ecdsa-sig-formatter@1.0.10:
 ee-first@1.1.1, ee-first@^1.1.1, ee-first@~1.1.1:
   version "1.1.1"
   resolved "http://registry.npm.taobao.org/ee-first/download/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
+
+egg-alinode-async@^2.1.2:
+  version "2.1.2"
+  resolved "http://registry.npm.taobao.org/egg-alinode-async/download/egg-alinode-async-2.1.2.tgz#14387d9279d449987cc19ed75a34c6a1da5704b5"
+  dependencies:
+    agentx "^1.9.3"
+    commandx "^1.5.0"
+    mkdirp "^0.5.1"
+    moment "^2.22.1"
+    mz "^2.7.0"
+    node-homedir "^1.1.0"
 
 egg-bin@^4.3.5:
   version "4.9.0"
@@ -3501,6 +3520,14 @@ form-data@^2.3.1:
 formidable@^1.2.0:
   version "1.2.1"
   resolved "http://registry.npm.taobao.org/formidable/download/formidable-1.2.1.tgz#70fb7ca0290ee6ff961090415f4b3df3d2082659"
+
+formstream@^1.1.0:
+  version "1.1.0"
+  resolved "http://registry.npm.taobao.org/formstream/download/formstream-1.1.0.tgz#51f3970f26136eb0ad44304de4cebb50207b4479"
+  dependencies:
+    destroy "^1.0.4"
+    mime "^1.3.4"
+    pause-stream "~0.0.11"
 
 fragment-cache@^0.2.1:
   version "0.2.1"
@@ -5275,7 +5302,7 @@ moment-timezone@^0.5.0:
   dependencies:
     moment ">= 2.9.0"
 
-"moment@>= 2.9.0", moment@^2.19.2, moment@^2.19.3, moment@^2.22.2:
+"moment@>= 2.9.0", moment@^2.19.2, moment@^2.19.3, moment@^2.22.1, moment@^2.22.2:
   version "2.22.2"
   resolved "http://registry.npm.taobao.org/moment/download/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
 
@@ -5966,7 +5993,7 @@ path-type@^3.0.0:
   dependencies:
     pify "^3.0.0"
 
-pause-stream@^0.0.11:
+pause-stream@^0.0.11, pause-stream@~0.0.11:
   version "0.0.11"
   resolved "http://registry.npm.taobao.org/pause-stream/download/pause-stream-0.0.11.tgz#fe5a34b0cbce12b5aa6a2b403ee2e73b602f1445"
   dependencies:
@@ -6153,7 +6180,7 @@ prop-types@^15.6.2:
     loose-envify "^1.3.1"
     object-assign "^4.1.1"
 
-proxy-agent@^2.1.0:
+proxy-agent@^2.1.0, proxy-agent@^2.3.1:
   version "2.3.1"
   resolved "http://registry.npm.taobao.org/proxy-agent/download/proxy-agent-2.3.1.tgz#3d49d863d46cf5f37ca8394848346ea02373eac6"
   dependencies:
@@ -7281,6 +7308,12 @@ tsscmp@1.0.5:
   version "1.0.5"
   resolved "http://registry.npm.taobao.org/tsscmp/download/tsscmp-1.0.5.tgz#7dc4a33af71581ab4337da91d85ca5427ebd9a97"
 
+tunnel-agent@^0.6.0:
+  version "0.6.0"
+  resolved "http://registry.npm.taobao.org/tunnel-agent/download/tunnel-agent-0.6.0.tgz#27a5dea06b36b04a0a9966774b290868f0fc40fd"
+  dependencies:
+    safe-buffer "^5.0.1"
+
 type-check@~0.3.2:
   version "0.3.2"
   resolved "http://registry.npm.taobao.org/type-check/download/type-check-0.3.2.tgz#5884cab512cf1d355e3fb784f30804b2b520db72"
@@ -7440,6 +7473,25 @@ urllib@^2.17.1, urllib@^2.24.0, urllib@^2.25.1, urllib@^2.29.1:
     iconv-lite "^0.4.15"
     ip "^1.1.5"
     proxy-agent "^2.1.0"
+    pump "^3.0.0"
+    qs "^6.4.0"
+    statuses "^1.3.1"
+    utility "^1.12.0"
+
+urllib@^2.22.0:
+  version "2.30.0"
+  resolved "http://registry.npm.taobao.org/urllib/download/urllib-2.30.0.tgz#68208f030e096ebeaf213110dc58d542220148c3"
+  dependencies:
+    any-promise "^1.3.0"
+    content-type "^1.0.2"
+    debug "^2.6.9"
+    default-user-agent "^1.0.0"
+    digest-header "^0.0.1"
+    ee-first "~1.1.1"
+    humanize-ms "^1.2.0"
+    iconv-lite "^0.4.15"
+    ip "^1.1.5"
+    proxy-agent "^2.3.1"
     pump "^3.0.0"
     qs "^6.4.0"
     statuses "^1.3.1"

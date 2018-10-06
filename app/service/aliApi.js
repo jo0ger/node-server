@@ -5,7 +5,7 @@
 const https = require('https')
 const { Service } = require('egg')
 
-module.exports = class MailService extends Service {
+module.exports = class AliApiService extends Service {
     lookupIp (ip) {
         return new Promise(resolve => {
             const req = https.request({

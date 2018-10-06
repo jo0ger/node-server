@@ -11,7 +11,11 @@ module.exports = app => {
         // 初始化管理员（如果有必要）
         await ctx.service.auth.seed()
         // 初始化配置（如果有必要）
-        await ctx.service.setting.seed()
+        const setting = await ctx.service.setting.seed()
+        // prod异步启动alinode
+        if (app.config.isProd) {
+            app.messenger.sendToAgent('alinode-run', setting.keys.alinode)
+        }
     })
 }
 
