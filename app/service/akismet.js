@@ -13,7 +13,7 @@ module.exports = class AkismetService extends Service {
                     if (err) {
                         this.app.coreLogger.error('评论验证失败，将跳过Spam验证，错误：', err.message)
                         this.service.notification.recordGeneral('AKISMET', 'CHECK_FAIL', err)
-                        return resolve(true)
+                        return resolve(false)
                     }
                     if (spam) {
                         this.app.coreLogger.warn('评论验证不通过，疑似垃圾评论')

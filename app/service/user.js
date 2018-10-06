@@ -28,12 +28,14 @@ module.exports = class UserService extends ProxyService {
     }
 
     // 创建用户
-    async create (user) {
+    async create (user, checkExist = true) {
         const { name } = user
-        const exist = await this.getItem({ name })
-        if (exist) {
-            this.logger.info('用户已存在，无需创建：' + name)
-            return exist
+        if (checkExist) {
+            const exist = await this.getItem({ name })
+            if (exist) {
+                this.logger.info('用户已存在，无需创建：' + name)
+                return exist
+            }
         }
         const data = await new this.model(user).save()
         const type = ['管理员', '用户'][data.role]
@@ -80,7 +82,7 @@ module.exports = class UserService extends ProxyService {
             } else {
                 user = await this.create(Object.assign(update, {
                     role: this.config.modelEnum.user.role.optional.NORMAL
-                }))
+                }), false)
                 if (user) {
                     this.service.notification.recordUser(user, 'create')
                     this.service.stat.record('USER_CREATE', { user: user._id }, 'count')
