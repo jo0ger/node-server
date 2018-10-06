@@ -49,9 +49,14 @@ module.exports = class SettingController extends Controller {
             null,
             populate
         )
-        data
-            ? ctx.success(data, '配置获取成功')
-            : ctx.fail('配置获取失败')
+        if (data) {
+            if (!data.personal.github) {
+                data.personal.github = {}
+            }
+            ctx.success(data, '配置获取成功')
+        } else {
+            ctx.fail('配置获取失败')
+        }
     }
 
     async update () {
