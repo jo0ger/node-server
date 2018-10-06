@@ -4,10 +4,10 @@
   "description": "",
   "private": true,
   "dependencies": {
-    "agentx": "^1.9.11",
     "akismet-api": "^4.2.0",
     "bcryptjs": "^2.4.3",
     "egg": "^2.2.1",
+    "egg-alinode-async": "^2.1.2",
     "egg-console": "^2.0.1",
     "egg-cors": "^2.1.0",
     "egg-mongoose": "^3.1.0",
@@ -29,7 +29,6 @@
     "moment": "^2.22.2",
     "mongoose": "5.2.8",
     "mongoose-paginate-v2": "^1.0.12",
-    "node-homedir": "^1.1.1",
     "nodemailer": "^4.6.8",
     "validator": "^10.6.0",
     "zlib": "^1.0.5"
