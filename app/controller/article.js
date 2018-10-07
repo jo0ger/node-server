@@ -119,10 +119,6 @@ module.exports = class ArticleController extends Controller {
             query.state = 1
             // 文章列表不需要content和state
             options.select = '-content -renderedContent -state'
-            options.sort = {
-                updatedAt: -1,
-                createdAt: -1
-            }
         } else {
             // 排序
             if (sortBy && order) {
