@@ -1,5 +1,5 @@
 module.exports = app => {
-    const backendRouter = app.router.namespace('/v2/backend')
+    const backendRouter = app.router.namespace('/backend')
     const { controller, middlewares } = app
     const auth = middlewares.auth(app)
 
