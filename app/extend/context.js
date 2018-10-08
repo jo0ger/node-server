@@ -53,22 +53,20 @@ module.exports = {
             this.throw(422, '发布人不存在')
         }
     },
-    async getLocation () {
+    async getCtxIp () {
         const req = this.req
-        const ip = (req.headers['x-forwarded-for'] ||
-            req.headers['x-real-ip'] ||
-            req.connection.remoteAddress ||
-            req.socket.remoteAddress ||
-            req.connection.socket.remoteAddress ||
-            req.ip ||
-            req.ips[0] || '').replace('::ffff:', '')
-        let location = {}
-        const { success, data } = await this.service.aliApi.lookupIp(ip)
-        if (success) {
-            location = data
-        } else {
-            location = geoip.lookup(ip) || {}
-        }
-        return { ip, location }
+        return (req.headers['x-forwarded-for']
+            || req.headers['x-real-ip']
+            || req.connection.remoteAddress
+            || req.socket.remoteAddress
+            || req.connection.socket.remoteAddress
+            || req.ip
+            || req.ips[0]
+            || ''
+        ).replace('::ffff:', '')
+    },
+    async getLocation () {
+        const ip = this.getCtxIp()
+        return await this.service.agent.lookupIp(ip)
     }
 }

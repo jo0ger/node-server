@@ -99,7 +99,7 @@ module.exports = class CommentService extends ProxyService {
         const url = this.config.author.url
         switch (type) {
         case COMMENT:
-            return `${url}/articles/${article._id || article}`
+            return `${url}/article/${article._id || article}`
         case MESSAGE:
             return `${url}/guestbook`
         default:

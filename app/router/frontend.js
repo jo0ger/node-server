@@ -1,34 +1,38 @@
 module.exports = app => {
-    const fontendRouter = app.router.namespace('')
+    const frontendRouter = app.router.namespace('')
     const { controller } = app
 
     // Article
-    fontendRouter.get('/articles', controller.article.list)
-    fontendRouter.get('/articles/archives', controller.article.archives)
-    fontendRouter.get('/articles/hot', controller.article.hot)
-    fontendRouter.get('/articles/:id', controller.article.item)
-    fontendRouter.patch('/articles/:id', controller.article.like)
-    fontendRouter.patch('/articles/:id/like', controller.article.like)
-    fontendRouter.patch('/articles/:id/unlike', controller.article.unlike)
+    frontendRouter.get('/articles', controller.article.list)
+    frontendRouter.get('/articles/archives', controller.article.archives)
+    frontendRouter.get('/articles/hot', controller.article.hot)
+    frontendRouter.get('/articles/:id', controller.article.item)
+    frontendRouter.patch('/articles/:id', controller.article.like)
+    frontendRouter.patch('/articles/:id/like', controller.article.like)
+    frontendRouter.patch('/articles/:id/unlike', controller.article.unlike)
 
     // Category
-    fontendRouter.get('/categories', controller.category.list)
-    fontendRouter.get('/categories/:id', controller.category.item)
+    frontendRouter.get('/categories', controller.category.list)
+    frontendRouter.get('/categories/:id', controller.category.item)
 
     // Tag
-    fontendRouter.get('/tags', controller.tag.list)
-    fontendRouter.get('/tags/:id', controller.tag.item)
+    frontendRouter.get('/tags', controller.tag.list)
+    frontendRouter.get('/tags/:id', controller.tag.item)
 
     // Comment
-    fontendRouter.get('/comments', controller.comment.list)
-    fontendRouter.get('/comments/:id', controller.comment.item)
-    fontendRouter.post('/comments', controller.comment.create)
-    fontendRouter.patch('/comments/:id/like', controller.comment.like)
-    fontendRouter.patch('/comments/:id/unlike', controller.comment.unlike)
+    frontendRouter.get('/comments', controller.comment.list)
+    frontendRouter.get('/comments/:id', controller.comment.item)
+    frontendRouter.post('/comments', controller.comment.create)
+    frontendRouter.patch('/comments/:id/like', controller.comment.like)
+    frontendRouter.patch('/comments/:id/unlike', controller.comment.unlike)
 
     // User
-    fontendRouter.get('/users/:id', controller.user.item)
+    frontendRouter.get('/users/:id', controller.user.item)
 
     // Setting
-    fontendRouter.get('/setting', controller.setting.index)
+    frontendRouter.get('/setting', controller.setting.index)
+
+    // Agent
+    frontendRouter.get('/agent/hitokoto', controller.agent.hitokoto)
+    frontendRouter.get('/agent/ip', controller.agent.ip)
 }
