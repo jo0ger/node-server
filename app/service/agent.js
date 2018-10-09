@@ -29,7 +29,7 @@ module.exports = class AgentService extends Service {
         }
     }
 
-    async hitokoto () {
+    async voice () {
         const res = await axios.get('https://api.lwl12.com/hitokoto/main/get', {
             params: {
                 encode: 'realjson',

@@ -33,6 +33,6 @@ module.exports = app => {
     frontendRouter.get('/setting', controller.setting.index)
 
     // Agent
-    frontendRouter.get('/agent/hitokoto', controller.agent.hitokoto)
+    frontendRouter.get('/agent/voice', controller.agent.voice)
     frontendRouter.get('/agent/ip', controller.agent.ip)
 }
