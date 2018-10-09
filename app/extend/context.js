@@ -53,7 +53,7 @@ module.exports = {
             this.throw(422, '发布人不存在')
         }
     },
-    async getCtxIp () {
+    getCtxIp () {
         const req = this.req
         return (req.headers['x-forwarded-for']
             || req.headers['x-real-ip']
