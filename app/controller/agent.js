@@ -1,8 +1,8 @@
 const { Controller } = require('egg')
 
 module.exports = class AgentController extends Controller {
-    async hitokoto () {
-        this.ctx.success(await this.service.agent.hitokoto())
+    async voice () {
+        this.ctx.success(await this.service.agent.voice())
     }
 
     async ip () {
