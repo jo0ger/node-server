@@ -9,7 +9,7 @@ module.exports = class Links extends Subscription {
         return {
             // 每天0点更新一次
             cron: '0 0 * * * *',
-            type: 'all'
+            type: 'worker'
         }
     }
 

@@ -8,8 +8,8 @@ module.exports = class Links extends Subscription {
     static get schedule () {
         return {
             // 每小时更新一次
-            cron: '0 0 */1 * * *',
-            type: 'all'
+            interval: '1h',
+            type: 'worker'
         }
     }
 
