@@ -95,7 +95,7 @@ module.exports = class SettingService extends ProxyService {
             }
         })
         // 个人github信息更新成功
-        this.logger.info('个人github信息更新成功')
+        this.logger.info('个人GitHub信息更新成功')
         this.mountToApp(setting)
         return setting
     }
