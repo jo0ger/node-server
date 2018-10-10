@@ -102,7 +102,7 @@ marked.setOptions({
     renderer,
     gfm: true,
     pedantic: false,
-    sanitize: false,
+    sanitize: true,
     tables: true,
     breaks: true,
     headerIds: true,
