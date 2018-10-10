@@ -16,7 +16,7 @@ services:
             - redis
             - mongodb
         volumes:
-            - /root/logs
+            - /root/logs:/root/logs
         networks:
             - docker-node-server
         # 端口映射

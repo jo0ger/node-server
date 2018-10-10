@@ -4,12 +4,13 @@
 
 const { Subscription } = require('egg')
 
-module.exports = class Links extends Subscription {
+module.exports = class UpdatePersonalGithubInfo extends Subscription {
     static get schedule () {
         return {
             // 每小时更新一次
             interval: '1h',
-            type: 'worker'
+            type: 'worker',
+            immediate: true
         }
     }
 

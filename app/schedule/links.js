@@ -4,7 +4,7 @@
 
 const { Subscription } = require('egg')
 
-module.exports = class Links extends Subscription {
+module.exports = class UpdateSiteLinks extends Subscription {
     static get schedule () {
         return {
             // 每天0点更新一次
