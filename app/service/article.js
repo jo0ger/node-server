@@ -120,7 +120,9 @@ module.exports = class ArticleService extends ProxyService {
                 tag: { $in: tag.map(t => t._id) }
             },
             'title thumb createdAt publishedAt meta category',
-            null,
+            {
+                sort: '-createdAt'
+            },
             {
                 path: 'category',
                 select: 'name description'
