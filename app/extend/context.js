@@ -1,5 +1,3 @@
-const geoip = require('geoip-lite')
-
 module.exports = {
     processPayload (payload) {
         if (!payload) return null

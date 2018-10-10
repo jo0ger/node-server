@@ -42,6 +42,7 @@
     "egg-mock": "^3.14.0",
     "eslint": "^4.11.0",
     "eslint-config-egg": "^6.0.0",
+    "pre-git": "^3.17.1",
     "release-it": "^7.6.1",
     "webstorm-disable-index": "^1.2.0"
   },
@@ -60,7 +61,8 @@
     "lint": "eslint . --fix",
     "ci": "npm run lint && npm run cov",
     "autod": "autod",
-    "rc": "release-it"
+    "rc": "release-it",
+    "commit": "commit-wizard"
   },
   "ci": {
     "version": "8"
@@ -74,5 +76,20 @@
     "email": "iamjooger@gmail.com",
     "url": "https://jooger.me"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "release": {
+    "analyzeCommits": "simple-commit-message"
+  },
+  "config": {
+    "pre-git": {
+      "commit-msg": "simple",
+      "pre-commit": [
+          "yarn lint"
+      ],
+      "pre-push": [],
+      "post-commit": [],
+      "post-checkout": [],
+      "post-merge": []
+    }
+  }
 }
