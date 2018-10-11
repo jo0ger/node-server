@@ -61,6 +61,10 @@ module.exports = app => {
             github: {
                 clientID: { type: String, default: '' },
                 clientSecret: { type: String, default: '' }
+            },
+            // 百度seo token
+            baiduSeo: {
+                token: { type: String, default: '' }
             }
         },
         limit: {
