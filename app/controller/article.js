@@ -186,9 +186,14 @@ module.exports = class ArticleController extends Controller {
             return ctx.fail('文章名称重复')
         }
         const data = await this.service.article.create(body)
-        data
-            ? ctx.success(data, '文章创建成功')
-            : ctx.fail('文章创建失败')
+        if (data) {
+            ctx.success(data, '文章创建成功')
+            if (!this.config.isProd) {
+                this.service.seo.baiduSeo('push', `${this.config.author.url}/article/${data._id}`)
+            }
+        } else {
+            ctx.fail('文章创建失败')
+        }
     }
 
     async update () {
@@ -218,18 +223,28 @@ module.exports = class ArticleController extends Controller {
             null,
             'category tag'
         )
-        data
-            ? ctx.success(data, '文章更新成功')
-            : ctx.fail('文章更新失败')
+        if (data) {
+            ctx.success(data, '文章更新成功')
+            if (!this.config.isProd) {
+                this.service.seo.baiduSeo('update', `${this.config.author.url}/article/${data._id}`)
+            }
+        } else {
+            ctx.fail('文章更新失败')
+        }
     }
 
     async delete () {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
         const data = await this.service.article.deleteItemById(params.id)
-        data
-            ? ctx.success('文章删除成功')
-            : ctx.fail('文章删除失败')
+        if (data) {
+            ctx.success(data, '文章删除成功')
+            if (!this.config.isProd) {
+                this.service.seo.baiduSeo('delete', `${this.config.author.url}/article/${data._id}`)
+            }
+        } else {
+            ctx.fail('文章删除失败')
+        }
     }
 
     async like () {
