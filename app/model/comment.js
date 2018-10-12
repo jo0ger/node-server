@@ -54,7 +54,7 @@ module.exports = app => {
         pre: {
             save (next) {
                 if (this.content) {
-                    this.renderedContent = app.utils.markdown.render(this.content)
+                    this.renderedContent = app.utils.markdown.render(this.content, true)
                 }
                 next()
             },
@@ -64,7 +64,7 @@ module.exports = app => {
                 const find = await this.model.findOne(this._conditions)
                 if (find) {
                     if (content && content !== find.content) {
-                        this._update.renderedContent = app.utils.markdown.render(content)
+                        this._update.renderedContent = app.utils.markdown.render(content, true)
                         this._update.updatedAt = Date.now()
                     }
                 }

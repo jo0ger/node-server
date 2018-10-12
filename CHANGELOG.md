@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v2.0.2
+
+2018-10-12
+
+* fix: github获取用户信息时clientID和clientSecret错误
+* fix: add marked sanitize control
+* fix: archive接口的月维度数据排序错误
+* fix: 关联文章排序错误
+
 ## v2.0.1
 
 2018-10-09
