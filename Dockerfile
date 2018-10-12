@@ -1,20 +1,18 @@
-FROM node:9.3.0
+## SEE: https://github.com/eggjs/egg/issues/1431
+FROM node:8.12.0-alpine
 
-LABEL author="Jooger <iamjooger@gmail.com>"
+RUN mkdir -p /usr/src/app
 
-RUN yarn global add pm2
+WORKDIR /usr/src/app
 
-COPY . /www/app/node-server/
+COPY package.json /usr/src/app/package.json
 
-WORKDIR /www/app/node-server
+RUN yarn config set registry 'https://registry.npm.taobao.org'
 
-RUN yarn
+RUN yarn install
 
-ENV HOST 0.0.0.0
-ENV PORT 3001
-ENV NODE_ENV docker
+COPY . /usr/src/app
 
-RUN ["chmod", "+x", "/www/app/node-server/docker-start.sh"]
-CMD /bin/bash /www/app/node-server/docker-start.sh $NODE_ENV
+EXPOSE 7001
 
-EXPOSE 3001
+CMD npm run docker

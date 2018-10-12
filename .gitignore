@@ -1,28 +1,12 @@
-# Logs
-logs
-*.log
-
-# Runtime data
-pids
-*.pid
-*.seed
-
-# Dependency directory
-# https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git-
-node_modules
-
-# Coverage directory used by tools like istanbul
-coverage
-
-# Debug log from npm
+logs/
 npm-debug.log
-
-# IDEA
-.vscode
-.idea
-
-.DS_Store
+yarn-error.log
+node_modules/
 package-lock.json
-
-# pm2
+coverage/
+.idea/
+run/
+.DS_Store
+*.sw*
+*.un~
 ecosystem.config.js
