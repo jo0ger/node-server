@@ -62,7 +62,7 @@ module.exports = class ArticleService extends ProxyService {
         }
         let data = await this.aggregate([
             { $match },
-            { $sort: { createdAt: 1 } },
+            { $sort: { createdAt: -1 } },
             { $project },
             {
                 $group: {
@@ -84,7 +84,8 @@ module.exports = class ArticleService extends ProxyService {
         ])
         let total = 0
         if (data && data.length) {
-            data = [...new Set(data.map(item => item._id.year))].map(year => {
+            // 先取出year，并且降序排列，再填充month
+            data = [...new Set(data.map(item => item._id.year).sort((a, b) => b - a))].map(year => {
                 const months = []
                 data.forEach(item => {
                     const { _id, articles } = item
