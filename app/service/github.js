@@ -42,7 +42,7 @@ module.exports = class GithubService extends Service {
             // 测试环境下 用测试配置
             gayhub = this.config.github
         } else {
-            const { keys } = this.service.setting.getItem()
+            const { keys } = this.app.setting
             if (!keys || !keys.github) {
                 this.logger.warn('未找到GitHub配置')
                 return null
