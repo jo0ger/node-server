@@ -188,7 +188,7 @@ module.exports = class ArticleController extends Controller {
         const data = await this.service.article.create(body)
         if (data) {
             ctx.success(data, '文章创建成功')
-            if (!this.config.isProd) {
+            if (this.config.isProd) {
                 this.service.seo.baiduSeo('push', `${this.config.author.url}/article/${data._id}`)
             }
         } else {
@@ -225,7 +225,7 @@ module.exports = class ArticleController extends Controller {
         )
         if (data) {
             ctx.success(data, '文章更新成功')
-            if (!this.config.isProd) {
+            if (this.config.isProd) {
                 this.service.seo.baiduSeo('update', `${this.config.author.url}/article/${data._id}`)
             }
         } else {
@@ -239,7 +239,7 @@ module.exports = class ArticleController extends Controller {
         const data = await this.service.article.deleteItemById(params.id)
         if (data) {
             ctx.success(data, '文章删除成功')
-            if (!this.config.isProd) {
+            if (this.config.isProd) {
                 this.service.seo.baiduSeo('delete', `${this.config.author.url}/article/${data._id}`)
             }
         } else {

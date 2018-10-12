@@ -42,12 +42,14 @@ renderer.link = function (href, title, text) {
 }
 
 renderer.image = function (href, title, text) {
+    const _title = title || text || ''
     return `
 		<img class="image-view"
 			src="${href}"
-			title="${title || text || ''}"
+			title="${_title}"
 			alt="${text || title || href}"
-		${this.options.xhtml ? '/' : ''}>
+        ${this.options.xhtml ? '/' : ''}>
+        ${_title ? `<p class="image-alt">《${_title}》</p>` : ''}
 	`.replace(/\s+/g, ' ').replace('\n', '')
 }
 
