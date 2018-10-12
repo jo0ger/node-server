@@ -218,7 +218,7 @@ module.exports = class CommentController extends Controller {
             return ctx.fail('检测为垃圾评论，请修改后在提交')
         }
         this.logger.info('评论检测正常，可以发布')
-        body.renderedContent = this.app.utils.markdown.render(body.content)
+        body.renderedContent = this.app.utils.markdown.render(body.content, true)
         const comment = await this.service.comment.create(body)
         if (comment) {
             const data = await this.service.comment.getItemById(comment._id)
@@ -294,7 +294,7 @@ module.exports = class CommentController extends Controller {
             }
         }
         if (body.content) {
-            body.renderedContent = this.app.utils.markdown.render(body.content)
+            body.renderedContent = this.app.utils.markdown.render(body.content, true)
         }
         let data = null
         if (!ctx.session._isAuthed) {

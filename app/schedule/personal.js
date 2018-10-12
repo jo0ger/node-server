@@ -9,8 +9,7 @@ module.exports = class UpdatePersonalGithubInfo extends Subscription {
         return {
             // 每小时更新一次
             interval: '1h',
-            type: 'worker',
-            immediate: true
+            type: 'worker'
         }
     }
 

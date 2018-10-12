@@ -14,7 +14,7 @@
     "requireUpstream": true,
     "src": {
         "commit": true,
-        "commitMessage": "[chore] release %s",
+        "commitMessage": "chore: release %s",
         "commitArgs": "",
         "tag": true,
         "tagName": "release-v%s",

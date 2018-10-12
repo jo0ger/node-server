@@ -102,7 +102,7 @@ marked.setOptions({
     renderer,
     gfm: true,
     pedantic: false,
-    sanitize: true,
+    sanitize: false,
     tables: true,
     breaks: true,
     headerIds: true,
@@ -125,4 +125,7 @@ function escape (html, encode) {
         .replace(/'/g, '&#39;')
 }
 
-exports.render = marked
+exports.render = (text, sanitize = false) => {
+    marked.setOptions({ sanitize })
+    return marked(text)
+}
