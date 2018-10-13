@@ -17,7 +17,7 @@ module.exports = class StatController extends Controller {
     }
 
     async count () {
-        // 文章浏览量 文章点赞数 文章评论量 站内留言量
+        // 文章浏览量 文章点赞数 文章评论量 站内留言量 用户数
         const [pv, up, comment, message, user] = await Promise.all(
             ['pv', 'up', 'comment', 'message', 'user'].map(type => {
                 return this.service.stat.getCount(type)

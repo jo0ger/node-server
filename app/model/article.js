@@ -24,7 +24,7 @@ module.exports = app => {
         tag: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
         // 缩略图 （图片uid, 图片名称，图片URL， 图片大小）
         thumb: { type: String, validate: app.utils.validate.isUrl },
-        // 来源 0 原创 | 1 转载
+        // 来源 0 原创 | 1 转载 | 2 混撰 | 3 翻译
         source: {
             type: Number,
             default: articleValidateConfig.source.default,

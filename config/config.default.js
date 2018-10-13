@@ -136,12 +136,14 @@ module.exports = appInfo => {
                     PUBLISH: 1
                 }
             },
-            // 来源 0 原创 | 1 转载
+            // 来源 0 原创 | 1 转载 | 2 混撰 | 3 翻译
             source: {
                 default: 0,
                 optional: {
                     ORIGINAL: 0,
-                    REPRINT: 1
+                    REPRINT: 1,
+                    HYBRID: 2,
+                    TRANSLATE: 3
                 }
             }
         },
