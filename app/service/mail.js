@@ -30,11 +30,11 @@ module.exports = class MailService extends Service {
         await new Promise((resolve, reject) => {
             client.sendMail(opt, (err, info) => {
                 if (err) {
-                    this.logger.error(type + toAdmin + ' 邮件发送失败，TO：' + opt.to + '，错误：' + err.message)
+                    this.logger.error(type + toAdmin + '邮件发送失败，TO：' + opt.to + '，错误：' + err.message)
                     this.service.notification.recordGeneral('MAIL', 'SEND_FAIL', err)
                     return reject(err)
                 }
-                this.logger.info(type + toAdmin + ' 邮件发送成功，TO：' + opt.to)
+                this.logger.info(type + toAdmin + '邮件发送成功，TO：' + opt.to)
                 resolve(info)
             })
         })
@@ -43,4 +43,5 @@ module.exports = class MailService extends Service {
     sendToAdmin (type, data) {
         return this.send(type, data, true)
     }
+
 }

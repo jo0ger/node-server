@@ -200,24 +200,26 @@ module.exports = class CommentController extends Controller {
         }
         // 永链
         const permalink = this.service.comment.getPermalink(body)
-        const isSpam = await this.service.akismet.checkSpam({
-            user_ip: ip,
-            user_agent: meta.ua,
-            referrer: meta.referer,
-            permalink,
-            comment_type: this.service.comment.getCommentType(type),
-            comment_author: user.name,
-            comment_author_email: user.email,
-            comment_author_url: user.site,
-            comment_content: content,
-            is_test: !this.config.isProd
-        })
-        // 如果是Spam评论
-        if (isSpam) {
-            this.logger.warn('检测为垃圾评论，禁止发布')
-            return ctx.fail('检测为垃圾评论，请修改后在提交')
+        if (this.config.isProd) {
+            const isSpam = await this.service.akismet.checkSpam({
+                user_ip: ip,
+                user_agent: meta.ua,
+                referrer: meta.referer,
+                permalink,
+                comment_type: this.service.comment.getCommentType(type),
+                comment_author: user.name,
+                comment_author_email: user.email,
+                comment_author_url: user.site,
+                comment_content: content,
+                is_test: !this.config.isProd
+            })
+            // 如果是Spam评论
+            if (isSpam) {
+                this.logger.warn('检测为垃圾评论，禁止发布')
+                return ctx.fail('检测为垃圾评论，请修改后在提交')
+            }
+            this.logger.info('评论检测正常，可以发布')
         }
-        this.logger.info('评论检测正常，可以发布')
         body.renderedContent = this.app.utils.markdown.render(body.content, true)
         const comment = await this.service.comment.create(body)
         if (comment) {
