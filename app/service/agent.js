@@ -35,7 +35,10 @@ module.exports = class AgentService extends Service {
                 encode: 'realjson',
                 charset: 'utf-8'
             }
+        }).catch(err => {
+            this.logger.error('获取一言失败：' + err)
+            return null
         })
-        return res.status === 200 ? res.data : null
+        return res && res.status === 200 ? res.data : null
     }
 }
