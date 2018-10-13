@@ -175,8 +175,9 @@ module.exports = class ArticleController extends Controller {
     async create () {
         const { ctx } = this
         const body = ctx.validateBody(this.rules.create)
-        if (body.source === this.config.modelEnum.article.source.optional.REPRINT && !body.from) {
-            return ctx.fail(422, '转载文章缺少原链接')
+        const { REPRINT, TRANSLATE } = this.config.modelEnum.article.source.optional
+        if ([REPRINT, TRANSLATE].find(item => item === body.source) && !body.from) {
+            return ctx.fail(422, '缺少原文章链接')
         }
         if (body.createdAt) {
             body.createdAt = new Date(body.createdAt)
@@ -200,8 +201,9 @@ module.exports = class ArticleController extends Controller {
         const { ctx } = this
         const params = ctx.validateParamsObjectId()
         const body = ctx.validateBody(this.rules.update)
-        if (body.source === this.config.modelEnum.article.source.optional.REPRINT && !body.from) {
-            return ctx.fail(422, '转载文章缺少原链接')
+        const { REPRINT, TRANSLATE } = this.config.modelEnum.article.source.optional
+        if ([REPRINT, TRANSLATE].find(item => item === body.source) && !body.from) {
+            return ctx.fail(422, '缺少原文章链接')
         }
         if (body.createdAt) {
             body.createdAt = new Date(body.createdAt)
