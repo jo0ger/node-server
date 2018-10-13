@@ -60,8 +60,29 @@ module.exports = class StatService extends ProxyService {
         return this.countFromToday(0, type)
     }
 
-    countTotal (type) {
-        return this.countFromToday(null, type)
+    async countTotal (type) {
+        if (['pv', 'up'].includes(type)) {
+            const res = await this.service.article.aggregate([
+                {
+                    $group: {
+                        _id: '$_id',
+                        total: {
+                            $sum: '$meta.' + type + 's'
+                        }
+                    }
+                }
+            ])
+            return res.reduce((sum, item) => {
+                sum += item.total
+                return sum
+            }, 0)
+        } else if (['comment', 'message'].includes(type)) {
+            return await this.service.comment.count({ type: ['comment', 'message'].findIndex(item => item === type) })
+        } else if (['user'].includes(type)) {
+            return await this.service.user.count({ role: this.config.modelEnum.user.role.optional.NORMAL })
+        }
+        // 上面都不支持时候，才走stat model数据
+        return await this.countFromToday(null, type)
     }
 
     countFromToday (subtract, type) {
