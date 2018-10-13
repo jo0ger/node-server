@@ -2,7 +2,13 @@
  * @desc Comment Services
  */
 
+const path = require('path')
+const fs = require('fs')
+const moment = require('moment')
+const Email = require('email-templates')
 const ProxyService = require('./proxy')
+
+const email = new Email()
 
 module.exports = class CommentService extends ProxyService {
     get model () {
@@ -20,7 +26,7 @@ module.exports = class CommentService extends ProxyService {
                 select: 'author meta sticky ups'
             }, {
                 path: 'forward',
-                select: 'author meta sticky ups'
+                select: 'author meta sticky ups renderedContent'
             }, {
                 path: 'article',
                 select: 'title, description thumb createdAt'
@@ -46,20 +52,20 @@ module.exports = class CommentService extends ProxyService {
         const { type, article } = comment
         const commentType = this.config.modelEnum.comment.type.optional
         const permalink = this.getPermalink(comment)
-        const adminType = this.getCommentType(comment.type)
         let adminTitle = '未知的评论'
         let typeTitle = ''
+        let at = null
         if (type === commentType.COMMENT) {
             // 文章评论
             typeTitle = '评论'
-            const at = await this.service.article.getItemById(article._id || article)
+            at = await this.service.article.getItemById(article._id || article)
             if (at && at._id) {
                 adminTitle = `博客文章《${at.title}》有了新的评论`
             }
         } else if (type === commentType.MESSAGE) {
             // 站内留言
             typeTitle = '留言'
-            adminTitle = '个人站点有新的留言'
+            adminTitle = '博客有新的留言'
         }
 
         const authorId = comment.author._id.toString()
@@ -67,22 +73,22 @@ module.exports = class CommentService extends ProxyService {
         const forwardAuthorId = comment.forward && comment.forward.author.toString()
         // 非管理员评论，发送给管理员邮箱
         if (authorId !== adminId) {
+            const html = await renderCommentEmailHtml(adminTitle, permalink, comment, at)
             this.service.mail.sendToAdmin(typeTitle, {
                 subject: adminTitle,
-                text: `来自 ${comment.author.name} 的${adminType}：${comment.content}`,
-                html: `<p>来自 <a href="${comment.author.site || '#'}" target="_blank">${comment.author.name}</a> 的${adminType} => <a href="${permalink}" target="_blank">点击查看</a>：${comment.renderedContent}</p>`
+                html
             })
         }
-
         // 非回复管理员，非回复自身，才发送给被评论者
         if (forwardAuthorId && forwardAuthorId !== authorId && forwardAuthorId !== adminId) {
             const forwardAuthor = await this.service.user.getItemById(forwardAuthorId)
             if (forwardAuthor && forwardAuthor.email) {
+                const subject = '你在 Jooger.me 的博客的评论有了新的回复'
+                const html = await renderCommentEmailHtml(subject, permalink, comment, at)
                 this.service.mail.send(typeTitle, {
                     to: forwardAuthor.email,
-                    subject: '你在 Jooger.me 的博客的评论有了新的回复',
-                    text: `来自 ${comment.author.name} 的回复：${comment.content}`,
-                    html: `<p>来自 <a href="${comment.author.site || '#'}" target="_blank">${comment.author.name}</a> 的回复 => <a href="${permalink}" target="_blank">点击查看</a>：${comment.renderedContent}</p>`
+                    subject,
+                    html
                 })
             }
         }
@@ -115,4 +121,23 @@ module.exports = class CommentService extends ProxyService {
     getCommentType (type) {
         return ['文章评论', '站点留言'][type] || '评论'
     }
+}
+
+async function renderCommentEmailHtml (title, link, comment) {
+    const data = Object.assign({}, comment, {
+        title,
+        link,
+        createdAt: moment(comment.createdAt).format('YYYY-MM-DD hh:mm')
+    })
+    const html = await email.render('comment', data)
+    const style = `<style>${getCommentStyle()}</style>`
+    return html + style
+}
+
+function getCommentStyle () {
+    const markdownStyle = path.resolve('emails/markdown.css')
+    const markdownCss = fs.readFileSync(markdownStyle, {
+        encoding: 'utf8'
+    })
+    return markdownCss
 }
