@@ -14,6 +14,8 @@ module.exports = class UpdatePersonalGithubInfo extends Subscription {
     }
 
     async subscribe () {
+        this.logger.info('开始更新个人Github信息')
         await this.service.setting.updateGithubInfo()
+        this.logger.info('结束更新个人Github信息')
     }
 }

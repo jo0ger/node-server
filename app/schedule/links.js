@@ -14,6 +14,8 @@ module.exports = class UpdateSiteLinks extends Subscription {
     }
 
     async subscribe () {
+        this.logger.info('开始更新友链')
         await this.service.setting.updateLinks()
+        this.logger.info('结束更新友链')
     }
 }
