@@ -66,5 +66,38 @@ module.exports = {
     async getLocation () {
         const ip = this.getCtxIp()
         return await this.service.agent.lookupIp(ip)
+    },
+    success (data = null, message) {
+        const { codeMap } = this.app.config
+        const successMsg = codeMap[200]
+        message = message || successMsg
+        if (this.app.utils.validate.isString(data)) {
+            message = data
+            data = null
+        }
+        this.status = 200
+        this.body = {
+            code: 200,
+            success: true,
+            message,
+            data
+        }
+    },
+    fail (code = -1, message = '', error = null) {
+        const { codeMap } = this.app.config
+        const failMsg = codeMap[-1]
+        if (this.app.utils.validate.isString(code)) {
+            error = message || null
+            message = code
+            code = -1
+        }
+        const body = {
+            code,
+            success: false,
+            message: message || codeMap[code] || failMsg
+        }
+        if (error) body.error = error
+        this.ctx.status = code === -1 ? 200 : code
+        this.ctx.body = body
     }
 }
