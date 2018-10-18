@@ -95,20 +95,13 @@ module.exports = appInfo => {
     }
 
     config.redis = {
-        clients: {
-            token: {
-                host: process.env.EGG_REDIS_HOST || '127.0.0.1',
-                port: process.env.EGG_REDIS_PORT || 6378,
-                db: 0,
-                password: process.env.EGG_REDIS_PASSWORD || appInfo.name
-            },
-            util: {
-                host: process.env.EGG_REDIS_HOST || '127.0.0.1',
-                port: process.env.EGG_REDIS_PORT || 6378,
-                db: 1,
-                password: process.env.EGG_REDIS_PASSWORD || appInfo.name
-            }
-        }
+        client: {
+            host: process.env.EGG_REDIS_HOST || '127.0.0.1',
+            port: process.env.EGG_REDIS_PORT || 6378,
+            db: 1,
+            password: process.env.EGG_REDIS_PASSWORD || appInfo.name
+        },
+        agent: true
     }
 
     // allowed origins
