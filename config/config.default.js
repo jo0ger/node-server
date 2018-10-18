@@ -22,7 +22,6 @@ module.exports = appInfo => {
     // add your config here
     config.middleware = [
         'gzip',
-        'response',
         'error',
         'headers'
     ]
