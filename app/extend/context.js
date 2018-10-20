@@ -97,7 +97,7 @@ module.exports = {
             message: message || codeMap[code] || failMsg
         }
         if (error) body.error = error
-        this.ctx.status = code === -1 ? 200 : code
-        this.ctx.body = body
+        this.status = code === -1 ? 200 : code
+        this.body = body
     }
 }
