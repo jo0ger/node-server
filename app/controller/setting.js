@@ -78,19 +78,27 @@ module.exports = class SettingController extends Controller {
                 }
             ]
         )
+        if (!data) {
+            return ctx.fail('配置更新失败')
+        }
+
         if (body.site && body.site.links) {
             // 抓取友链
             data = await this.service.setting.updateLinks()
         }
+
         if (body.personal && body.personal.github) {
             // 更新github信息
             data = await this.service.setting.updateGithubInfo()
         }
-        if (data) {
-            this.service.setting.mountToApp(data)
-            ctx.success(data, '配置更新成功')
-        } else {
-            ctx.fail('配置更新失败')
+
+        this.service.setting.mountToApp(data)
+
+        if (body.site && body.site.musicId && body.site.musicId !== exist.site.musicId) {
+            // 更新music缓存
+            this.service.agent.fetchRemoteMusicList(true)
         }
+
+        ctx.success(data, '配置更新成功')
     }
 }
