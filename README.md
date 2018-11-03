@@ -104,4 +104,85 @@ $ docker-compose down -v
 
 ## CHANGELOG
 
-[HERE](CHANGELOG.md)
+### v2.1.0
+
+2018-11-03
+
+* feat: 评论&留言的邮件通知支持自定义模板
+* feat: 添加音乐接口，支持网易云音乐
+* feat: voice支持redis缓存
+* refactor: 移除reponse的中间件，添加到context的extend中
+
+### v2.0.3
+
+2018-10-13
+
+* fix: marked开启sanitize
+* fix: marked渲染图片时title错误
+* fix: 统计数据-总数统计错误，添加情况分类
+* fix: voice获取失败情况处理
+
+
+### v2.0.2
+
+2018-10-12
+
+* fix: github获取用户信息时clientID和clientSecret错误
+* fix: add marked sanitize control
+* fix: archive接口的月维度数据排序错误
+* fix: 关联文章排序错误
+
+### v2.0.1
+
+2018-10-09
+
+* fix: 获取context的ip错误
+* chore: docker添加logs的volume
+
+### v2.0.0
+
+2018-10-07
+
+* 框架：用Egg重构
+* Model层
+    - article增加原创、转载字段
+    - 新增notification站内通知和stat站内统计模型
+    - user简化，去掉不必要字段
+    - setting重构，分类型
+* 接口
+    - 新增voice接口获取一些心灵鸡汤文字
+    - 新增ip接口查询ip
+* 服务
+    - ip查询优先阿里云IP查询，geoip-lite为降级
+    - 定时任务换成egg的schedule
+    - model proxy重构
+    - 业务逻辑拆分，每个model都有其对应的service层
+    - admin user和setting初始化流程变更
+    - 完善的日志系统
+* addon
+    - 接入sentry
+    - docker支持
+    - 增加release tag
+
+
+### v1.1.0
+
+* 文章归档api（2018.01.04）
+* Model代理 (2018.01.28)
+* ESlint (2018.02.01
+
+### v1.0.0
+
+* 音乐api (2017.9.26)
+* Github oauth 代理 (2017.9.28)
+* 文章分类api (2017.10.26)
+* Redis缓存部分数据 (2017.10.27 v1.1)
+* 评论api (2017.10.28)
+* 评论定位 [geoip](https://github.com/bluesmoon/node-geoip) (2017.10.29)
+* 垃圾评论过滤 [akismet](https://github.com/chrisfosterelli/akismet-api) (2017.10.29)
+* 用户禁言 (2017.10.29)
+* 评论发送邮件 [nodemailer](https://github.com/nodemailer/nodemailer) (2017.10.29)
+* GC优化 (2017.10.30，linux下需要预先安装g++, **已废弃**)
+* 个人动态api (2017.10.30)
+
+
