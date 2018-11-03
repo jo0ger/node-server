@@ -35,4 +35,6 @@ module.exports = app => {
     // Agent
     frontendRouter.get('/agent/voice', controller.agent.voice)
     frontendRouter.get('/agent/ip', controller.agent.ip)
+    frontendRouter.get('/agent/music', controller.agent.musicList)
+    frontendRouter.get('/agent/music/song/:id', controller.agent.musicSong)
 }

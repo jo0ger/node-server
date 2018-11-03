@@ -7919,6 +7919,10 @@ simple-commit-message@4.0.3:
     semver "5.5.0"
     word-wrap "1.2.3"
 
+simple-netease-cloud-music@^0.4.0:
+  version "0.4.0"
+  resolved "http://registry.npm.taobao.org/simple-netease-cloud-music/download/simple-netease-cloud-music-0.4.0.tgz#d8cd2d281b4fcd52c32283c84458896d727eec7b"
+
 slash@^1.0.0:
   version "1.0.0"
   resolved "http://registry.npm.taobao.org/slash/download/slash-1.0.0.tgz#c41f2f6c39fc16d1cd17ad4b5d896114ae470d55"

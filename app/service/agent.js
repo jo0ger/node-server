@@ -4,7 +4,10 @@
 
 const axios = require('axios')
 const geoip = require('geoip-lite')
+const NeteaseMusic = require('simple-netease-cloud-music')
 const { Service } = require('egg')
+
+const netease = new NeteaseMusic()
 
 module.exports = class AgentService extends Service {
     get voiceStoreConfig () {
@@ -12,6 +15,12 @@ module.exports = class AgentService extends Service {
             key: 'voice',
             // 最大限制500条缓存
             maxLen: 500
+        }
+    }
+
+    get musicStoreConfig () {
+        return {
+            key: 'music'
         }
     }
 
@@ -42,6 +51,7 @@ module.exports = class AgentService extends Service {
         const voiceStore = await this.app.store.get(key)
         let data = null
         if (voiceStore && voiceStore.length) {
+            // 随机
             data = voiceStore[Math.floor(Math.random() * voiceStore.length)]
         } else {
             data = await this.fetchRemoteVoice()
@@ -79,5 +89,91 @@ module.exports = class AgentService extends Service {
         }
         voiceStore.push(voice)
         await this.app.store.set(key, voiceStore)
+    }
+
+    async getMusicList () {
+        const { key } = this.musicStoreConfig
+        let list = await this.app.store.get(key)
+        if (!list) {
+            list = await this.fetchRemoteMusicList(true)
+        }
+        return list
+    }
+
+    async getMusicSong (songId) {
+        const { key } = this.musicStoreConfig
+        const list = await this.app.store.get(key)
+        let song = null
+        if (list) {
+            const hit = list.find(item => item.id === songId)
+            if (hit && hit.url) {
+                song = hit
+            }
+        }
+        return song || await this.fetchRemoteMusicSong(songId, true)
+    }
+
+    async fetchRemoteMusicList (cacheIt = true) {
+        const playListId = this.app.setting.site.musicId
+        if (!playListId) return
+        const data = await netease.playlist(playListId)
+            .catch(err => {
+                this.logger.error('获取歌单列表失败：' + err)
+                return null
+            })
+
+        if (!data || !data.playlist) return
+        const tracks = (data.playlist.tracks || []).map(({ name, id, ar, al, dt, tns }) => {
+            return {
+                id,
+                name,
+                duration: dt || 0,
+                album: al ? {
+                    name: al.name,
+                    cover: this.config.isProd ? (this.app.proxyUrl(al.picUrl) || '') : al.picUrl,
+                    tns: al.tns
+                } : {},
+                artists: ar ? ar.map(({ id, name }) => ({ id, name })) : [],
+                tns: tns || []
+            }
+        })
+        cacheIt && await this.setMusicListToStore(tracks)
+        return tracks
+    }
+
+    async fetchRemoteMusicSong (songId, cacheIt = true) {
+        if (!songId) return
+        songId = +songId
+        let song = await netease.url(songId)
+            .catch(err => {
+                this.logger.error('获取歌曲链接失败：' + err)
+                return null
+            })
+        if (!song || !song.data || !song.data[0]) return
+        song = song.data[0]
+        if (cacheIt) {
+            const cache = await this.setMusicSongToStore(songId, song.url)
+            return cache
+        }
+        return song
+    }
+
+    async setMusicListToStore (playlist) {
+        if (!playlist || !playlist.length) return
+        const { key } = this.musicStoreConfig
+        // 一周的缓存时间
+        await this.app.store.set(key, playlist, 7 * 24 * 60 * 60 * 1000)
+    }
+
+    async setMusicSongToStore (songId, songUrl) {
+        if (!songId || !songUrl) return
+        const { key } = this.musicStoreConfig
+        const list = await this.app.store.get(key)
+        if (!list) return
+        const hit = list.find(item => item.id === songId)
+        if (!hit) return
+        hit.url = songUrl
+        await this.setMusicListToStore(list)
+        return Object.assign(hit)
     }
 }
