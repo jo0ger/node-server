@@ -179,25 +179,6 @@ module.exports = class CommentController extends Controller {
         if ((parent && !forward) || (!parent && forward)) {
             return ctx.fail(422, '缺少父评论ID或被回复评论ID')
         }
-        const { user, error } = await this.service.user.checkCommentAuthor(author)
-        if (!user) {
-            return ctx.fail(error)
-        } else if (user.mute) {
-            // 被禁言
-            return ctx.fail('你已被禁言，请联系管理员解禁')
-        }
-        body.author = user._id
-        const spamValid = await this.service.user.checkUserSpam(user)
-        if (!spamValid) {
-            return ctx.fail('该用户的垃圾评论数量已达到最大限制，已被禁言')
-        }
-        const { ip, location } = await ctx.getLocation()
-        const meta = body.meta = {
-            location,
-            ip,
-            ua: ctx.req.headers['user-agent'] || '',
-            referer: ctx.req.headers.referer || ''
-        }
         // 永链
         const permalink = this.service.comment.getPermalink(body)
         if (this.config.isProd) {
@@ -219,6 +200,25 @@ module.exports = class CommentController extends Controller {
                 return ctx.fail('检测为垃圾评论，请修改后在提交')
             }
             this.logger.info('评论检测正常，可以发布')
+        }
+        const { user, error } = await this.service.user.checkCommentAuthor(author)
+        if (!user) {
+            return ctx.fail(error)
+        } else if (user.mute) {
+            // 被禁言
+            return ctx.fail('你已被禁言，请联系管理员解禁')
+        }
+        body.author = user._id
+        const spamValid = await this.service.user.checkUserSpam(user)
+        if (!spamValid) {
+            return ctx.fail('该用户的垃圾评论数量已达到最大限制，已被禁言')
+        }
+        const { ip, location } = await ctx.getLocation()
+        const meta = body.meta = {
+            location,
+            ip,
+            ua: ctx.req.headers['user-agent'] || '',
+            referer: ctx.req.headers.referer || ''
         }
         body.renderedContent = this.app.utils.markdown.render(body.content, true)
         const comment = await this.service.comment.create(body)
