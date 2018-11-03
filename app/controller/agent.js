@@ -12,4 +12,18 @@ module.exports = class AgentController extends Controller {
         }, ctx.query)
         this.ctx.success(await this.service.agent.lookupIp(ctx.query.ip), 'IP查询成功')
     }
+
+    async musicList () {
+        this.ctx.success(await this.service.agent.getMusicList())
+    }
+
+    async musicSong () {
+        const params = this.ctx.validateParams({
+            id: {
+                type: 'string',
+                required: true
+            }
+        })
+        this.ctx.success(await this.service.agent.getMusicSong(params.id))
+    }
 }
