@@ -182,6 +182,12 @@ module.exports = class CommentController extends Controller {
         // 永链
         const permalink = this.service.comment.getPermalink(body)
         const { ip, location } = await ctx.getLocation()
+        const meta = body.meta = {
+            location,
+            ip,
+            ua: ctx.req.headers['user-agent'] || '',
+            referer: ctx.req.headers.referer || ''
+        }
         if (this.config.isProd) {
             const isSpam = await this.service.akismet.checkSpam({
                 user_ip: ip,
@@ -213,12 +219,6 @@ module.exports = class CommentController extends Controller {
         const spamValid = await this.service.user.checkUserSpam(user)
         if (!spamValid) {
             return ctx.fail('该用户的垃圾评论数量已达到最大限制，已被禁言')
-        }
-        const meta = body.meta = {
-            location,
-            ip,
-            ua: ctx.req.headers['user-agent'] || '',
-            referer: ctx.req.headers.referer || ''
         }
         body.renderedContent = this.app.utils.markdown.render(body.content, true)
         const comment = await this.service.comment.create(body)
