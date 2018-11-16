@@ -65,30 +65,51 @@ module.exports = class UserService extends ProxyService {
             author.email && (update.email = author.email)
             update.avatar = this.app.utils.gravatar(author.email)
             const id = author.id || author._id
+
+            const updateUser = async (exist, update) => {
+                const hasDiff = exist && Object.keys(update).some(key => update[key] !== exist[key])
+                if (hasDiff) {
+                    // 有变动才更新
+                    user = await this.updateItemById(exist._id, update)
+                    console.log(user, exist);
+
+                    if (user) {
+                        this.logger.info('用户更新成功：' + exist.name)
+                        this.service.notification.recordUser(exist, 'update')
+                    }
+                } else {
+                    user = exist
+                }
+            }
+
             if (id) {
                 // 更新
                 if (isObjectId(id)) {
                     user = await this.getItemById(id)
-                    const hasDiff = user && Object.keys(update).some(key => update[key] !== user[key])
-                    if (hasDiff) {
-                        // 有变动才更新
-                        user = await this.updateItemById(id, update)
-                        if (user) {
-                            this.logger.info('用户更新成功：' + user.name)
-                            this.service.notification.recordUser(user, 'update')
-                        }
-                    }
+                    await updateUser(user, update)
                 }
             } else {
-                user = await this.create(Object.assign(update, {
-                    role: this.config.modelEnum.user.role.optional.NORMAL
-                }), false)
-                if (user) {
-                    this.service.notification.recordUser(user, 'create')
-                    this.service.stat.record('USER_CREATE', { user: user._id }, 'count')
+                // 根据 email 和 name 确定用户唯一性
+                const exist = await this.getItem({
+                    email: update.email,
+                    name: update.name
+                })
+                if (exist) {
+                    // 更新
+                    await updateUser(exist, update)
+                } else {
+                    // 创建
+                    user = await this.create(Object.assign(update, {
+                        role: this.config.modelEnum.user.role.optional.NORMAL
+                    }), false)
+                    if (user) {
+                        this.service.notification.recordUser(user, 'create')
+                        this.service.stat.record('USER_CREATE', { user: user._id }, 'count')
+                    }
                 }
             }
         }
+
         if (!user && !error) {
             error = '用户不存在'
         }
