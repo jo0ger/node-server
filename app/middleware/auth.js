@@ -3,7 +3,6 @@
  */
 
 const compose = require('koa-compose')
-const jwt = require('jsonwebtoken')
 
 module.exports = app => {
     return compose([
@@ -30,23 +29,12 @@ function verifyToken (app) {
     return async (ctx, next) => {
         ctx.session._verify = false
         const token = ctx.cookies.get(config.session.key, app.config.session.signed)
-        if (token) {
-            let decodedToken = null
-            try {
-                decodedToken = await jwt.verify(token, config.secrets)
-            } catch (err) {
-                logger.warn('Token校验出错，错误：' + err.message)
-                return ctx.fail(401, '登录失效，请重新登录')
-            }
-            if (decodedToken && decodedToken.exp > Math.floor(Date.now() / 1000)) {
-                // 已校验权限
-                ctx.session._verify = true
-                ctx.session._token = token
-                logger.info('Token校验成功')
-            }
-        } else {
-            return ctx.fail('请先登录')
-        }
+        if (!token) return ctx.fail('请先登录')
+        const verify = await app.verifyToken(token)
+        if (!verify) return ctx.fail(401, '登录失效，请重新登录')
+        ctx.session._verify = true
+        ctx.session._token = token
+        logger.info('Token校验成功')
         await next()
     }
 }

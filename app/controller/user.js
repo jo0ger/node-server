@@ -9,6 +9,10 @@ module.exports = class UserController extends Controller {
         return {
             update: {
                 mute: { type: 'boolean', required: false }
+            },
+            checkAdmin: {
+                userId: { type: 'objectId', required: true },
+                token: { type: 'string', required: true }
             }
         }
     }
@@ -53,5 +57,20 @@ module.exports = class UserController extends Controller {
         data
             ? ctx.success(data, '用户更新成功')
             : ctx.fail('用户更新失败')
+    }
+
+    async checkAdmin () {
+        const { ctx } = this
+        ctx.validate(this.rules.checkAdmin, ctx.query)
+        const { userId, token } = ctx.query
+        let isAdmin = false
+        const verify = await this.app.verifyToken(token)
+        if (verify) {
+            const user = await this.service.user.getItemById(userId)
+            if (user.role === this.config.modelEnum.user.role.optional.ADMIN) {
+                isAdmin = true
+            }
+        }
+        ctx.success(isAdmin, '校验管理员成功')
     }
 }

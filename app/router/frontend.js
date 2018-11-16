@@ -28,6 +28,7 @@ module.exports = app => {
 
     // User
     frontendRouter.get('/users/:id', controller.user.item)
+    frontendRouter.get('/users/admin/check', controller.user.checkAdmin)
 
     // Setting
     frontendRouter.get('/setting', controller.setting.index)
