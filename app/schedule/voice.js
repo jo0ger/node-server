@@ -7,8 +7,8 @@ const { Subscription } = require('egg')
 module.exports = class GetVoice extends Subscription {
     static get schedule () {
         return {
-            // 每分钟更新一次
-            interval: '1m',
+            // 每5分钟更新一次
+            interval: '5m',
             type: 'worker'
         }
     }

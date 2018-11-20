@@ -71,8 +71,6 @@ module.exports = class UserService extends ProxyService {
                 if (hasDiff) {
                     // 有变动才更新
                     user = await this.updateItemById(exist._id, update)
-                    console.log(user, exist);
-
                     if (user) {
                         this.logger.info('用户更新成功：' + exist.name)
                         this.service.notification.recordUser(exist, 'update')

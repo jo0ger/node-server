@@ -151,6 +151,7 @@ module.exports = class AgentService extends Service {
             })
         if (!song || !song.data || !song.data[0]) return
         song = song.data[0]
+        song.url = this.app.proxyUrl(song.url)
         if (cacheIt) {
             const cache = await this.setMusicSongToStore(songId, song.url)
             return cache
@@ -161,8 +162,8 @@ module.exports = class AgentService extends Service {
     async setMusicListToStore (playlist) {
         if (!playlist || !playlist.length) return
         const { key } = this.musicStoreConfig
-        // 一周的缓存时间
-        await this.app.store.set(key, playlist, 7 * 24 * 60 * 60 * 1000)
+        // 1小时的缓存时间
+        await this.app.store.set(key, playlist, 60 * 60 * 1000)
     }
 
     async setMusicSongToStore (songId, songUrl) {
