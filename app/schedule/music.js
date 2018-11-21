@@ -9,7 +9,8 @@ module.exports = class UpdateMusic extends Subscription {
         return {
             // 每小时更新一次
             interval: '1h',
-            type: 'worker'
+            type: 'worker',
+            immediate: true
         }
     }
 
@@ -20,9 +21,7 @@ module.exports = class UpdateMusic extends Subscription {
         list = await Promise.all(list.map(async item => {
             const song = await this.service.agent.fetchRemoteMusicSong(item.id, false)
             if (song) {
-                return Object.assign({}, item, {
-                    url: song.url
-                })
+                return Object.assign({}, item, song)
             }
             return item
         }))

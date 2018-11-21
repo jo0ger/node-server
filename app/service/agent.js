@@ -110,7 +110,7 @@ module.exports = class AgentService extends Service {
                 song = hit
             }
         }
-        return song || await this.fetchRemoteMusicSong(songId, true)
+        return song || await this.fetchRemoteMusicSong(songId)
     }
 
     async fetchRemoteMusicList (cacheIt = true) {
@@ -144,17 +144,45 @@ module.exports = class AgentService extends Service {
     async fetchRemoteMusicSong (songId, cacheIt = true) {
         if (!songId) return
         songId = +songId
-        let song = await netease.url(songId)
-            .catch(err => {
-                this.logger.error('获取歌曲链接失败：' + err)
-                return null
-            })
-        if (!song || !song.data || !song.data[0]) return
-        song = song.data[0]
-        song.url = this.app.proxyUrl(song.url)
+
+        const app = this.app
+
+        // 获取歌曲链接
+        async function fetchUrl () {
+            let song = await netease.url(songId)
+                .catch(err => {
+                    this.logger.error('获取歌曲链接失败：' + err)
+                    return null
+                })
+            if (!song || !song.data || !song.data[0]) return null
+            song = song.data[0]
+            song.url = app.proxyUrl(song.url)
+            return song
+        }
+
+        // 获取歌词
+        async function fetchLyric () {
+            const res = {}
+            const { lrc, tlyric } = await netease.lyric(songId)
+                .catch(err => {
+                    this.logger.error('获取歌曲歌词失败：' + err)
+                    return {
+                        lrc: null,
+                        tlyric: null
+                    }
+                })
+            res.lyric = lrc && lrc.lyric || null
+            res.tlyric = tlyric && tlyric.lyric || null
+            return res
+        }
+        const song = await fetchUrl()
+        const { lyric, tlyric } = await fetchLyric()
+        Object.assign(song, {
+            lyric: parseLyric(lyric, tlyric)
+        })
+        // Object.assign(song, lyric)
         if (cacheIt) {
-            const cache = await this.setMusicSongToStore(songId, song.url)
-            return cache
+            return await this.setMusicSongToStore(songId, song)
         }
         return song
     }
@@ -166,15 +194,60 @@ module.exports = class AgentService extends Service {
         await this.app.store.set(key, playlist, 60 * 60 * 1000)
     }
 
-    async setMusicSongToStore (songId, songUrl) {
-        if (!songId || !songUrl) return
+    async setMusicSongToStore (songId, song) {
+        if (!songId || !song) return
         const { key } = this.musicStoreConfig
         const list = await this.app.store.get(key)
         if (!list) return
         const hit = list.find(item => item.id === songId)
         if (!hit) return
-        hit.url = songUrl
+        Object.assign(hit, song)
         await this.setMusicListToStore(list)
         return Object.assign(hit)
     }
+}
+
+// 歌词时间正则 => 01:59.999
+const lrcTimeReg = /\[(([0-5][0-9]):([0-5][0-9])\.(\d+))\]/g
+/**
+ * 解析歌词
+ * @param {String} lrc 原版歌词
+ * @param {String} tlrc 翻译歌词
+ * @return {Array<Array>} 解析后的歌词
+ */
+function parseLyric (lrc, tlrc) {
+    if (!lrc) return []
+    function parse (text) {
+        if (!text) text = ''
+        return text.split('\n').reduce((prev, line) => {
+            const match = lrcTimeReg.exec(line)
+            if (match) {
+                const time = parseTime(match[1])
+                prev[time] = line.replace(lrcTimeReg, '') || '~~~'
+            }
+            return prev
+        }, {})
+    }
+
+    const lrcParsed = parse(lrc)
+    const tlrcParsed = parse(tlrc)
+
+    return Object.keys(lrcParsed).reduce((prev, time) => {
+        prev.push({
+            time,
+            lrc: lrcParsed[time],
+            tlrc: tlrcParsed[time] || ''
+        })
+        return prev
+    }, [])
+}
+
+function parseTime (time) {
+    time = time.split(':')
+    if (time.length !== 2) {
+        return 0
+    }
+    const minutes = parseInt(time[0])
+    const seconds = parseFloat(time[1])
+    return minutes * 60 + seconds
 }
