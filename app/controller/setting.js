@@ -67,6 +67,8 @@ module.exports = class SettingController extends Controller {
             return ctx.fail('配置未找到')
         }
         const update = this.app.merge({}, exist, body)
+        // 先不更新友链，在下方更新
+        update.site.links = exist.site.links
         let data = await this.service.setting.updateItemById(
             exist._id,
             update,
@@ -84,7 +86,7 @@ module.exports = class SettingController extends Controller {
 
         if (body.site && body.site.links) {
             // 抓取友链
-            data = await this.service.setting.updateLinks()
+            data = await this.service.setting.updateLinks(body.site.links)
         }
 
         if (body.personal && body.personal.github) {

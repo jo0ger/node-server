@@ -34,7 +34,7 @@ module.exports = class SettingService extends ProxyService {
 
     /**
      * @desc 抓取并生成友链
-     * @param {Array} links 友链
+     * @param {Array} links 需要更新的友链
      * @return {Array} 抓取后的友链
      */
     async generateLinks (links = []) {
@@ -42,11 +42,12 @@ module.exports = class SettingService extends ProxyService {
         links = await Promise.all(
             links.map(async link => {
                 if (link) {
+                    link.id = link.id || this.app.utils.share.createObjectId()
                     const userInfo = await this.service.github.getUserInfo(link.github)
                     if (userInfo) {
                         link.name = link.name || userInfo.name
-                        link.avatar = this.app.proxyUrl(userInfo.avatar_url)
-                        link.slogan = userInfo.bio
+                        link.avatar = this.app.proxyUrl(link.avatar || userInfo.avatar_url)
+                        link.slogan = link.slogan || userInfo.bio
                         link.site = link.site || userInfo.blog || userInfo.url
                     }
                     return link
@@ -60,12 +61,13 @@ module.exports = class SettingService extends ProxyService {
 
     /**
      * @desc 更新友链
+     * @param {Array} links 需要更新的友链
      * @return {Setting} 更新友链后的配置数据
      */
-    async updateLinks () {
+    async updateLinks (links) {
         let setting = await this.getItem()
         if (!setting) return null
-        const update = await this.generateLinks(setting.site.links)
+        const update = await this.generateLinks(Array.isArray(links) && links || setting.site.links)
         if (!update.length) return
         setting = await this.updateItemById(setting._id, {
             $set: {

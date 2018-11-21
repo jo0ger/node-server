@@ -12,6 +12,7 @@ module.exports = app => {
             logo: { type: String, validate: app.utils.validate.isUrl },
             welcome: { type: String, default: '' },
             links: [{
+                id: { type: Schema.Types.ObjectId, required: true },
                 name: { type: String, required: true },
                 github: { type: String, default: '' },
                 avatar: { type: String, default: '' },
