@@ -98,7 +98,7 @@ module.exports = class SettingController extends Controller {
 
         if (body.site && body.site.musicId && body.site.musicId !== exist.site.musicId) {
             // 更新music缓存
-            this.service.agent.fetchRemoteMusicList(true)
+            this.app.runSchedule('music')
         }
 
         ctx.success(data, '配置更新成功')

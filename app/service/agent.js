@@ -95,7 +95,7 @@ module.exports = class AgentService extends Service {
         const { key } = this.musicStoreConfig
         let list = await this.app.store.get(key)
         if (!list) {
-            list = await this.fetchRemoteMusicList(true)
+            list = await this.fetchRemoteMusicList()
         }
         return list
     }
@@ -177,12 +177,13 @@ module.exports = class AgentService extends Service {
         }
         const song = await fetchUrl()
         const { lyric, tlyric } = await fetchLyric()
-        Object.assign(song, {
-            lyric: parseLyric(lyric, tlyric)
-        })
-        // Object.assign(song, lyric)
-        if (cacheIt) {
-            return await this.setMusicSongToStore(songId, song)
+        if (song) {
+            Object.assign(song, {
+                lyric: parseLyric(lyric, tlyric)
+            })
+            if (cacheIt) {
+                return await this.setMusicSongToStore(songId, song)
+            }
         }
         return song
     }
@@ -232,14 +233,17 @@ function parseLyric (lrc, tlrc) {
     const lrcParsed = parse(lrc)
     const tlrcParsed = parse(tlrc)
 
-    return Object.keys(lrcParsed).reduce((prev, time) => {
-        prev.push({
-            time,
-            lrc: lrcParsed[time],
-            tlrc: tlrcParsed[time] || ''
-        })
-        return prev
-    }, [])
+    return Object.keys(lrcParsed)
+        .map(time => parseFloat(time))
+        .sort((a, b) => a - b)
+        .reduce((prev, time) => {
+            prev.push({
+                time,
+                lrc: lrcParsed[time],
+                tlrc: tlrcParsed[time] || ''
+            })
+            return prev
+        }, [])
 }
 
 function parseTime (time) {

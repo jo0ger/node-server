@@ -8,7 +8,7 @@ module.exports = class UpdateMusic extends Subscription {
     static get schedule () {
         return {
             // 每小时更新一次
-            interval: '1h',
+            interval: '15s',
             type: 'worker',
             immediate: true
         }
