@@ -18,7 +18,7 @@ module.exports = class UpdateMusic extends Subscription {
         this.logger.info('开始更新Music')
         // 先不缓存到redis中
         let list = await this.service.agent.fetchRemoteMusicList(false)
-        list = await Promise.all(list.map(async item => {
+        list = await Promise.all((list || []).map(async item => {
             const song = await this.service.agent.fetchRemoteMusicSong(item.id, false)
             if (song) {
                 return Object.assign({}, item, song)
