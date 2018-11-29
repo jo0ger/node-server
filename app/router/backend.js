@@ -62,4 +62,11 @@ module.exports = app => {
     // Stat
     backendRouter.get('/stat/count', auth, controller.stat.count)
     backendRouter.get('/stat/trend', auth, controller.stat.trend)
+
+    // Moment
+    backendRouter.get('/moments', auth, controller.moment.list)
+    backendRouter.get('/moments/:id', auth, controller.moment.item)
+    backendRouter.post('/moments', auth, controller.moment.create)
+    backendRouter.patch('/moments/:id', auth, controller.moment.update)
+    backendRouter.delete('/moments/:id', auth, controller.moment.delete)
 }

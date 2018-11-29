@@ -42,6 +42,9 @@ module.exports = class CommentController extends Controller {
     async list () {
         const { ctx } = this
         ctx.query.page = Number(ctx.query.page)
+        if (ctx.query.limit) {
+            ctx.query.limit = Number(ctx.query.limit)
+        }
         const tranArray = ['limit', 'state', 'type', 'order']
         tranArray.forEach(key => {
             if (ctx.query[key]) {

@@ -38,4 +38,8 @@ module.exports = app => {
     frontendRouter.get('/agent/ip', controller.agent.ip)
     frontendRouter.get('/agent/music', controller.agent.musicList)
     frontendRouter.get('/agent/music/song/:id', controller.agent.musicSong)
+
+    // Moment
+    frontendRouter.get('/moments', controller.moment.list)
+    frontendRouter.get('/moments/:id', controller.moment.item)
 }
