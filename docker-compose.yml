@@ -1,6 +1,7 @@
 version: "3"
 services:
     node-server:
+        container_name: node-server
         # 阿里云容器代理
         image: registry.cn-beijing.aliyuncs.com/jooger/node-server:latest
         # 环境变量
@@ -24,6 +25,7 @@ services:
             - 7001:7001
 
     redis:
+        container_name: redis
         image: redis:4.0.11-alpine
         # appendonly 数据持久化
         command: redis-server --appendonly yes --requirepass node-server
@@ -35,6 +37,7 @@ services:
             - 6378:6379
 
     mongodb:
+        container_name: mongodb
         image: mongo:3.6.7
         restart: always
         environment:
@@ -44,6 +47,7 @@ services:
         volumes:
             - egg-mongo:/data/db
             - ./init.d/mongo/:/docker-entrypoint-initdb.d
+            - /root/backup/data/db:/root/backup
         networks:
             - docker-node-server
         ports:

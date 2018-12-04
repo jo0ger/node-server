@@ -8,7 +8,7 @@ module.exports = class MomentController extends Controller {
     get rules () {
         return {
             list: {
-                page: { type: 'int', required: true, min: 1 },
+                page: { type: 'int', required: false, min: 1 },
                 limit: { type: 'int', required: false, min: 1 }
             },
             create: {
@@ -40,7 +40,7 @@ module.exports = class MomentController extends Controller {
 
     async list () {
         const { ctx } = this
-        ctx.query.page = Number(ctx.query.page)
+        ctx.query.page = Number(ctx.query.page || 1)
         if (ctx.query.limit) {
             ctx.query.limit = Number(ctx.query.limit)
         }
@@ -52,6 +52,9 @@ module.exports = class MomentController extends Controller {
             },
             page,
             limit: limit || this.app.setting.limit.momentCount || 10
+        }
+        if (!ctx.session._isAuthed) {
+            options.select = '-location.ip -location.isp -location.isp_id'
         }
         const query = {}
         // 搜索关键词

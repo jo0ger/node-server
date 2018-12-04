@@ -41,5 +41,4 @@ module.exports = app => {
 
     // Moment
     frontendRouter.get('/moments', controller.moment.list)
-    frontendRouter.get('/moments/:id', controller.moment.item)
 }

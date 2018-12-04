@@ -465,18 +465,15 @@ akismet-api@^4.2.0:
     bluebird "^3.1.1"
     superagent "^3.8.0"
 
-ali-oss@^4.10.1:
-  version "4.15.1"
-  resolved "http://registry.npm.taobao.org/ali-oss/download/ali-oss-4.15.1.tgz#e64a7aa9ddfca4573f8c143a59f55dddb1f49305"
+ali-oss@^6.0.1:
+  version "6.0.1"
+  resolved "http://registry.npm.taobao.org/ali-oss/download/ali-oss-6.0.1.tgz#27648230db3070dc39cb7492e963562437c661f0"
   dependencies:
     address "^1.0.0"
     agentkeepalive "^3.4.1"
     any-promise "^1.3.0"
     bowser "^1.6.0"
-    co "^4.6.0"
     co-defer "^1.0.0"
-    co-gather "^0.0.1"
-    co-priority-queue "^1.0.3"
     copy-to "^2.0.1"
     dateformat "^2.0.0"
     debug "^2.2.0"
@@ -488,9 +485,10 @@ ali-oss@^4.10.1:
     jstoxml "^0.2.3"
     merge-descriptors "^1.0.1"
     mime "^1.3.4"
+    mz-modules "^2.1.0"
     platform "^1.3.1"
     sdk-base "^2.0.1"
-    stream-http "^2.8.0"
+    stream-http "2.8.2"
     stream-wormhole "^1.0.4"
     urllib "^2.17.1"
     utility "^1.8.0"
@@ -2072,26 +2070,12 @@ co-defer@^1.0.0:
   version "1.0.0"
   resolved "http://registry.npm.taobao.org/co-defer/download/co-defer-1.0.0.tgz#3e4a787a8eed6b0a21ee287c094f7e8de0d3c818"
 
-co-gather@^0.0.1:
-  version "0.0.1"
-  resolved "http://registry.npm.taobao.org/co-gather/download/co-gather-0.0.1.tgz#efa35fbef02c9f647d8a740b3f5db731862535bc"
-  dependencies:
-    co-thread "0.0.1"
-
 co-mocha@^1.2.2:
   version "1.2.2"
   resolved "http://registry.npm.taobao.org/co-mocha/download/co-mocha-1.2.2.tgz#c4fdf24d37f43ca4da668b14542a96e9377479ab"
   dependencies:
     co "^4.0.0"
     is-generator "^1.0.1"
-
-co-priority-queue@^1.0.3:
-  version "1.0.3"
-  resolved "http://registry.npm.taobao.org/co-priority-queue/download/co-priority-queue-1.0.3.tgz#b9646e00e84439fb15563d61b68bee2ba5169b4f"
-
-co-thread@0.0.1:
-  version "0.0.1"
-  resolved "http://registry.npm.taobao.org/co-thread/download/co-thread-0.0.1.tgz#57713f0ef4b87e5595d4f23711ffe4b3b6de5e74"
 
 co@^4.0.0, co@^4.6.0:
   version "4.6.0"
@@ -3177,12 +3161,6 @@ egg-onerror@^2.1.0:
     koa-onerror "^4.0.0"
     mustache "^2.3.0"
     stack-trace "^0.0.10"
-
-egg-oss@^1.1.0:
-  version "1.1.0"
-  resolved "http://registry.npm.taobao.org/egg-oss/download/egg-oss-1.1.0.tgz#848d778e76619fc69d4d50e9120b4ed55d9e77a1"
-  dependencies:
-    ali-oss "^4.10.1"
 
 egg-path-matching@^1.0.0, egg-path-matching@^1.0.1:
   version "1.0.1"
@@ -8223,9 +8201,9 @@ stream-combiner@~0.0.4:
   dependencies:
     duplexer "~0.1.1"
 
-stream-http@^2.8.0:
-  version "2.8.3"
-  resolved "http://registry.npm.taobao.org/stream-http/download/stream-http-2.8.3.tgz#b2d242469288a5a27ec4fe8933acf623de6514fc"
+stream-http@2.8.2:
+  version "2.8.2"
+  resolved "http://registry.npm.taobao.org/stream-http/download/stream-http-2.8.2.tgz#4126e8c6b107004465918aa2fc35549e77402c87"
   dependencies:
     builtin-status-codes "^3.0.0"
     inherits "^2.0.1"
@@ -8802,7 +8780,26 @@ url-to-options@^1.0.1:
   version "1.0.1"
   resolved "http://registry.npm.taobao.org/url-to-options/download/url-to-options-1.0.1.tgz#1505a03a289a48cbd7a434efbaeec5055f5633a9"
 
-urllib@^2.17.1, urllib@^2.22.0, urllib@^2.24.0, urllib@^2.25.1, urllib@^2.29.1, urllib@^2.31.1:
+urllib@^2.17.1:
+  version "2.31.3"
+  resolved "http://registry.npm.taobao.org/urllib/download/urllib-2.31.3.tgz#10fe5e71c242376e1450cc43573ac485db19029f"
+  dependencies:
+    any-promise "^1.3.0"
+    content-type "^1.0.2"
+    debug "^2.6.9"
+    default-user-agent "^1.0.0"
+    digest-header "^0.0.1"
+    ee-first "~1.1.1"
+    humanize-ms "^1.2.0"
+    iconv-lite "^0.4.15"
+    ip "^1.1.5"
+    proxy-agent "^2.3.1"
+    pump "^3.0.0"
+    qs "^6.4.0"
+    statuses "^1.3.1"
+    utility "^1.12.0"
+
+urllib@^2.22.0, urllib@^2.24.0, urllib@^2.25.1, urllib@^2.29.1, urllib@^2.31.1:
   version "2.31.2"
   resolved "http://registry.npm.taobao.org/urllib/download/urllib-2.31.2.tgz#09e5a5eef3ce1fcabaa69f2211fef17b3d017d6e"
   dependencies:

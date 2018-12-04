@@ -1,6 +1,7 @@
 version: "3"
 services:
     redis:
+        container_name: redis
         image: redis:4.0.11-alpine
         command: redis-server --appendonly yes --requirepass node-server
         volumes:
@@ -11,6 +12,7 @@ services:
             - 6378:6379
 
     mongodb:
+        container_name: mongodb
         image: mongo:3.6.7
         restart: always
         environment:
