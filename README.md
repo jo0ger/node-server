@@ -104,6 +104,17 @@ $ docker-compose down -v
 
 ## CHANGELOG
 
+### v2.2.0
+
+* feat: 新增管理员检测的接口
+* feat: 新增C端公告的接口
+* feat: 定时任务新增数据库备份任务，配合jenkins进行数据备份
+* feat: 歌单歌曲新增歌词
+* fix: 配置里更新歌单ID时，未更新redis缓存
+* fix: 评论IP获取错误
+* fix: 评论的新用户重复创建
+* fix: 歌单定时任务里报undefined错误（因为未考虑抓取失败场景）
+
 ### v2.1.0
 
 2018-11-03
