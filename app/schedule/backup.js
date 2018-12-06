@@ -19,7 +19,7 @@ module.exports = class BackupUpload extends Subscription {
             // 每天2点更新一次
             cron: '0 2 * * * *',
             type: 'worker',
-            env: 'prod'
+            env: ['prod']
         }
     }
 
@@ -42,6 +42,11 @@ module.exports = class BackupUpload extends Subscription {
             }
         } catch (error) {
             this.logger.error('上传数据备份失败', error)
+            const title = '博客上传数据备份失败'
+            this.service.mail.sendToAdmin(title, {
+                subject: title,
+                html: `<p>错误原因：${error.stack}</p>`
+            })
         }
     }
 

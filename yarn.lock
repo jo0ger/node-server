@@ -3274,7 +3274,7 @@ egg-watcher@^3.1.0:
     sdk-base "^3.5.0"
     wt "^1.2.0"
 
-egg@^2.2.1:
+egg@^2.14.1:
   version "2.14.1"
   resolved "http://registry.npm.taobao.org/egg/download/egg-2.14.1.tgz#f0d1c0a0b8307ffb868c0fe81fccc18910eed8fb"
   dependencies:

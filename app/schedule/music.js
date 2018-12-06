@@ -10,7 +10,8 @@ module.exports = class UpdateMusic extends Subscription {
             // 每小时更新一次
             interval: '15s',
             type: 'worker',
-            immediate: true
+            immediate: true,
+            env: ['prod']
         }
     }
 
