@@ -120,6 +120,11 @@ module.exports = class CommentController extends Controller {
             // 评论列表不需要content和state
             options.select = '-content -state -updatedAt -spam -type -meta.ip'
         } else {
+            options.sort.createdAt = -1
+            options.populate.push({
+                path: 'article',
+                select: '-renderedContent -content'
+            })
             // 起始日期
             if (startDate) {
                 const $gte = new Date(startDate)
@@ -251,7 +256,6 @@ module.exports = class CommentController extends Controller {
             ctx.validateCommentAuthor()
         }
         const body = ctx.validateBody(this.rules.update)
-        body.author = ctx.request.body.author
         const exist = await this.service.comment.getItemById(params.id)
         if (!exist) {
             return ctx.fail('评论不存在')
@@ -266,19 +270,22 @@ module.exports = class CommentController extends Controller {
             referrer: exist.meta.referer,
             permalink,
             comment_type: this.service.comment.getCommentType(exist.type),
-            comment_author: exist.author.github.login,
-            comment_author_email: exist.author.github.email,
-            comment_author_url: exist.author.github.blog,
+            comment_author: exist.author.name,
+            comment_author_email: exist.author.email,
+            comment_author_url: exist.author.site,
             comment_content: exist.content,
             is_test: !this.config.isProd
         }
-        const isSpam = await this.service.akismet.checkSpam(opt)
-        // 如果是Spam评论
-        if (isSpam) {
-            this.logger.warn('检测为垃圾评论，禁止发布')
-            return ctx.fail('检测为垃圾评论，不能更新')
+        if (body.content) {
+            const isSpam = await this.service.akismet.checkSpam(opt)
+            // 如果是Spam评论
+            if (isSpam) {
+                this.logger.warn('检测为垃圾评论，禁止发布')
+                return ctx.fail('检测为垃圾评论，不能更新')
+            }
+            this.logger.info('评论检测正常，可以更新')
+            body.renderedContent = this.app.utils.markdown.render(body.content, true)
         }
-        this.logger.info('评论检测正常，可以更新')
         // 状态修改是涉及到spam修改
         if (body.state !== undefined) {
             const SPAM = this.config.modelEnum.comment.state.optional.SPAM
@@ -297,9 +304,6 @@ module.exports = class CommentController extends Controller {
                     this.app.akismet.submitHam(opt)
                 }
             }
-        }
-        if (body.content) {
-            body.renderedContent = this.app.utils.markdown.render(body.content, true)
         }
         let data = null
         if (!ctx.session._isAuthed) {

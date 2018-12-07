@@ -9,7 +9,7 @@ module.exports = app => {
         content: { type: String, required: true, validate: /\S+/ },
         // marked渲染后的内容
         renderedContent: { type: String, required: true, validate: /\S+/ },
-        // 状态 -2 垃圾评论 | -1 已删除 | 0 待审核 | 1 通过
+        // 状态 -2 垃圾评论 | -1 隐藏 | 0 待审核 | 1 通过
         state: {
             type: Number,
             default: commentValidateConfig.state.default,
