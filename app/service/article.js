@@ -174,7 +174,7 @@ module.exports = class ArticleService extends ProxyService {
         // TIP: 这里必须$in的是一个ObjectId对象数组，而不能只是id字符串数组
         articleIds = [...new Set(articleIds)].filter(id => validate.isObjectId(id)).map(id => share.createObjectId(id))
         const counts = await this.service.comment.aggregate([
-            { $match: { article: { $in: articleIds } } },
+            { $match: { article: { $in: articleIds }, state: this.config.modelEnum.comment.state.optional.PASS } },
             { $group: { _id: '$article', total_count: { $sum: 1 } } }
         ])
         await Promise.all(

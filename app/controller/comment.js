@@ -328,6 +328,10 @@ module.exports = class CommentController extends Controller {
             data = await this.service.comment.updateItemById(params.id, body)
         }
         if (data) {
+            if (data.type === this.config.modelEnum.comment.type.optional.COMMENT) {
+                // 异步 如果是文章评论，则更新文章评论数量
+                this.service.article.updateCommentCount(data.article._id)
+            }
             // 生成通告
             this.service.notification.recordComment(data, 'update')
             ctx.success(data, '评论更新成功')
