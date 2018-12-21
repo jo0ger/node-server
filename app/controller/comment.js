@@ -98,14 +98,6 @@ module.exports = class CommentController extends Controller {
             ]
         }
 
-        if (parent) {
-            // 获取子评论
-            query.parent = parent
-        } else {
-            // 获取父评论
-            query.parent = { $exists: false }
-        }
-
         // 排序
         if (sortBy && order) {
             options.sort = {}
@@ -119,6 +111,14 @@ module.exports = class CommentController extends Controller {
             query.spam = false
             // 评论列表不需要content和state
             options.select = '-content -state -updatedAt -spam -type -meta.ip'
+
+            if (parent) {
+                // 获取子评论
+                query.parent = parent
+            } else {
+                // 获取父评论
+                query.parent = { $exists: false }
+            }
         } else {
             options.sort.createdAt = -1
             options.populate.push({
@@ -238,7 +238,7 @@ module.exports = class CommentController extends Controller {
             }
             if (this.config.isProd) {
                 // 发送邮件通知站主和被评论者
-                this.service.comment.sendCommentEmailToAdminAndUser(data)
+                this.service.comment.sendCommentEmailToAdminAndUser(data, !ctx.session._isAuthed)
             }
             // 生成通告
             this.service.notification.recordComment(comment, 'create')

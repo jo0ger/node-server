@@ -45,7 +45,7 @@ module.exports = class CommentService extends ProxyService {
         return data
     }
 
-    async sendCommentEmailToAdminAndUser (comment) {
+    async sendCommentEmailToAdminAndUser (comment, canReply = true) {
         if (comment.toObject) {
             comment = comment.toObject()
         }
@@ -73,7 +73,7 @@ module.exports = class CommentService extends ProxyService {
         const forwardAuthorId = comment.forward && comment.forward.author.toString()
         // 非管理员评论，发送给管理员邮箱
         if (authorId !== adminId) {
-            const html = await renderCommentEmailHtml(adminTitle, permalink, comment, at)
+            const html = await renderCommentEmailHtml(adminTitle, permalink, comment, at, canReply)
             this.service.mail.sendToAdmin(typeTitle, {
                 subject: adminTitle,
                 html
@@ -83,8 +83,8 @@ module.exports = class CommentService extends ProxyService {
         if (forwardAuthorId && forwardAuthorId !== authorId && forwardAuthorId !== adminId) {
             const forwardAuthor = await this.service.user.getItemById(forwardAuthorId)
             if (forwardAuthor && forwardAuthor.email) {
-                const subject = '你在 Jooger.me 的博客的评论有了新的回复'
-                const html = await renderCommentEmailHtml(subject, permalink, comment, at)
+                const subject = `你在 Jooger.me 的博客的${typeTitle}有了新的回复`
+                const html = await renderCommentEmailHtml(subject, permalink, comment, at, canReply)
                 this.service.mail.send(typeTitle, {
                     to: forwardAuthor.email,
                     subject,
@@ -123,11 +123,12 @@ module.exports = class CommentService extends ProxyService {
     }
 }
 
-async function renderCommentEmailHtml (title, link, comment) {
+async function renderCommentEmailHtml (title, link, comment, showReplyBtn = true) {
     const data = Object.assign({}, comment, {
         title,
         link,
-        createdAt: moment(comment.createdAt).format('YYYY-MM-DD hh:mm')
+        createdAt: moment(comment.createdAt).format('YYYY-MM-DD hh:mm'),
+        showReplyBtn
     })
     const html = await email.render('comment', data)
     const style = `<style>${getCommentStyle()}</style>`
