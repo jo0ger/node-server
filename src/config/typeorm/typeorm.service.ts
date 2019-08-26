@@ -27,7 +27,7 @@ export class TypeormService implements TypeOrmOptionsFactory {
     const isProd = this.varService.isProd()
     return {
       type: 'mongodb',
-      url: this.varService.get('MONGO_URL'),
+      url: this.varService.get('DB_MONGO_URL'),
       entities: getMetadataArgsStorage().tables.map(t => t.target),
       synchronize: true,
       useNewUrlParser: true,

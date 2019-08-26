@@ -14,6 +14,7 @@
 
 import * as fs from 'fs'
 import * as dotenv from 'dotenv'
+import * as dotenvParseVariables from 'dotenv-parse-variables'
 import { Injectable } from '@nestjs/common'
 
 @Injectable()
@@ -22,7 +23,13 @@ export class VarService {
 
   constructor (filePath: string) {
     this.envVars = Object.assign(
-      dotenv.parse(fs.readFileSync('src/env/default.env')),
+      this.parse('src/env/default.env'),
+      this.parse(filePath)
+    )
+  }
+
+  public parse (filePath: string) {
+    return dotenvParseVariables(
       dotenv.parse(fs.readFileSync(filePath))
     )
   }
@@ -36,6 +43,6 @@ export class VarService {
   }
 
   public isProd () {
-    return this.get('NODE_ENV') === 'production'
+    return this.get('APP_ENV') === 'production'
   }
 }

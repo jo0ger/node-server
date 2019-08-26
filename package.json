@@ -34,6 +34,7 @@
     "compression": "^1.7.4",
     "csurf": "^1.10.0",
     "dotenv": "^8.1.0",
+    "dotenv-parse-variables": "^0.2.2",
     "express-rate-limit": "^5.0.0",
     "graphql": "^14.5.0",
     "helmet": "^3.20.0",

@@ -1,15 +1,11 @@
 /*
  * Summary: Application Launcher
- * Module: /src/main.ts
- * -----
- * File Created: 2019-08-23 18:46:37, Fri
+ * File: /src/main.ts
+ * File Created: 2019-08-26 21:43:40, Mon
  * Author: Jooger (iamjooger@gmail.com)
  * -----
- * Last Modified: Monday, 26th August 2019 10:11:44 am
+ * Last Modified: 2019-08-26 22:47:44, Mon
  * Modified By: Jooger (iamjooger@gmail.com>)
- * HISTORY:
- * Date      	By	Comments
- * ----------	---	---------------------------------------------------------
  */
 
 import * as helmet from 'helmet'
@@ -33,10 +29,19 @@ async function bootstrap() {
   const loggerService = app.get(LoggerService)
 
   // -> App 配置
-  const { APP_NAME, APP_PORT } = varService.getVars()
+  const { APP_NAME, APP_PORT, CORS_ALLOWED_ORIGINS, CORS_ALLOWED_METHODS, CORS_ALLOWED_HEADERS, CORS_MAX_AGE } = varService.getVars()
   loggerService.log(`${APP_NAME} is starting....`)
   app.useLogger(loggerService)
   app.useGlobalInterceptors(app.get(LoggerInterceptor))
+
+  // -> CORS
+  app.enableCors({
+    origin: CORS_ALLOWED_ORIGINS,
+    methods: CORS_ALLOWED_METHODS,
+    allowedHeaders: CORS_ALLOWED_HEADERS,
+    maxAge: CORS_MAX_AGE,
+    optionsSuccessStatus: 204
+  })
 
   // -> 添加一些保证 App 安全的 Http headers
   app.use(helmet())
@@ -67,7 +72,6 @@ async function bootstrap() {
   return [varService.getVars(), loggerService]
 }
 
-bootstrap().then(([{ APP_NAME, APP_PORT, NODE_ENV }, logger]) => {
-  // tslint:disable-next-line: no-console
-  logger.log(`${APP_NAME} has been started! port: ${APP_PORT}, env: ${NODE_ENV}`)
+bootstrap().then(([{ APP_NAME, APP_PORT, APP_ENV }, logger]) => {
+  logger.log(`${APP_NAME} has been started! port: ${APP_PORT}, env: ${APP_ENV}`)
 })

@@ -2084,6 +2084,13 @@ dont-sniff-mimetype@1.1.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/dont-sniff-mimetype/-/dont-sniff-mimetype-1.1.0.tgz#c7d0427f8bcb095762751252af59d148b0a623b2"
 
+dotenv-parse-variables@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.npm.taobao.org/dotenv-parse-variables/download/dotenv-parse-variables-0.2.2.tgz#38435e3d96b929e9cdb40be052221fbd1261da00"
+  integrity sha1-OENePZa5KenNtAvgUiIfvRJh2gA=
+  dependencies:
+    debug "^4.1.1"
+
 dotenv@^6.2.0:
   version "6.2.0"
   resolved "https://registry.npmjs.org/dotenv/-/dotenv-6.2.0.tgz#941c0410535d942c8becf28d3f357dbd9d476064"
