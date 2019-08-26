@@ -14,7 +14,8 @@
     "arrow-parens": false,
     "object-literal-sort-keys": false,
     "semicolon": false,
-    "trailing-comma": false
+    "trailing-comma": false,
+    "space-before-function-paren": false
   },
   "rulesDirectory": []
 }

@@ -13,9 +13,11 @@
  */
 
 import { Module } from '@nestjs/common'
+import { VarModule } from '../var/var.module'
 import { TypeormService } from './typeorm.service'
 
 @Module({
+  imports: [VarModule],
   providers: [TypeormService]
 })
 export class TypeormModule {}
