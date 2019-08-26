@@ -24,13 +24,16 @@ export class TypeormService implements TypeOrmOptionsFactory {
   ) {}
 
   async createTypeOrmOptions(): Promise<TypeOrmModuleOptions> {
+    const isProd = this.varService.isProd()
     return {
       type: 'mongodb',
       url: this.varService.get('MONGO_URL'),
       entities: getMetadataArgsStorage().tables.map(t => t.target),
       synchronize: true,
       useNewUrlParser: true,
-      logging: !this.varService.isProd()
+      // TIP: 如果用了 webpack hmr 进行开发，那么这个选项必传 true，不然会造成重复连接报错
+      keepConnectionAlive: !isProd,
+      logging: !isProd
     }
   }
 }

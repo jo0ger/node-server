@@ -20,6 +20,8 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { VarService } from './config/var/var.service'
 
+declare const module: NodeModule & { hot: any }
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   // Reflect
@@ -39,6 +41,13 @@ async function bootstrap() {
     max: 100 // 在缓存期间最多允许 100 个连接
   }))
   await app.listen(varService.get('APP_PORT') || 3000)
+
+  // -> Webpack HRM
+  if (module.hot) {
+    module.hot.accept()
+    module.hot.dispose(() => app.close())
+  }
+
   return varService.getVars()
 }
 
