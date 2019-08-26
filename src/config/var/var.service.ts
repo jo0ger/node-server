@@ -28,6 +28,10 @@ export class VarService {
     return this.envVars[key]
   }
 
+  public getVars () {
+    return Object.assign(this.envVars)
+  }
+
   public isProd () {
     return this.get('NODE_ENV') === 'production'
   }
