@@ -27,10 +27,16 @@ export class LoggerInterceptor implements NestInterceptor {
     return next
       .handle()
       .pipe(
-        tap(res => {
-          this.loggerService.log(this.requestFormat(req), 'Request')
-          this.loggerService.log(this.responseFormat(res), `Response ${Date.now() - start}ms`)
-        })
+        tap(
+          res => {
+            this.loggerService.log(this.requestFormat(req), 'Request')
+            this.loggerService.log(this.responseFormat(res), `Response ${Date.now() - start}ms`)
+          },
+          err => {
+            this.loggerService.error(this.requestFormat(req), 'Request')
+            this.loggerService.error(this.responseFormat(err), `Response Error ${Date.now() - start}ms`)
+          }
+        )
       )
   }
 

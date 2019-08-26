@@ -19,6 +19,7 @@ import { VarModule } from '../../config/var/var.module'
   providers: [
     LoggerInterceptor,
     LoggerService
-  ]
+  ],
+  exports: [LoggerService]
 })
 export class LoggerModule {}
