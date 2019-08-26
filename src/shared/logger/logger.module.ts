@@ -11,10 +11,14 @@
 
 import { Module } from '@nestjs/common'
 import { LoggerService } from './logger.service'
+import { LoggerInterceptor } from './logger.interceptor'
 import { VarModule } from '../../config/var/var.module'
 
 @Module({
   imports: [VarModule],
-  providers: [LoggerService]
+  providers: [
+    LoggerInterceptor,
+    LoggerService
+  ]
 })
 export class LoggerModule {}

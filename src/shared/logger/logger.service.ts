@@ -46,7 +46,11 @@ export class LoggerService implements Nest.LoggerService {
         }
       }
     })
-    this.logger = getLogger(`${APP_NAME}: `)
+    this.logger = getLogger(`${APP_NAME}`)
+  }
+
+  getLogger (category?: string) {
+    return getLogger(category)
   }
 
   log (message: any, context?: string) {

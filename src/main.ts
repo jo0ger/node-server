@@ -20,6 +20,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { VarService } from './config/var/var.service'
 import { LoggerService } from './shared/logger/logger.service'
+import { LoggerInterceptor } from './shared/logger/logger.interceptor'
 
 declare const module: NodeModule & { hot: any }
 
@@ -33,8 +34,9 @@ async function bootstrap() {
 
   // -> App 配置
   const { APP_NAME, APP_PORT } = varService.getVars()
-  app.useLogger(loggerService)
   loggerService.log(`${APP_NAME} is starting....`)
+  app.useLogger(loggerService)
+  app.useGlobalInterceptors(app.get(LoggerInterceptor))
 
   // -> 添加一些保证 App 安全的 Http headers
   app.use(helmet())
@@ -67,5 +69,5 @@ async function bootstrap() {
 
 bootstrap().then(([{ APP_NAME, APP_PORT, NODE_ENV }, logger]) => {
   // tslint:disable-next-line: no-console
-  logger.log(`${APP_NAME} has been started! port at ${APP_PORT}, env is ${NODE_ENV}`)
+  logger.log(`${APP_NAME} has been started! port: ${APP_PORT}, env: ${NODE_ENV}`)
 })
