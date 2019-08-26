@@ -21,7 +21,10 @@ export class VarService {
   private readonly envVars: { [key: string]: string }
 
   constructor (filePath: string) {
-    this.envVars = dotenv.parse(fs.readFileSync(filePath))
+    this.envVars = Object.assign(
+      dotenv.parse(fs.readFileSync('src/env/default.env')),
+      dotenv.parse(fs.readFileSync(filePath))
+    )
   }
 
   public get (key: string): string {

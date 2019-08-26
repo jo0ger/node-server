@@ -20,6 +20,7 @@ import { ArticleModule } from './modules/article/article.module'
 import { TypeormService } from './config/typeorm/typeorm.service'
 import { TypeormModule } from './config/typeorm/typeorm.module'
 import { VarModule } from './config/var/var.module'
+import { LoggerModule } from './shared/logger/logger.module';
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { VarModule } from './config/var/var.module'
       // TIP: Here need to import the VarModule for using VarService
       imports: [VarModule],
       useClass: TypeormService
-    })
+    }),
+    LoggerModule
   ],
   controllers: [AppController],
   providers: [AppService, TypeormService]

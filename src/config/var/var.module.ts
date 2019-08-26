@@ -19,7 +19,7 @@ import { VarService } from './var.service'
   providers: [
     {
       provide: VarService,
-      useValue: new VarService(`src/${process.env.NODE_ENV}.env`)
+      useValue: new VarService(`src/env/${process.env.NODE_ENV}.env`)
     }
   ],
   exports: [VarService]
