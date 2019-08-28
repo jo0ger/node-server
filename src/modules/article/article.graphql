@@ -1,0 +1,12 @@
+type Article {
+  title: String
+}
+
+type Query {
+  getArticles (
+    offset: Int
+  ): Article
+  getArticleById (
+    id: String
+  ): Article
+}
