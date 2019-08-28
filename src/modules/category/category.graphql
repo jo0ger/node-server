@@ -1,0 +1,12 @@
+type Category {
+  id: ObjectId
+  name: String!
+  description: String
+  createdAt: Date
+  updatedAt: Date
+  extends: [Extend]
+}
+
+type Query {
+  getCategories: [Category]
+}

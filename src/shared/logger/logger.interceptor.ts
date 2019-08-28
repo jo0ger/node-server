@@ -41,6 +41,8 @@ export class LoggerInterceptor implements NestInterceptor {
   }
 
   private requestFormat (req: any): string {
+    // TODO 不知道为什么 graphql 请求获取不到 request，所以这里先做一下兼容
+    if (!req) return 'Graphql Request'
     return stringify({
       url: req.url,
       method: req.method,

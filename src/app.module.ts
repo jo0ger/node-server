@@ -9,6 +9,7 @@ import { VarModule } from './config/var/var.module'
 import { LoggerModule } from './shared/logger/logger.module'
 import { GraphQLModule } from '@nestjs/graphql'
 import { GraphqlService } from './config/graphql/graphql.service'
+import { CategoryModule } from './modules/category/category.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { GraphqlService } from './config/graphql/graphql.service'
     GraphQLModule.forRootAsync({
       imports: [VarModule, LoggerModule],
       useClass: GraphqlService
-    })
+    }),
+    CategoryModule
   ],
   controllers: [AppController],
   providers: [AppService, TypeormService]

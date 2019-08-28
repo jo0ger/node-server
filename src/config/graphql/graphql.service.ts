@@ -10,9 +10,19 @@
 
 import * as path from 'path'
 import { Injectable } from '@nestjs/common'
+import { ObjectId } from 'mongodb'
+import { GraphQLScalarType } from 'graphql'
+import { Kind } from 'graphql/language'
 import { GqlOptionsFactory, GqlModuleOptions } from '@nestjs/graphql'
 import { VarService } from '../var/var.service'
 import { LoggerService } from '../../shared/logger/logger.service'
+
+function parseObjectId (id) {
+  if (ObjectId.isValid(id)) {
+    return ObjectId(id)
+  }
+  throw new Error('ObjectId must be a single String of 24 hex characters')
+}
 
 @Injectable()
 export class GraphqlService implements GqlOptionsFactory {
@@ -24,6 +34,7 @@ export class GraphqlService implements GqlOptionsFactory {
   async createGqlOptions (): Promise<GqlModuleOptions> {
     return {
       debug: !this.varService.isProd(),
+      path: '/api/graphql',
       typePaths: ['./**/*.graphql'],
       definitions: {
         path: path.join(process.cwd(), 'src/graphql.ts'),
@@ -31,6 +42,34 @@ export class GraphqlService implements GqlOptionsFactory {
       },
       formatError: err => err,
       formatResponse: res => res,
+      resolvers: {
+        ObjectId: new GraphQLScalarType({
+          name: 'ObjectId',
+          description: 'The `ObjectId` scalar type represents a mongodb unique ID',
+          serialize: String,
+          parseValue: parseObjectId,
+          parseLiteral (ast: any) {
+            return parseObjectId(ast.value)
+          }
+        }),
+        Date: new GraphQLScalarType({
+          name: 'Date',
+          description: 'Date scalar type',
+          parseValue (value) {
+            return new Date(value)
+          },
+          serialize (value) {
+            return value.getTime()
+          },
+          parseLiteral (ast) {
+            if (ast.kind === Kind.INT) {
+              return new Date(ast.value)
+            }
+            return null
+          },
+        })
+      },
+      directiveResolvers: {},
       subscriptions: {
         onConnect: (connectionParams, websocket, ctx) => {
           this.log('🔗 Connected to websocket')

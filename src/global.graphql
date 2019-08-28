@@ -1,0 +1,10 @@
+# Global scalar or something else
+
+scalar ObjectId
+scalar Date
+
+type Extend {
+  id: ObjectId!
+  key: String!
+  value: String
+}
