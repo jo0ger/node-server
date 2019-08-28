@@ -30,6 +30,8 @@
     "apollo-server-express": "^2.9.0",
     "body-parser": "^1.19.0",
     "circular-json-es6": "^2.0.2",
+    "class-transformer": "^0.2.3",
+    "class-validator": "^0.10.0",
     "cli-color": "^1.4.0",
     "compression": "^1.7.4",
     "csurf": "^1.10.0",

@@ -1582,6 +1582,11 @@ circular-json-es6@^2.0.2:
   version "2.0.2"
   resolved "https://registry.npmjs.org/circular-json-es6/-/circular-json-es6-2.0.2.tgz#e4f4a093e49fb4b6aba1157365746112a78bd344"
 
+class-transformer@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.npm.taobao.org/class-transformer/download/class-transformer-0.2.3.tgz#598c92ca71dcca73f91ccb875d74a3847ccfa32d"
+  integrity sha1-WYySynHcynP5HMuHXXSjhHzPoy0=
+
 class-utils@^0.3.5:
   version "0.3.6"
   resolved "https://registry.npm.taobao.org/class-utils/download/class-utils-0.3.6.tgz#f93369ae8b9a7ce02fd41faad0ca83033190c463"
@@ -1594,6 +1599,15 @@ class-utils@^0.3.5:
 class-validator@>=0.9.1:
   version "0.10.0"
   resolved "https://registry.npmjs.org/class-validator/-/class-validator-0.10.0.tgz#5e5f8108fa200d5ce1906cd5537af102c072dbcd"
+  dependencies:
+    "@types/validator" "10.11.2"
+    google-libphonenumber "^3.1.6"
+    validator "11.1.0"
+
+class-validator@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.npm.taobao.org/class-validator/download/class-validator-0.10.0.tgz?cache=0&sync_timestamp=1565441611824&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fclass-validator%2Fdownload%2Fclass-validator-0.10.0.tgz#5e5f8108fa200d5ce1906cd5537af102c072dbcd"
+  integrity sha1-Xl+BCPogDVzhkGzVU3rxAsBy280=
   dependencies:
     "@types/validator" "10.11.2"
     google-libphonenumber "^3.1.6"

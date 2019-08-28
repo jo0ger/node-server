@@ -17,6 +17,7 @@ import { AppModule } from './app.module'
 import { VarService } from './config/var/var.service'
 import { LoggerService } from './shared/logger/logger.service'
 import { LoggerInterceptor } from './shared/logger/logger.interceptor'
+import { ValidationPipe } from './common/pipe/validation.pipe'
 
 declare const module: NodeModule & { hot: any }
 
@@ -33,6 +34,7 @@ async function bootstrap() {
   loggerService.log(`${APP_NAME} is starting....`)
   app.useLogger(loggerService)
   app.useGlobalInterceptors(app.get(LoggerInterceptor))
+  app.useGlobalPipes(new ValidationPipe())
 
   // -> CORS
   app.enableCors({
