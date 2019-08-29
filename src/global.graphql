@@ -8,3 +8,18 @@ type Extend {
   key: String!
   value: String
 }
+
+input ExtendInput {
+  key: String!
+  value: String
+}
+
+type Message {
+  message: String!
+}
+
+type PageInfo {
+  total: Int!
+  offset: Int!
+  limit: Int!
+}

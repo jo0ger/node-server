@@ -7,6 +7,27 @@ type Category {
   extends: [Extend]
 }
 
+input CreateCategoryInput {
+  name: String!
+  description: String
+  extends: [ExtendInput]
+}
+
+input UpdateCategoryInput {
+  id: ObjectId
+  name: String!
+  description: String
+  extends: [ExtendInput]
+}
+
 type Query {
   getCategories: [Category]
+  getCategoryById (id: ObjectId): Category
+}
+
+type Mutation {
+  createCategory (input: CreateCategoryInput): Category
+  updateCategory (input: UpdateCategoryInput): Category
+  deleteCategory (id: ObjectId): Message
+  deleteAllCategories: Message
 }
