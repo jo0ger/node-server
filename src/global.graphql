@@ -4,14 +4,13 @@ scalar ObjectId
 scalar Date
 
 type Extend {
-  id: ObjectId!
   key: String!
-  value: String
+  value: String!
 }
 
 input ExtendInput {
   key: String!
-  value: String
+  value: String!
 }
 
 type Message {

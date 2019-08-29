@@ -10,14 +10,14 @@ type Category {
 input CreateCategoryInput {
   name: String!
   description: String
-  extends: [ExtendInput]
+  extends: [ExtendInput!]
 }
 
 input UpdateCategoryInput {
-  id: ObjectId
+  id: ObjectId!
   name: String!
   description: String
-  extends: [ExtendInput]
+  extends: [ExtendInput!]
 }
 
 type Query {
@@ -29,5 +29,6 @@ type Mutation {
   createCategory (input: CreateCategoryInput): Category
   updateCategory (input: UpdateCategoryInput): Category
   deleteCategory (id: ObjectId): Message
+  deleteCategories (ids: [ObjectId!]): Message
   deleteAllCategories: Message
 }

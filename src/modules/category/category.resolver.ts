@@ -9,10 +9,11 @@
  * Modified By: Jooger (iamjooger@gmail.com>)
  */
 
-import { Resolver, Query, Args } from '@nestjs/graphql';
+import { ObjectID } from 'typeorm';
+import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
 import { Category } from './category.entity';
 import { CategoryService } from './category.service';
-import { ObjectID } from 'typeorm';
+import { CreateCategoryInput } from '../../graphql'
 
 @Resolver('Category')
 export class CategoryResolver {
@@ -28,5 +29,13 @@ export class CategoryResolver {
   @Query(() => Category)
   async getCategoryById (@Args('id') id: ObjectID) {
     return this.categoryService.findById(id)
+  }
+
+  @Mutation(() => Category, { name: 'createCategory' })
+  async createCategory (
+    @Args('input') input: Category
+  ) {
+    const category = await this.categoryService.create(input)
+    return category
   }
 }

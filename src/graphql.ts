@@ -13,11 +13,11 @@ export class CreateCategoryInput {
 
 export class ExtendInput {
     key: string;
-    value?: string;
+    value: string;
 }
 
 export class UpdateCategoryInput {
-    id?: ObjectId;
+    id: ObjectId;
     name: string;
     description?: string;
     extends?: ExtendInput[];
@@ -37,9 +37,8 @@ export class Category {
 }
 
 export class Extend {
-    id: ObjectId;
     key: string;
-    value?: string;
+    value: string;
 }
 
 export class Message {
@@ -52,6 +51,8 @@ export abstract class IMutation {
     abstract updateCategory(input?: UpdateCategoryInput): Category | Promise<Category>;
 
     abstract deleteCategory(id?: ObjectId): Message | Promise<Message>;
+
+    abstract deleteCategories(ids?: ObjectId[]): Message | Promise<Message>;
 
     abstract deleteAllCategories(): Message | Promise<Message>;
 }

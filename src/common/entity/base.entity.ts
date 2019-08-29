@@ -8,12 +8,12 @@
  * Modified By: Jooger (iamjooger@gmail.com>)
  */
 
-import { CreateDateColumn } from "typeorm"
+import { CreateDateColumn, UpdateDateColumn } from "typeorm"
 
 export class BaseEntity {
   @CreateDateColumn({ type: 'date', default: Date.now })
   createdAt: Date
 
-  @CreateDateColumn({ type: 'date', default: Date.now })
+  @UpdateDateColumn({ type: 'date', default: Date.now })
   updatedAt: Date
 }

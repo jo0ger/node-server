@@ -9,7 +9,8 @@
  */
 
 import { Entity, Column, ObjectIdColumn, ObjectID } from "typeorm"
-import { IsString, IsNotEmpty, IsArray } from "class-validator"
+import { IsString, IsNotEmpty, IsArray, ValidateNested } from "class-validator"
+import { Type } from "class-transformer"
 import { BaseEntity } from "../../common/entity/base.entity"
 import { Extend } from "../../common/entity/extend.entity"
 
@@ -25,9 +26,22 @@ export class Category extends BaseEntity {
 
   @Column({ default: '' })
   @IsString({ message: '分类描述必须为字符串' })
-  description: string
+  description?: string
 
   @Column(type => Extend)
-  @IsArray()
+  @Type(type => Extend)
+  @IsArray({ message: '分类扩展必须为数组' })
+  @ValidateNested({ each: true })
   extends: Extend[]
+
+  constructor (
+    name: string,
+    description: string = '',
+    exts: Extend[] = []
+  ) {
+    super()
+    this.name = name
+    this.description = description
+    this.extends = exts
+  }
 }
