@@ -8,7 +8,7 @@
  * Modified By: Jooger (iamjooger@gmail.com>)
  */
 
-import { CreateDateColumn, UpdateDateColumn } from "typeorm"
+import { CreateDateColumn, UpdateDateColumn, Column } from 'typeorm'
 
 export class BaseEntity {
   @CreateDateColumn({ type: 'date', default: Date.now })

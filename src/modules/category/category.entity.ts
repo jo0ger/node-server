@@ -8,11 +8,11 @@
  * Modified By: Jooger (iamjooger@gmail.com>)
  */
 
-import { Entity, Column, ObjectIdColumn, ObjectID } from "typeorm"
-import { IsString, IsNotEmpty, IsArray, ValidateNested } from "class-validator"
-import { Type } from "class-transformer"
-import { BaseEntity } from "../../common/entity/base.entity"
-import { Extend } from "../../common/entity/extend.entity"
+import { Entity, Column, ObjectIdColumn, ObjectID } from 'typeorm'
+import { IsString, IsNotEmpty, IsArray, ValidateNested } from 'class-validator'
+import { Type } from 'class-transformer'
+import { BaseEntity } from '../../common/entity/base.entity'
+import { Extend } from '../../common/entity/extend.entity'
 
 @Entity('categories')
 export class Category extends BaseEntity {

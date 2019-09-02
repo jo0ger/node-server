@@ -9,11 +9,10 @@
  * Modified By: Jooger (iamjooger@gmail.com>)
  */
 
-import { ObjectID } from 'typeorm';
-import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
-import { Category } from './category.entity';
-import { CategoryService } from './category.service';
-import { CreateCategoryInput } from '../../graphql'
+import { ObjectID } from 'typeorm'
+import { Resolver, Query, Args, Mutation } from '@nestjs/graphql'
+import { Category } from './category.entity'
+import { CategoryService } from './category.service'
 
 @Resolver('Category')
 export class CategoryResolver {
@@ -27,15 +26,37 @@ export class CategoryResolver {
   }
 
   @Query(() => Category)
-  async getCategoryById (@Args('id') id: ObjectID) {
+  async getCategoryById (
+    @Args('id') id: ObjectID
+  ) {
     return this.categoryService.findById(id)
   }
 
-  @Mutation(() => Category, { name: 'createCategory' })
+  @Mutation(() => Category)
   async createCategory (
     @Args('input') input: Category
   ) {
-    const category = await this.categoryService.create(input)
-    return category
+    return await this.categoryService.create(input)
+  }
+
+  @Mutation(() => Category)
+  async updateCategory (
+    @Args('input') input: Category
+  ) {
+    return await this.categoryService.update(input)
+  }
+
+  @Mutation(() => Category)
+  async deleteCategory (
+    @Args('id') id: ObjectID
+  ) {
+    return await this.categoryService.deleteById(id)
+  }
+
+  @Mutation(() => Category)
+  async deleteCategories (
+    @Args('ids') ids: string
+  ) {
+    return await this.categoryService.deleteMany(ids)
   }
 }

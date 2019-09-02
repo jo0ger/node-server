@@ -10,7 +10,7 @@
  */
 
 import { Injectable, BadRequestException } from '@nestjs/common'
-import { MongoRepository, ObjectID, Not, In } from 'typeorm'
+import { MongoRepository, ObjectID, Not, In, Equal } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Category } from './category.entity'
 import { CreateCategoryInput, UpdateCategoryInput } from '../../graphql'
@@ -22,6 +22,13 @@ export class CategoryService {
     @InjectRepository(Category)
     private readonly categoryRepo: MongoRepository<Category>
   ) {}
+
+  async checkName (where = {}) {
+    const exist = await this.categoryRepo.findOne({ where })
+    if (exist) {
+      throw new BadRequestException('分类名称重复')
+    }
+  }
 
   async findAll () {
     return await this.categoryRepo.find({
@@ -35,10 +42,7 @@ export class CategoryService {
 
   async create (input: CreateCategoryInput) {
     const { name } = input
-    const exist = await this.categoryRepo.findOne({ name })
-    if (exist) {
-      throw new BadRequestException('分类名称重复')
-    }
+    await this.checkName({ name })
     const category = new Category(
       name,
       input.description,
@@ -49,26 +53,38 @@ export class CategoryService {
 
   async update (input: UpdateCategoryInput) {
     const { id, name } = input
-    const exist = await this.categoryRepo.findOne({
-      where: {
-        name: Not(name)
-      }
+    await this.checkName({
+      id: {
+        $nin: [id]
+      },
+      name
     })
-    if (exist) {
-      throw new BadRequestException('分类名称重复')
-    }
-    return await this.categoryRepo.updateOne({ id }, input)
+    const res = await this.categoryRepo.findOneAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          ...input,
+          updatedAt: Date.now()
+        }
+      },
+      { returnOriginal: false })
+    return res.value
   }
 
-  async deleteMany (ids: ObjectID[]) {
+  async deleteMany (ids: ObjectID[] | string) {
+    let idS = []
+    if (typeof ids === 'string') {
+      idS = ids.split(',')
+    }
     return await this.categoryRepo.deleteMany({
       where: {
-        id: In(ids)
+        id: In(idS)
       }
     })
   }
 
   async deleteById (id: ObjectID) {
-    return await this.categoryRepo.deleteOne({ id })
+    const res = await this.categoryRepo.findOneAndDelete({ _id: id })
+    return res.value
   }
 }
