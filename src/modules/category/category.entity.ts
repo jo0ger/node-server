@@ -9,8 +9,6 @@
  */
 
 import { Entity, Column, ObjectIdColumn, ObjectID } from 'typeorm'
-import { IsString, IsNotEmpty, IsArray, ValidateNested } from 'class-validator'
-import { Type } from 'class-transformer'
 import { BaseEntity } from '../../common/entity/base.entity'
 import { Extend } from '../../common/entity/extend.entity'
 
@@ -20,18 +18,12 @@ export class Category extends BaseEntity {
   id: ObjectID
 
   @Column()
-  @IsString({ message: '分类名称必须为字符串' })
-  @IsNotEmpty({ message: '分类名称不能为空' })
   name: string
 
   @Column({ default: '' })
-  @IsString({ message: '分类描述必须为字符串' })
   description?: string
 
   @Column(type => Extend)
-  @Type(type => Extend)
-  @IsArray({ message: '分类扩展必须为数组' })
-  @ValidateNested({ each: true })
   extends: Extend[]
 
   constructor (

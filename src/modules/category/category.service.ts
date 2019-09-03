@@ -13,8 +13,8 @@ import { Injectable, BadRequestException } from '@nestjs/common'
 import { MongoRepository, ObjectID, Not, In, Equal } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Category } from './category.entity'
-import { CreateCategoryInput, UpdateCategoryInput } from '../../graphql'
 import { Extend } from '../../common/entity/extend.entity'
+import { CreateCategoryInputDto, UpdateCategoryInputDto } from './category.dto'
 
 @Injectable()
 export class CategoryService {
@@ -40,7 +40,7 @@ export class CategoryService {
     return await this.categoryRepo.findOne(id)
   }
 
-  async create (input: CreateCategoryInput) {
+  async create (input: CreateCategoryInputDto) {
     const { name } = input
     await this.checkName({ name })
     const category = new Category(
@@ -51,7 +51,7 @@ export class CategoryService {
     return await this.categoryRepo.save(category)
   }
 
-  async update (input: UpdateCategoryInput) {
+  async update (input: Partial<UpdateCategoryInputDto>) {
     const { id, name } = input
     await this.checkName({
       id: {

@@ -13,6 +13,7 @@ import { ObjectID } from 'typeorm'
 import { Resolver, Query, Args, Mutation } from '@nestjs/graphql'
 import { Category } from './category.entity'
 import { CategoryService } from './category.service'
+import { CreateCategoryInputDto, UpdateCategoryInputDto } from './category.dto'
 
 @Resolver('Category')
 export class CategoryResolver {
@@ -34,14 +35,14 @@ export class CategoryResolver {
 
   @Mutation(() => Category)
   async createCategory (
-    @Args('input') input: Category
+    @Args('input') input: CreateCategoryInputDto
   ) {
     return await this.categoryService.create(input)
   }
 
   @Mutation(() => Category)
   async updateCategory (
-    @Args('input') input: Category
+    @Args('input') input: Partial<UpdateCategoryInputDto>
   ) {
     return await this.categoryService.update(input)
   }
