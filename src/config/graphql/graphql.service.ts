@@ -70,6 +70,19 @@ export class GraphqlService implements GqlOptionsFactory {
         })
       },
       directiveResolvers: {},
+      context: async ({ req, res, connection }) => {
+        if (connection) {
+          return {
+            req: connection.context
+          }
+        }
+
+        return {
+          req,
+          res,
+          qqq: 111
+        }
+      },
       subscriptions: {
         onConnect: (connectionParams, websocket, ctx) => {
           this.log('🔗 Connected to websocket')

@@ -18,6 +18,7 @@ import { VarService } from './config/var/var.service'
 import { LoggerService } from './shared/logger/logger.service'
 import { LoggerInterceptor } from './shared/logger/logger.interceptor'
 import { ValidationPipe } from './common/pipe/validation.pipe'
+import { AnyExceptionFilter } from './common/filter/any-exception.filter'
 
 declare const module: NodeModule & { hot: any }
 
@@ -35,6 +36,7 @@ async function bootstrap() {
   app.useLogger(loggerService)
   app.useGlobalInterceptors(app.get(LoggerInterceptor))
   app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalFilters(new AnyExceptionFilter())
 
   // -> CORS
   app.enableCors({
