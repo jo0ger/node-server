@@ -32,15 +32,21 @@ export class GraphqlService implements GqlOptionsFactory {
   ) {}
 
   async createGqlOptions (): Promise<GqlModuleOptions> {
+    const isProd = this.varService.isProd()
     return {
-      debug: !this.varService.isProd(),
+      debug: !isProd,
       path: '/api/graphql',
       typePaths: ['./**/*.graphql'],
       definitions: {
         path: path.join(process.cwd(), 'src/graphql.ts'),
         outputAs: 'class'
       },
-      formatError: err => err,
+      formatError: err => {
+        if (isProd) {
+          return err.originalError
+        }
+        return err
+      },
       formatResponse: res => res,
       resolvers: {
         ObjectId: new GraphQLScalarType({

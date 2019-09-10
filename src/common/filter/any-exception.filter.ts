@@ -11,32 +11,13 @@
 
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common'
 import { GqlArgumentsHost, GqlExceptionFilter } from '@nestjs/graphql';
-import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
 import { ServerResponse } from 'http';
 
-@Catch(HttpException)
+@Catch()
 export class AnyExceptionFilter implements GqlExceptionFilter {
   catch (exception: any, host: ArgumentsHost) {
     const gqlHost = GqlArgumentsHost.create(host)
-    const ctx = gqlHost.getContext()
-    const args = gqlHost.getArgs()
-    const info = gqlHost.getInfo()
-    const root = gqlHost.getRoot()
-    const ctx2 = new ExecutionContextHost([ctx.req])
-    console.log(ctx2);
-    console.log(ctx.req.body);
-    console.log(ctx.res.req);
+    const { req, res } = gqlHost.getContext()
     return exception
-    // const response = ctx.getResponse()
-    // const request = ctx.getRequest()
-    // const status = exception.getStatus();
-    // console.log(request, response.status);
-    // response
-    //   .status(status)
-    //   .json({
-    //     status,
-    //     timestamp: new Date().toISOString(),
-    //     path: request.url,
-    //   })
   }
 }

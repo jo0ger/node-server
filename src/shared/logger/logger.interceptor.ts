@@ -33,8 +33,8 @@ export class LoggerInterceptor implements NestInterceptor {
             this.loggerService.log(this.responseFormat(res), `Response ${Date.now() - start}ms`)
           },
           err => {
-            this.loggerService.error(this.requestFormat(req), 'Request')
-            this.loggerService.error(this.responseFormat(err), `Response Error ${Date.now() - start}ms`)
+            this.loggerService.error(this.requestFormat(req), null, 'Request')
+            this.loggerService.error(this.responseFormat(err), null, `Response Error ${Date.now() - start}ms`)
           }
         )
       )
@@ -42,7 +42,9 @@ export class LoggerInterceptor implements NestInterceptor {
 
   private requestFormat (req: any): string {
     // TODO 不知道为什么 graphql 请求获取不到 request，所以这里先做一下兼容
-    if (!req) return 'Graphql Request'
+    if (!req) {
+      return 'Graphql Request'
+    }
     return stringify({
       url: req.url,
       method: req.method,
