@@ -60,9 +60,9 @@ module.exports = class AgentService extends Service {
     }
 
     async fetchRemoteVoice () {
-        const res = await axios.get('https://api.lwl12.com/hitokoto/main/get', {
+        const res = await axios.get('https://v1.hitokoto.cn', {
             params: {
-                encode: 'realjson',
+                encode: 'json',
                 charset: 'utf-8'
             }
         }).catch(err => {
@@ -70,8 +70,14 @@ module.exports = class AgentService extends Service {
             return null
         })
         if (res && res.status === 200) {
-            await this.setVoiceToStore(res.data)
-            return res.data
+            const { hitokoto, from, creator } = res.data
+            const data = {
+                text: hitokoto,
+                source: from,
+                author: creator
+            }
+            await this.setVoiceToStore(data)
+            return data
         }
         return null
     }
