@@ -104,6 +104,10 @@ $ docker-compose down -v
 
 ## CHANGELOG
 
+### v2.2.3
+
+* fix: “一言” 接口修复
+
 ### v2.2.2
 
 * fix: 后台管理在获取评论列表时把子评论过滤掉了
