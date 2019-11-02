@@ -41,4 +41,7 @@ module.exports = app => {
 
     // Moment
     frontendRouter.get('/moments', controller.moment.list)
+
+    // Sports
+    frontendRouter.get('/sport', controller.sport.test)
 }

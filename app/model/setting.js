@@ -66,6 +66,11 @@ module.exports = app => {
             // 百度seo token
             baiduSeo: {
                 token: { type: String, default: '' }
+            },
+            // 咕咚
+            codoon: {
+                phone: { type: String, default: '' },
+                pass: { type: String, default: '' }
             }
         },
         limit: {
