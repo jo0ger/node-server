@@ -44,3 +44,8 @@ exports.mailer = {
     enable: true,
     path: path.join(__dirname, '../app/lib/plugin/egg-mailer')
 }
+
+exports.codoon = {
+    enable: true,
+    path: path.join(__dirname, '../app/lib/plugin/egg-codoon')
+}

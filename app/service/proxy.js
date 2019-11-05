@@ -55,6 +55,10 @@ module.exports = class ProxyService extends Service {
         return new this.model(payload).save()
     }
 
+    insertMany (payload) {
+        return this.model.insertMany(payload)
+    }
+
     updateItem (query = {}, data, opt, populate = []) {
         opt = this.app.merge({
             lean: true,
