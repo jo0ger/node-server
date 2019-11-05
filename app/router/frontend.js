@@ -44,4 +44,5 @@ module.exports = app => {
 
     // Sports
     frontendRouter.get('/sport', controller.sport.test)
+    frontendRouter.get('/sport/all', controller.sport.testAll)
 }

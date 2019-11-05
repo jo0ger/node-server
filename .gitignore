@@ -10,3 +10,4 @@ run/
 *.sw*
 *.un~
 ecosystem.config.js
+tmp/

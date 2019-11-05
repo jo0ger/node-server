@@ -38,6 +38,9 @@ module.exports = app => {
         // 上传时间
         uploadedAt: { type: Date, default: Date.now },
 
+        // 上传来源
+        uploadFrom: StringSchema(),
+
         // 运动距离 单位：米
         distance: NumberSchema(),
 

@@ -6382,6 +6382,10 @@ natural-compare@^1.4.0:
   version "1.4.0"
   resolved "http://registry.npm.taobao.org/natural-compare/download/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
 
+natural-orderby@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.npm.taobao.org/natural-orderby/download/natural-orderby-2.0.3.tgz#8623bc518ba162f8ff1cdb8941d74deb0fdcc016"
+
 ndir@^0.1.5:
   version "0.1.5"
   resolved "http://registry.npm.taobao.org/ndir/download/ndir-0.1.5.tgz#120891d7697bbbe8214cfeff09602060d3454558"

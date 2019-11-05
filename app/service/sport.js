@@ -6,9 +6,10 @@ const axios = require('axios')
 const ProxyService = require('./proxy')
 const cheerio = require('cheerio')
 const setCookie = require('set-cookie-parser')
+const { orderBy } = require('natural-orderby')
 
-const codoonSessionidKey = Symbol('codoon_sessionid')
-const codoonUserKey = Symbol('codoon_user')
+const codoonCacheKey = Symbol('codoon')
+// 7 天有效时间
 const maxAge = 7 * 24 * 60 * 60 * 1000
 let client = null
 
@@ -122,16 +123,36 @@ module.exports = class SportService extends ProxyService {
 }
 
 class Codoon {
-    constructor (scope) {
-        this.scope = scope
-        this.logger = scope.logger
-        this.app = scope.app
+    constructor (ctx) {
+        this.ctx = ctx
+        this.logger = ctx.logger
+        this.app = ctx.app
+        this.cache({
+            sessionId: null,
+            user: null,
+            autoIds: []
+        })
+    }
+
+    get supportSportTypes () {
+        // 0 健走 | 1 跑步 | 2 骑行 | -1 其他，待定
+        return ['walk', 'run', 'bike']
+    }
+
+    get codoonParams () {
+        try {
+            const { phone: login_id, pass: password } = this.app.setting.keys.codoon || {}
+            return { login_id, password }
+        } catch (e) {
+            // pass
+        }
     }
 
     get client () {
         if (!client) {
             client = axios.create({
                 baseURL: 'http://www.codoon.com',
+                timeout: 30000,
                 headers: {
                     Accept: 'application/json; charset=utf-8',
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36'
@@ -150,12 +171,25 @@ class Codoon {
         return client
     }
 
-    getSessionId () {
-        return this.scope.app.store.get(codoonSessionidKey)
+    getCache () {
+        return this.ctx.app.store.get(codoonCacheKey)
     }
 
-    getUserInfo () {
-        return this.scope.app.store.get(codoonUserKey)
+    async getSessionId () {
+        const cache = await this.getCache()
+        return cache.sessionId
+    }
+
+    async getUserInfo () {
+        const cache = await this.getCache()
+        return cache.user
+    }
+
+    async cache (patch = {}) {
+        const cache = await this.getCache()
+        const args = [codoonCacheKey, Object.assign({}, cache, patch)]
+        if (!cache) args.push(maxAge)
+        await this.app.store.set(...args)
     }
 
     login () {
@@ -173,16 +207,16 @@ class Codoon {
         }).catch(err => {
             const cookies = setCookie.parse(err.response)
             const sessionIdCookie = cookies.find(c => c.name === 'sessionid')
-            const sessionid = sessionIdCookie.value
-            this.logger.info('咕咚登录成功，sessionid=' + sessionid)
-            return this.app.store.set(codoonSessionidKey, sessionid, maxAge)
+            const sessionId = sessionIdCookie.value
+            this.logger.info('咕咚登录成功，sessionid=' + sessionId)
+            return this.cache({ sessionId })
         })
     }
 
     async getRemoteUserInfo () {
         const res = await this.client.get('/ugcserver/index')
         const user = res.data.data
-        await this.app.store.set(codoonUserKey, user, maxAge)
+        await this.cache({ user })
         return user
     }
 
@@ -218,16 +252,120 @@ class Codoon {
         return result
     }
 
-    async getRemoteRecords () {
+    async getRemoteAllRecords (options = {}) {
+        const {
+            endRouteId = null, // 待抓取的结束路线 ID
+            interval = 1000, // 抓取间隔
+            sort = 'asc', // 按日期排序 false desc asc
+            deWeighting = true, // 去重
+            debug = false // debug？
+        } = options
+        const finish = data => {
+            this.logger.info('暂无更多运动记录')
+            return data
+        }
+
+        const getRecords = async (autoId = '') => {
+            const { autoId: nextAutoId, hasNext, records } = await this.getRemoteRecordsByAutoId(autoId)
+            if (!hasNext) {
+                return finish(records)
+            }
+            if (endRouteId) {
+                const hit = records.findIndex(({ routeId }) => routeId === String(endRouteId))
+                if (hit > -1) {
+                    // 命中
+                    return finish(records.slice(0, hit))
+                }
+            }
+            if (interval > 0) {
+                await new Promise(r => setTimeout(r, interval))
+            }
+            return records.concat(await getRecords(nextAutoId))
+        }
+
+        let records = await getRecords()
+
+        if (deWeighting) {
+            const set = new Set()
+            records = records.filter(item => {
+                if (set.has(item.routeId)) return false
+                return set.add(item.routeId)
+            })
+        }
+
+        if (sort) {
+            records = orderBy(
+                records,
+                v => v.date,
+                sort
+            )
+        }
+
+        if (debug) {
+            const fs = require('fs-extra')
+            const path = require('path')
+            fs.outputJsonSync(path.resolve(__dirname, '../../tmp/sports.json'), records)
+        }
+        return records
+    }
+
+    async getRemoteRecordsByAutoId (prevAutoId = '') {
         const res = await this.client.get('/gps_sports/routes_feed', {
             headers: {
                 Accept: 'text/html,application/xhtml+xml'
+            },
+            params: {
+                auto_id: prevAutoId
             }
         })
-        return res.data
+        const $ = cheerio.load(res.data)
+
+        // 获取本列数据的 autoId
+        const getAutoId = () => {
+            let autoIdScript = $('script:first-child').html()
+            autoIdScript = 'var jQ = function () {return {hide: function () {}}}\n' + autoIdScript
+            autoIdScript += '\nreturn auto_id;'
+            // eslint-disable-next-line no-new-func
+            return (new Function(autoIdScript))()
+        }
+
+        const getSportType = icon => this.supportSportTypes.findIndex(type => icon.includes(type))
+
+        const getRecords = () => {
+            const ctx = $('table')
+            return ctx
+                .map(function () {
+                    const item = $(this)
+                    const icon = item.find('td:nth-child(1) img').attr('src')
+                    const type = getSportType(icon)
+                    return {
+                        date: item.closest('dl.detail_sports_date_list').attr('class').slice(-10),
+                        routeId: item.attr('route_id'),
+                        type,
+                        icon,
+                        distance: item.find('td:nth-child(2) span:nth-child(3)').text(),
+                        duration: item.find('td:nth-child(3) span:nth-child(3)').text(),
+                        avgSpeed: item.find('td:nth-child(4) span:nth-child(3)').text(),
+                        calorie: item.find('td:nth-child(5) span:nth-child(3)').text()
+                    }
+                })
+                .get()
+        }
+
+        const autoId = getAutoId()
+        const records = getRecords()
+
+        this.logger.info(`运动记录抓取成功，prevAutoId: ${prevAutoId || null}, autoId: ${autoId}`)
+
+        return {
+            prevAutoId,
+            autoId,
+            records,
+            hasNext: records.length >= 3 // 咕咚每次 autoId 返回的数据最多 3 条
+        }
     }
 
-    async getRemoteRecordDetail (route_id = '') {
+    async getRemoteRecordDetailByRouteId (route_id = '') {
         const { id: user_id } = await this.getUserInfo()
         let res = null
         try {
