@@ -186,6 +186,17 @@ class Codoon {
         return user
     }
 
+    /**
+     * @return {Object} 运动总量
+     *  - distance 运动距离 单位：km
+     *  - duration 运动时间 单位：天
+     *  - calorie  消耗热量 单位：大卡
+     *  - equal {Object} 等价于
+     *      - runway 环形跑道 单位：圈
+     *      - fat    脂肪 单位：公斤
+     *      - gasoline #93汽油 单位：升
+     *      - bulb 60W电灯泡 单位：小时
+     */
     async getRemoteTotalData () {
         const res = await this.client.get('/data_v', {
             headers: {
@@ -193,8 +204,18 @@ class Codoon {
             }
         })
         const $ = cheerio.load(res.data)
-        console.log($('.my_d_T span'))
-        return res.data
+        const result = {
+            distance: $('.my_d_T .Tydjl_i + div span').text(),
+            duration: $('.my_d_T .TydT_i + div span').text(),
+            calorie: $('.my_d_T .Tydk_i + div span').text(),
+            equal: {
+                runway: $('.REW .REWR > div:last-child').text(),
+                fat: $('.REW .REWM > div:last-child').text(),
+                gasoline: $('.REW .REWG > div:last-child').text(),
+                bulb: $('.REW .REWL > div:last-child').text()
+            }
+        }
+        return result
     }
 
     async getRemoteRecords () {
