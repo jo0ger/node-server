@@ -4,7 +4,7 @@ const setCookie = require('set-cookie-parser')
 const { orderBy } = require('natural-orderby')
 
 const codoonCacheKey = Symbol('codoon')
-// 7 天有效时间
+// 7天有效时间
 const maxAge = 7 * 24 * 60 * 60 * 1000
 
 module.exports = app => {
