@@ -7,7 +7,7 @@ const { Subscription } = require('egg')
 module.exports = class UpdateMusic extends Subscription {
     static get schedule () {
         return {
-            // 每小时更新一次
+            // 每15s更新一次
             interval: '15s',
             type: 'worker',
             immediate: true,

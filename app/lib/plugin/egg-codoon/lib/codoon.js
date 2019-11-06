@@ -69,6 +69,10 @@ class Codoon {
         this.app.logger.info(...args)
     }
 
+    error (...args) {
+        args.unshift('[egg-codoon]')
+        this.app.logger.error(...args)
+    }
 
     getCache () {
         return this.app.store.get(codoonCacheKey)
@@ -91,26 +95,34 @@ class Codoon {
         await this.app.store.set(...args)
     }
 
-    login () {
-        return this.http.post('http://sso.codoon.com/login', Object.assign({
-            forever: 'on',
-            app_id: 'www',
-            next: '/'
-        }, this.codoonParams), {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            // 禁止 302，不然拿不到 cookie
-            maxRedirects: 0
-        }).then(() => {
+    async login () {
+        let success = true
+        try {
+            await this.http.post('http://sso.codoon.com/login', Object.assign({
+                forever: 'on',
+                app_id: 'www',
+                next: '/'
+            }, this.config), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                // 禁止 302，不然拿不到 cookie
+                maxRedirects: 0
+            })
             this.log('咕咚登录成功')
-        }).catch(err => {
-            const cookies = setCookie.parse(err.response)
+        } catch (err) {
+            const cookies = setCookie.parse(err.response) || []
             const sessionIdCookie = cookies.find(c => c.name === 'sessionid')
-            const sessionId = sessionIdCookie.value
-            this.log('咕咚登录成功，sessionid=' + sessionId)
-            return this.cache({ sessionId })
-        })
+            if (sessionIdCookie) {
+                const sessionId = sessionIdCookie.value
+                this.log('咕咚登录成功，sessionid=' + sessionId)
+                await this.cache({ sessionId })
+            } else {
+                success = false
+                this.log('咕咚登录失败')
+            }
+        }
+        return success
     }
 
     async getRemoteUserInfo () {
@@ -208,9 +220,9 @@ class Codoon {
             // eslint-disable-next-line no-new-func
             const trendData = new Function(scriptText)()
             if (trendData) {
-                result.distance.trend = trendData.length_records
-                result.duration.trend = trendData.time_records
-                result.calorie.trend = trendData.calory_records
+                result.distance.trend = trendData.length_records || []
+                result.duration.trend = trendData.time_records || []
+                result.calorie.trend = trendData.calory_records || []
             }
         }
 
@@ -226,6 +238,7 @@ class Codoon {
             interval = 1000, // 抓取间隔
             sort = 'asc', // 按日期排序 false desc asc
             deWeighting = true, // 去重
+            onlySupportType = true,
             debug = false // debug？
         } = options
         const finish = data => {
@@ -261,9 +274,13 @@ class Codoon {
             })
         }
 
+        if (onlySupportType) {
+            records = records.filter(({ type }) => this.supportSportTypes[type])
+        }
+
         if (sort) {
             records = orderBy(
-                records,
+                records.reverse(),
                 v => v.date,
                 sort
             )
@@ -336,34 +353,19 @@ class Codoon {
 
     async getRemoteRecordDetailByRouteId (route_id = '') {
         const { id: user_id } = await this.getUserInfo()
-        let res = null
-        try {
-            res = await this.http.get('/gps_sports/route', {
-                params: {
-                    user_id,
-                    route_id,
-                    need_next: 1
-                }
-            })
-        } catch (e) {
-            // TODO log it，除了 跑步，健走，骑行外的运动会报错
-        }
+        console.log(route_id, user_id)
+        const res = await this.http.get('/gps_sports/route', {
+            params: {
+                user_id,
+                route_id,
+                need_next: 1
+            }
+        })
+        this.log(route_id + ' 运动记录详情抓取成功')
         return res && res.data || null
     }
 
     async getRemoteAdjacentRecordDetail () {
         // TODO
-    }
-
-    async getRemoteStat (range = 7) {
-        const res = await this.http.get('/gps_sports/my_routes/statistic', {
-            headers: {
-                Accept: 'text/html,application/xhtml+xml'
-            },
-            params: {
-                range_name: range
-            }
-        })
-        return res.data
     }
 }

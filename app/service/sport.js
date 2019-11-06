@@ -9,7 +9,7 @@ module.exports = class SportService extends ProxyService {
         return this.app.model.Sport
     }
 
-    mapDataToModel (data) {
+    mapCodoonDataToModel (data) {
         const model = {}
         if (!data) return model
         model.createdAt = data.start_time

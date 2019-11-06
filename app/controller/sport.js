@@ -7,7 +7,8 @@ const { Controller } = require('egg')
 module.exports = class SportController extends Controller {
     async test () {
         const { ctx, app } = this
-        const data = await app.codoon.getRemoteRecentStatData(ctx.query.range)
+        await app.codoon.getRemoteUserInfo()
+        const data = await app.codoon.getRemoteRecordDetailByRouteId(ctx.query.routeId)
         // const data = await app.codoon.getRemoteRecentStatData()
         ctx.success(data, '获取用户信息成功')
     }
