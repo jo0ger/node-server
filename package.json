@@ -32,7 +32,7 @@
     "mongoose": "5.2.8",
     "mongoose-paginate-v2": "^1.0.12",
     "nodemailer": "^4.6.8",
-    "pug": "^2.0.3",
+    "pug": "^3.0.1",
     "simple-netease-cloud-music": "^0.4.0",
     "validator": "^10.6.0",
     "zlib": "^1.0.5"
