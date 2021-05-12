@@ -6425,6 +6425,10 @@ nodemailer@^4.6.8:
   version "4.7.0"
   resolved "http://registry.npm.taobao.org/nodemailer/download/nodemailer-4.7.0.tgz#4420e06abfffd77d0618f184ea49047db84f4ad8"
 
+nodemailer@^6.4.16:
+  version "6.4.16"
+  resolved "https://registry.nlark.com/nodemailer/download/nodemailer-6.4.16.tgz#5cb6391b1d79ab7eff32d6f9f48366b5a7117293"
+
 nopt@^4.0.1:
   version "4.0.1"
   resolved "http://registry.npm.taobao.org/nopt/download/nopt-4.0.1.tgz#d0d4685afd5415193c8c7505602d0d17cd64474d"

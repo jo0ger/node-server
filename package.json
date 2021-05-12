@@ -31,7 +31,7 @@
     "moment": "^2.22.2",
     "mongoose": "5.2.8",
     "mongoose-paginate-v2": "^1.0.12",
-    "nodemailer": "^4.6.8",
+    "nodemailer": "^6.4.16",
     "pug": "^2.0.3",
     "simple-netease-cloud-music": "^0.4.0",
     "validator": "^10.6.0",
